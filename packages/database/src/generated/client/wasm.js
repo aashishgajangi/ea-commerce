@@ -112,6 +112,9 @@ Prisma.NullTypes = {
  */
 
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
+  ReadUncommitted: "ReadUncommitted",
+  ReadCommitted: "ReadCommitted",
+  RepeatableRead: "RepeatableRead",
   Serializable: "Serializable",
 });
 
@@ -160,9 +163,157 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   createdAt: "createdAt",
 };
 
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: "id",
+  name: "name",
+  slug: "slug",
+  description: "description",
+  image: "image",
+  parentId: "parentId",
+  isActive: "isActive",
+  sortOrder: "sortOrder",
+  seoTitle: "seoTitle",
+  seoDescription: "seoDescription",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.ProductScalarFieldEnum = {
+  id: "id",
+  name: "name",
+  slug: "slug",
+  description: "description",
+  shortDescription: "shortDescription",
+  sku: "sku",
+  basePrice: "basePrice",
+  salePrice: "salePrice",
+  costPrice: "costPrice",
+  stockQuantity: "stockQuantity",
+  lowStockThreshold: "lowStockThreshold",
+  trackInventory: "trackInventory",
+  allowBackorder: "allowBackorder",
+  weight: "weight",
+  dimensions: "dimensions",
+  seoTitle: "seoTitle",
+  seoDescription: "seoDescription",
+  tags: "tags",
+  status: "status",
+  isActive: "isActive",
+  isFeatured: "isFeatured",
+  publishedAt: "publishedAt",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: "id",
+  productId: "productId",
+  sku: "sku",
+  name: "name",
+  price: "price",
+  compareAtPrice: "compareAtPrice",
+  costPrice: "costPrice",
+  stockQuantity: "stockQuantity",
+  attributes: "attributes",
+  weight: "weight",
+  barcode: "barcode",
+  isActive: "isActive",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.ProductImageScalarFieldEnum = {
+  id: "id",
+  productId: "productId",
+  url: "url",
+  altText: "altText",
+  caption: "caption",
+  width: "width",
+  height: "height",
+  size: "size",
+  sortOrder: "sortOrder",
+  imageType: "imageType",
+  isActive: "isActive",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.ProductCategoryScalarFieldEnum = {
+  id: "id",
+  productId: "productId",
+  categoryId: "categoryId",
+  createdAt: "createdAt",
+};
+
+exports.Prisma.CartItemScalarFieldEnum = {
+  id: "id",
+  userId: "userId",
+  productId: "productId",
+  quantity: "quantity",
+  unitPrice: "unitPrice",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  id: "id",
+  userId: "userId",
+  orderNumber: "orderNumber",
+  subtotal: "subtotal",
+  taxAmount: "taxAmount",
+  shippingCost: "shippingCost",
+  discountAmount: "discountAmount",
+  totalAmount: "totalAmount",
+  status: "status",
+  paymentStatus: "paymentStatus",
+  customerEmail: "customerEmail",
+  shippingAddress: "shippingAddress",
+  billingAddress: "billingAddress",
+  paymentMethod: "paymentMethod",
+  paymentIntentId: "paymentIntentId",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
+exports.Prisma.OrderItemScalarFieldEnum = {
+  id: "id",
+  orderId: "orderId",
+  productId: "productId",
+  productName: "productName",
+  productSku: "productSku",
+  quantity: "quantity",
+  unitPrice: "unitPrice",
+  totalPrice: "totalPrice",
+  createdAt: "createdAt",
+};
+
+exports.Prisma.ReferralScalarFieldEnum = {
+  id: "id",
+  referrerId: "referrerId",
+  referredId: "referredId",
+  referralCode: "referralCode",
+  email: "email",
+  status: "status",
+  commissionRate: "commissionRate",
+  commissionEarned: "commissionEarned",
+  clickCount: "clickCount",
+  conversionAt: "conversionAt",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+};
+
 exports.Prisma.SortOrder = {
   asc: "asc",
   desc: "desc",
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull,
+};
+
+exports.Prisma.QueryMode = {
+  default: "default",
+  insensitive: "insensitive",
 };
 
 exports.Prisma.NullsOrder = {
@@ -170,11 +321,65 @@ exports.Prisma.NullsOrder = {
   last: "last",
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull,
+};
+exports.ProductStatus = exports.$Enums.ProductStatus = {
+  DRAFT: "DRAFT",
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  ARCHIVED: "ARCHIVED",
+};
+
+exports.ImageType = exports.$Enums.ImageType = {
+  THUMBNAIL: "THUMBNAIL",
+  GALLERY: "GALLERY",
+  HERO: "HERO",
+  VARIANT: "VARIANT",
+};
+
+exports.OrderStatus = exports.$Enums.OrderStatus = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  PROCESSING: "PROCESSING",
+  SHIPPED: "SHIPPED",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+};
+
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+  PARTIALLY_REFUNDED: "PARTIALLY_REFUNDED",
+};
+
+exports.ReferralStatus = exports.$Enums.ReferralStatus = {
+  PENDING: "PENDING",
+  ACTIVE: "ACTIVE",
+  CONVERTED: "CONVERTED",
+  EXPIRED: "EXPIRED",
+  CANCELLED: "CANCELLED",
+};
+
 exports.Prisma.ModelName = {
   User: "User",
   Account: "Account",
   Session: "Session",
   VerificationToken: "VerificationToken",
+  Category: "Category",
+  Product: "Product",
+  ProductVariant: "ProductVariant",
+  ProductImage: "ProductImage",
+  ProductCategory: "ProductCategory",
+  CartItem: "CartItem",
+  Order: "Order",
+  OrderItem: "OrderItem",
+  Referral: "Referral",
 };
 
 /**

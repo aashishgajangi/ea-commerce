@@ -26,10 +26,11 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  // E-commerce relations (to be added in Phase 2)
-  // orders    Order[]
-  // cart      CartItem[]
-  // referrals Referral[]
+  // E-commerce relations
+  orders    Order[]
+  cartItems CartItem[]
+  referralsGiven    Referral[] @relation("UserReferrals")
+  referralsReceived Referral[] @relation("UserReferred")
 
   @@map("users")
 }
@@ -77,4 +78,343 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// ================================
+// PRODUCT MANAGEMENT MODELS
+// ================================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  image       String?
+  parentId    String?  @map("parent_id")
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  seoTitle    String?  @map("seo_title")
+  seoDescription String? @map("seo_description")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Hierarchical relations
+  parent     Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children   Category[] @relation("CategoryHierarchy")
+  
+  // Product relations
+  productCategories ProductCategory[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@index([isActive])
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  shortDescription String? @db.Text @map("short_description")
+  sku         String?  @unique
+  
+  // Pricing
+  basePrice   Decimal  @map("base_price") @db.Decimal(10, 2)
+  salePrice   Decimal? @map("sale_price") @db.Decimal(10, 2)
+  costPrice   Decimal? @map("cost_price") @db.Decimal(10, 2)
+  
+  // Inventory
+  stockQuantity Int     @default(0) @map("stock_quantity")
+  lowStockThreshold Int @default(5) @map("low_stock_threshold")
+  trackInventory Boolean @default(true) @map("track_inventory")
+  allowBackorder Boolean @default(false) @map("allow_backorder")
+  
+  // Product attributes
+  weight      Decimal? @db.Decimal(8, 3)
+  dimensions  String?  // JSON: {length, width, height}
+  
+  // SEO & Marketing
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+  tags           String[] // Array of tags for search
+  
+  // Status & Visibility
+  status         ProductStatus @default(DRAFT)
+  isActive       Boolean       @default(true) @map("is_active")
+  isFeatured     Boolean       @default(false) @map("is_featured")
+  publishedAt    DateTime?     @map("published_at")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  variants          ProductVariant[]
+  images            ProductImage[]
+  productCategories ProductCategory[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([basePrice])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String @id @default(cuid())
+  productId String @map("product_id")
+  
+  // Variant identification
+  sku       String  @unique
+  name      String? // e.g., "Red - Large"
+  
+  // Variant-specific pricing
+  price          Decimal  @db.Decimal(10, 2)
+  compareAtPrice Decimal? @map("compare_at_price") @db.Decimal(10, 2)
+  costPrice      Decimal? @map("cost_price") @db.Decimal(10, 2)
+  
+  // Inventory for this variant
+  stockQuantity Int     @default(0) @map("stock_quantity")
+  
+  // Variant attributes (JSON)
+  attributes Json // e.g., {"color": "red", "size": "large"}
+  
+  // Physical attributes
+  weight     Decimal? @db.Decimal(8, 3)
+  barcode    String?  @unique
+  
+  // Status
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([sku])
+  @@index([isActive])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String @map("product_id")
+  
+  url       String
+  altText   String? @map("alt_text")
+  caption   String?
+  
+  // Image properties
+  width     Int?
+  height    Int?
+  size      Int? // File size in bytes
+  
+  // Organization
+  sortOrder Int         @default(0) @map("sort_order")
+  imageType ImageType   @default(GALLERY) @map("image_type")
+  
+  // Status
+  isActive  Boolean     @default(true) @map("is_active")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([imageType])
+  @@index([sortOrder])
+  @@map("product_images")
+}
+
+// Junction table for many-to-many relationship
+model ProductCategory {
+  id         String @id @default(cuid())
+  productId  String @map("product_id")
+  categoryId String @map("category_id")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, categoryId])
+  @@index([productId])
+  @@index([categoryId])
+  @@map("product_categories")
+}
+
+// ================================
+// SHOPPING & ORDERS (Phase 2.2)
+// ================================
+
+model CartItem {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  productId String @map("product_id")
+  
+  quantity  Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String      @map("user_id")
+  orderNumber   String      @unique @map("order_number")
+  
+  // Order totals
+  subtotal      Decimal     @db.Decimal(10, 2)
+  taxAmount     Decimal     @default(0) @map("tax_amount") @db.Decimal(10, 2)
+  shippingCost  Decimal     @default(0) @map("shipping_cost") @db.Decimal(10, 2)
+  discountAmount Decimal    @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  totalAmount   Decimal     @map("total_amount") @db.Decimal(10, 2)
+  
+  // Order status
+  status        OrderStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  
+  // Customer info (snapshot at time of order)
+  customerEmail String      @map("customer_email")
+  shippingAddress Json      @map("shipping_address")
+  billingAddress  Json      @map("billing_address")
+  
+  // Payment info
+  paymentMethod   String?     @map("payment_method")
+  paymentIntentId String?     @map("payment_intent_id")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+  
+  // Item details (snapshot at time of order)
+  productName String @map("product_name")
+  productSku  String? @map("product_sku")
+  
+  quantity    Int
+  unitPrice   Decimal @map("unit_price") @db.Decimal(10, 2)
+  totalPrice  Decimal @map("total_price") @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ================================
+// REFERRALS (Phase 4.1)
+// ================================
+
+model Referral {
+  id           String         @id @default(cuid())
+  referrerId   String         @map("referrer_id")
+  referredId   String?        @map("referred_id")
+  
+  referralCode String         @unique @map("referral_code")
+  email        String?        // Email of person being referred
+  
+  status       ReferralStatus @default(PENDING)
+  
+  // Commission details
+  commissionRate   Decimal @default(0) @map("commission_rate") @db.Decimal(5, 4) // e.g., 0.0500 = 5%
+  commissionEarned Decimal @default(0) @map("commission_earned") @db.Decimal(10, 2)
+  
+  // Tracking
+  clickCount    Int      @default(0) @map("click_count")
+  conversionAt  DateTime? @map("conversion_at")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  referrer User  @relation("UserReferrals", fields: [referrerId], references: [id])
+  referred User? @relation("UserReferred", fields: [referredId], references: [id])
+
+  @@index([referrerId])
+  @@index([referralCode])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ================================
+// ENUMS
+// ================================
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ImageType {
+  THUMBNAIL
+  GALLERY
+  HERO
+  VARIANT
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum ReferralStatus {
+  PENDING
+  ACTIVE
+  CONVERTED
+  EXPIRED
+  CANCELLED
 }
