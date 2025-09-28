@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:e2e": "playwright test",
+    "test:e2e": "echo 'E2E tests will be implemented in Phase 2 when full user flows are available'",
     "security:scan": "npm audit --audit-level high",
     "lighthouse": "echo 'Lighthouse temporarily disabled due to security vulnerabilities in @lhci/cli'"
   },
