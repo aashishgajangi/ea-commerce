@@ -27,6 +27,37 @@ export const config = [
     },
   },
   {
-    ignores: ["dist/**"],
+    // EA Commerce specific rules for code quality and error handling
+    rules: {
+      // TypeScript specific (non-type-aware rules)
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+
+      // Error handling patterns
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-throw-literal": "error",
+      "prefer-promise-reject-errors": "error",
+
+      // Code quality
+      "no-var": "error",
+      "prefer-const": "error",
+      "no-duplicate-imports": "error",
+      "no-unused-expressions": "error",
+      eqeqeq: ["error", "always"],
+      curly: ["error", "all"],
+
+      // Async/await patterns
+      "require-await": "error",
+      "no-return-await": "error",
+
+      // Security
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+    },
+  },
+  {
+    ignores: ["dist/**", "node_modules/**", ".next/**", "coverage/**"],
   },
 ];

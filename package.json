@@ -6,15 +6,39 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format-check": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "type-check": "turbo run type-check",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "security:scan": "npm audit && turbo run security:scan",
+    "lighthouse": "turbo run lighthouse",
+    "quality-gates": "npm run type-check && npm run lint && npm run format-check && npm run test:unit && npm run security:scan"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^20.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "eslint": "^8.57.0",
+    "husky": "^8.0.0",
+    "jsdom": "^27.0.0",
+    "lint-staged": "^15.0.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^1.0.0"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "packageManager": "npm@10.9.3",
   "workspaces": [

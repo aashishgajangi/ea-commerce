@@ -1,14 +1,19 @@
 {
-  "name": "web",
+  "name": "admin",
   "version": "0.1.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3000",
+    "dev": "next dev --turbopack --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "security:scan": "npm audit --audit-level high",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@repo/ui": "*",
@@ -23,6 +28,9 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.34.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^1.0.0",
+    "@playwright/test": "^1.40.0",
+    "@lhci/cli": "^0.12.0"
   }
 }
