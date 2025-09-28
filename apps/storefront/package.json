@@ -13,7 +13,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "security:scan": "npm audit --audit-level high",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "echo 'Lighthouse temporarily disabled due to security vulnerabilities in @lhci/cli'"
   },
   "dependencies": {
     "@repo/ui": "*",
@@ -37,7 +37,6 @@
     "tailwindcss": "^3.4.0",
     "typescript": "5.9.2",
     "vitest": "^3.2.4",
-    "@playwright/test": "^1.40.0",
-    "@lhci/cli": "^0.12.0"
+    "@playwright/test": "^1.40.0"
   }
 }
