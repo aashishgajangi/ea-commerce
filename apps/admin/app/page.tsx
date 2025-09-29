@@ -89,30 +89,41 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Next Steps */}
+        {/* Admin Navigation */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-4">Next Steps</h2>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              <span>Fix tRPC client compatibility</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              <span>Image upload & optimization</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              <span>Admin UI components</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              <span>Product management forms</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              <span>Search & filtering</span>
-            </div>
+          <h2 className="text-2xl font-semibold mb-4">Admin Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a
+              href="/products"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-blue-600">
+                Product Management
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Create, edit, and manage products
+              </p>
+            </a>
+            <a
+              href="/categories"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-green-600">
+                Category Management
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Organize products with hierarchical categories
+              </p>
+            </a>
+            <a
+              href="/search"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-purple-600">Search & Filter</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Advanced product search and filtering
+              </p>
+            </a>
           </div>
         </div>
       </div>
@@ -136,13 +147,15 @@ export default function AdminDashboard() {
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-orange-800 mb-2">🔧 In Progress</h4>
+            <h4 className="font-medium text-orange-800 mb-2">
+              🔧 Ready for Testing
+            </h4>
             <ul className="space-y-1 text-gray-700">
-              <li>• tRPC client setup (version issues)</li>
-              <li>• Frontend integration</li>
-              <li>• Admin UI components</li>
-              <li>• Image upload system</li>
-              <li>• Database migration</li>
+              <li>• Product management UI</li>
+              <li>• Category management UI</li>
+              <li>• Search & filtering system</li>
+              <li>• Image upload pipeline</li>
+              <li>• tRPC client (pending version fix)</li>
             </ul>
           </div>
         </div>

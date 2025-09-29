@@ -1,0 +1,58 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - generic [ref=e3]:
+            - heading "Product Management" [level=1] [ref=e4]
+            - button "Add Product" [ref=e5] [cursor=pointer]
+        - generic [ref=e6]:
+            - generic [ref=e8]:
+                - generic [ref=e9]:
+                    - generic [ref=e10]:
+                        - heading "Sample Product 1" [level=3] [ref=e11]
+                        - generic [ref=e12]: ACTIVE
+                    - generic [ref=e13]:
+                        - generic [ref=e14]:
+                            - paragraph [ref=e15]: Price
+                            - paragraph [ref=e16]: $29.99
+                        - generic [ref=e17]:
+                            - paragraph [ref=e18]: Stock
+                            - paragraph [ref=e19]: "100"
+                        - generic [ref=e20]:
+                            - paragraph [ref=e21]: Slug
+                            - paragraph [ref=e22]: sample-product-1
+                        - generic [ref=e23]:
+                            - paragraph [ref=e24]: Created
+                            - paragraph [ref=e25]: 9/29/2025
+                - generic [ref=e26]:
+                    - button "Edit" [ref=e27] [cursor=pointer]
+                    - button "Feature" [ref=e28] [cursor=pointer]
+                    - button "Delete" [ref=e29] [cursor=pointer]
+            - generic [ref=e31]:
+                - generic [ref=e32]:
+                    - generic [ref=e33]:
+                        - heading "Sample Product 2" [level=3] [ref=e34]
+                        - generic [ref=e35]: DRAFT
+                        - generic [ref=e36]: Featured
+                    - generic [ref=e37]:
+                        - generic [ref=e38]:
+                            - paragraph [ref=e39]: Price
+                            - paragraph [ref=e40]: $49.99
+                        - generic [ref=e41]:
+                            - paragraph [ref=e42]: Stock
+                            - paragraph [ref=e43]: "50"
+                        - generic [ref=e44]:
+                            - paragraph [ref=e45]: Slug
+                            - paragraph [ref=e46]: sample-product-2
+                        - generic [ref=e47]:
+                            - paragraph [ref=e48]: Created
+                            - paragraph [ref=e49]: 9/29/2025
+                - generic [ref=e50]:
+                    - button "Edit" [ref=e51] [cursor=pointer]
+                    - button "Unfeature" [ref=e52] [cursor=pointer]
+                    - button "Delete" [ref=e53] [cursor=pointer]
+    - button "Open Next.js Dev Tools" [ref=e59] [cursor=pointer]:
+        - img [ref=e60] [cursor=pointer]
+    - alert [ref=e63]
+```

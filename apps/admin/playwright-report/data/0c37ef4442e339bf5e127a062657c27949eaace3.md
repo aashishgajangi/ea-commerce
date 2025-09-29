@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - generic [ref=e3]:
+            - heading "Category Management" [level=1] [ref=e4]
+            - button "Add Category" [ref=e5] [cursor=pointer]
+        - generic [ref=e6]:
+            - generic [ref=e7]:
+                - generic [ref=e9]:
+                    - generic [ref=e10]:
+                        - generic [ref=e11]:
+                            - button "▼" [ref=e12] [cursor=pointer]
+                            - heading "Electronics" [level=3] [ref=e13]
+                            - generic [ref=e14]: Active
+                        - paragraph [ref=e15]: Electronic devices and accessories
+                        - generic [ref=e16]:
+                            - generic [ref=e17]:
+                                - paragraph [ref=e18]: Slug
+                                - paragraph [ref=e19]: electronics
+                            - generic [ref=e20]:
+                                - paragraph [ref=e21]: Sort Order
+                                - paragraph [ref=e22]: "0"
+                    - generic [ref=e23]:
+                        - button "Edit" [ref=e24] [cursor=pointer]
+                        - button "Add Child" [ref=e25] [cursor=pointer]
+                        - button "Delete" [ref=e26] [cursor=pointer]
+                - generic [ref=e29]:
+                    - generic [ref=e30]:
+                        - generic [ref=e31]:
+                            - heading "Smartphones" [level=3] [ref=e32]
+                            - generic [ref=e33]: Active
+                        - paragraph [ref=e34]: Mobile phones and accessories
+                        - generic [ref=e35]:
+                            - generic [ref=e36]:
+                                - paragraph [ref=e37]: Slug
+                                - paragraph [ref=e38]: smartphones
+                            - generic [ref=e39]:
+                                - paragraph [ref=e40]: Sort Order
+                                - paragraph [ref=e41]: "0"
+                    - generic [ref=e42]:
+                        - button "Edit" [ref=e43] [cursor=pointer]
+                        - button "Add Child" [ref=e44] [cursor=pointer]
+                        - button "Delete" [ref=e45] [cursor=pointer]
+            - generic [ref=e48]:
+                - generic [ref=e49]:
+                    - generic [ref=e50]:
+                        - heading "Clothing" [level=3] [ref=e51]
+                        - generic [ref=e52]: Active
+                    - paragraph [ref=e53]: Apparel and fashion items
+                    - generic [ref=e54]:
+                        - generic [ref=e55]:
+                            - paragraph [ref=e56]: Slug
+                            - paragraph [ref=e57]: clothing
+                        - generic [ref=e58]:
+                            - paragraph [ref=e59]: Sort Order
+                            - paragraph [ref=e60]: "1"
+                - generic [ref=e61]:
+                    - button "Edit" [ref=e62] [cursor=pointer]
+                    - button "Add Child" [ref=e63] [cursor=pointer]
+                    - button "Delete" [ref=e64] [cursor=pointer]
+    - button "Open Next.js Dev Tools" [ref=e70] [cursor=pointer]:
+        - img [ref=e71] [cursor=pointer]
+    - alert [ref=e74]
+```

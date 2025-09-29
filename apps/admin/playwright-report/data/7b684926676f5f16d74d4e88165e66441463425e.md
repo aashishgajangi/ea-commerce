@@ -1,0 +1,143 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+    - generic [ref=e2]:
+        - heading "Product Search" [level=1] [ref=e3]
+        - generic [ref=e4]:
+            - generic [ref=e5]:
+                - generic [ref=e6]:
+                    - img [ref=e8]
+                    - textbox "Search products by name, category, or tags..." [ref=e10]
+                - generic [ref=e11]:
+                    - generic [ref=e12]:
+                        - generic [ref=e13]: "Sort by:"
+                        - combobox [ref=e14]:
+                            - option "Name" [selected]
+                            - option "Price"
+                            - option "Stock"
+                        - button "↑" [ref=e15] [cursor=pointer]
+                    - button "Filters ▼" [active] [ref=e16] [cursor=pointer]
+            - generic [ref=e18]:
+                - generic [ref=e19]:
+                    - heading "Category" [level=3] [ref=e20]
+                    - generic [ref=e21]:
+                        - generic [ref=e22]:
+                            - checkbox "Electronics(2)" [ref=e23]
+                            - generic [ref=e24]:
+                                - text: Electronics
+                                - generic [ref=e25]: (2)
+                        - generic [ref=e26]:
+                            - checkbox "Computers(1)" [ref=e27]
+                            - generic [ref=e28]:
+                                - text: Computers
+                                - generic [ref=e29]: (1)
+                - generic [ref=e30]:
+                    - heading "Status" [level=3] [ref=e31]
+                    - generic [ref=e32]:
+                        - generic [ref=e33]:
+                            - checkbox "Active(3)" [ref=e34]
+                            - generic [ref=e35]:
+                                - text: Active
+                                - generic [ref=e36]: (3)
+                        - generic [ref=e37]:
+                            - checkbox "Draft(0)" [ref=e38]
+                            - generic [ref=e39]:
+                                - text: Draft
+                                - generic [ref=e40]: (0)
+                        - generic [ref=e41]:
+                            - checkbox "Inactive(0)" [ref=e42]
+                            - generic [ref=e43]:
+                                - text: Inactive
+                                - generic [ref=e44]: (0)
+                - generic [ref=e45]:
+                    - heading "Price Range" [level=3] [ref=e46]
+                    - generic [ref=e47]:
+                        - generic [ref=e48]:
+                            - checkbox "Under $500(0)" [ref=e49]
+                            - generic [ref=e50]:
+                                - text: Under $500
+                                - generic [ref=e51]: (0)
+                        - generic [ref=e52]:
+                            - checkbox "$500 - $1,000(1)" [ref=e53]
+                            - generic [ref=e54]:
+                                - text: $500 - $1,000
+                                - generic [ref=e55]: (1)
+                        - generic [ref=e56]:
+                            - checkbox "$1,000 - $1,500(2)" [ref=e57]
+                            - generic [ref=e58]:
+                                - text: $1,000 - $1,500
+                                - generic [ref=e59]: (2)
+                        - generic [ref=e60]:
+                            - checkbox "Over $1,500(0)" [ref=e61]
+                            - generic [ref=e62]:
+                                - text: Over $1,500
+                                - generic [ref=e63]: (0)
+            - generic [ref=e64]:
+                - paragraph [ref=e66]: Showing 3 of 3 products
+                - generic [ref=e67]:
+                    - generic [ref=e69]:
+                        - generic [ref=e70]:
+                            - heading "iPhone 15 Pro" [level=3] [ref=e71]
+                            - generic [ref=e72]: Featured
+                        - generic [ref=e73]:
+                            - generic [ref=e74]:
+                                - generic [ref=e75]: "Price:"
+                                - generic [ref=e76]: $999.99
+                            - generic [ref=e77]:
+                                - generic [ref=e78]: "Stock:"
+                                - generic [ref=e79]: 25 units
+                            - generic [ref=e80]:
+                                - generic [ref=e81]: "Category:"
+                                - generic [ref=e82]: Electronics
+                            - generic [ref=e83]:
+                                - generic [ref=e84]: "Status:"
+                                - generic [ref=e85]: ACTIVE
+                        - generic [ref=e86]:
+                            - generic [ref=e87]: phone
+                            - generic [ref=e88]: apple
+                            - generic [ref=e89]: premium
+                    - generic [ref=e91]:
+                        - generic [ref=e92]:
+                            - heading "MacBook Air M3" [level=3] [ref=e93]
+                            - generic [ref=e94]: Featured
+                        - generic [ref=e95]:
+                            - generic [ref=e96]:
+                                - generic [ref=e97]: "Price:"
+                                - generic [ref=e98]: $1299.99
+                            - generic [ref=e99]:
+                                - generic [ref=e100]: "Stock:"
+                                - generic [ref=e101]: 12 units
+                            - generic [ref=e102]:
+                                - generic [ref=e103]: "Category:"
+                                - generic [ref=e104]: Computers
+                            - generic [ref=e105]:
+                                - generic [ref=e106]: "Status:"
+                                - generic [ref=e107]: ACTIVE
+                        - generic [ref=e108]:
+                            - generic [ref=e109]: laptop
+                            - generic [ref=e110]: apple
+                            - generic [ref=e111]: premium
+                    - generic [ref=e113]:
+                        - heading "Samsung Galaxy S24" [level=3] [ref=e115]
+                        - generic [ref=e116]:
+                            - generic [ref=e117]:
+                                - generic [ref=e118]: "Price:"
+                                - generic [ref=e119]: $899.99
+                            - generic [ref=e120]:
+                                - generic [ref=e121]: "Stock:"
+                                - generic [ref=e122]: 18 units
+                            - generic [ref=e123]:
+                                - generic [ref=e124]: "Category:"
+                                - generic [ref=e125]: Electronics
+                            - generic [ref=e126]:
+                                - generic [ref=e127]: "Status:"
+                                - generic [ref=e128]: ACTIVE
+                        - generic [ref=e129]:
+                            - generic [ref=e130]: phone
+                            - generic [ref=e131]: samsung
+                            - generic [ref=e132]: android
+    - button "Open Next.js Dev Tools" [ref=e138] [cursor=pointer]:
+        - img [ref=e139] [cursor=pointer]
+    - alert [ref=e142]
+```

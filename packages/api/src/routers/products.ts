@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, adminProcedure } from "../trpc";
+import { imageUploadService } from "../lib/image-upload";
 
 // Input validation schemas
 const createProductSchema = z.object({
@@ -459,6 +460,160 @@ export const productsRouter: any = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to toggle featured status",
+          cause: error,
+        });
+      }
+    }),
+
+  // Upload product image (Admin only)
+  uploadImage: adminProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        fileName: z.string(),
+        fileBuffer: z.string(), // base64 encoded
+        altText: z.string().optional(),
+        caption: z.string().optional(),
+        imageType: z
+          .enum(["THUMBNAIL", "GALLERY", "HERO", "VARIANT"])
+          .default("GALLERY"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Check if product exists
+        const product = await ctx.prisma.product.findUnique({
+          where: { id: input.productId },
+        });
+
+        if (!product) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Product not found",
+          });
+        }
+
+        // Convert base64 to buffer
+        const buffer = Buffer.from(input.fileBuffer, "base64");
+
+        // Process images
+        const processedImages = await imageUploadService.processImage(
+          buffer,
+          input.fileName,
+          { maxWidth: 1200, maxHeight: 1200 },
+        );
+
+        // Generate thumbnail
+        const thumbnail = await imageUploadService.generateThumbnail(
+          buffer,
+          input.fileName,
+        );
+
+        // Save main image to database
+        const mainImage = processedImages[0]; // Use WebP as primary
+        if (!mainImage) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to process image",
+          });
+        }
+
+        // Get current max sort order for this product
+        const lastImage = await ctx.prisma.productImage.findFirst({
+          where: { productId: input.productId },
+          orderBy: { sortOrder: "desc" },
+        });
+
+        const sortOrder = (lastImage?.sortOrder || 0) + 1;
+
+        const savedImage = await ctx.prisma.productImage.create({
+          data: {
+            productId: input.productId,
+            url: mainImage.url,
+            altText: input.altText || `${product.name} image`,
+            caption: input.caption,
+            width: mainImage.width,
+            height: mainImage.height,
+            size: mainImage.size,
+            sortOrder,
+            imageType: input.imageType,
+            isActive: true,
+          },
+        });
+
+        return {
+          ...savedImage,
+          thumbnail: thumbnail.url,
+          variants: processedImages,
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upload image",
+          cause: error,
+        });
+      }
+    }),
+
+  // Delete product image (Admin only)
+  deleteImage: adminProcedure
+    .input(z.object({ imageId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const image = await ctx.prisma.productImage.findUnique({
+          where: { id: input.imageId },
+        });
+
+        if (!image) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Image not found",
+          });
+        }
+
+        await ctx.prisma.productImage.delete({
+          where: { id: input.imageId },
+        });
+
+        return { success: true };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete image",
+          cause: error,
+        });
+      }
+    }),
+
+  // Reorder product images (Admin only)
+  reorderImages: adminProcedure
+    .input(
+      z.object({
+        imageIds: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const updatePromises = input.imageIds.map((imageId, index) =>
+          ctx.prisma.productImage.update({
+            where: { id: imageId },
+            data: { sortOrder: index },
+          }),
+        );
+
+        await Promise.all(updatePromises);
+
+        return { success: true };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to reorder images",
           cause: error,
         });
       }
