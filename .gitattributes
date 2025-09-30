@@ -1,0 +1,16 @@
+# Exclude Prisma generated files from language statistics
+**/generated/** linguist-generated=true
+
+# Exclude test reports and results from language statistics
+playwright-report/** linguist-generated=true
+test-results/** linguist-generated=true
+
+# Exclude build artifacts
+.next/** linguist-generated=true
+dist/** linguist-generated=true
+build/** linguist-generated=true
+out/** linguist-generated=true
+
+# Mark specific file types
+*.prisma linguist-language=Prisma
+*.md linguist-documentation
