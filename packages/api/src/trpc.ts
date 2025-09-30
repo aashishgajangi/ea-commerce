@@ -1,8 +1,8 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { prisma } from "@repo/database";
+import type { Session } from "next-auth";
 
 /**
  * 1. CONTEXT
@@ -45,20 +45,22 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (
-  opts: CreateNextContextOptions,
-): Promise<{
+export const createTRPCContext = async (opts: {
+  session: Session | null;
+}): Promise<{
   session: CreateContextOptions["session"];
   prisma: typeof prisma;
 }> => {
-  const { req, res } = opts;
-
-  // Get the session from the server using the unstable_getServerSession wrapper function
-  // TODO: Implement proper session handling
-  const session = null;
-
   return createInnerTRPCContext({
-    session,
+    session: opts.session
+      ? {
+          user: {
+            id: (opts.session.user as any).id,
+            email: opts.session.user.email!,
+            role: (opts.session.user as any).role || "USER",
+          },
+        }
+      : null,
   });
 };
 
@@ -126,17 +128,18 @@ export const protectedProcedure: any = t.procedure.use(({ ctx, next }) => {
 /**
  * Admin procedure - requires authenticated user with admin role
  */
-export const adminProcedure: any = protectedProcedure.use(({ ctx, next }) => {
-  // TODO: Check user role from session when auth is properly integrated
-  // For now, we'll use a placeholder
-  const isAdmin = true; // ctx.session.user.role === 'ADMIN';
+export const adminProcedure = protectedProcedure.use(
+  ({ ctx, next }: { ctx: any; next: any }) => {
+    // Check user role from session
+    const isAdmin = ctx.session?.user?.role === "ADMIN";
 
-  if (!isAdmin) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Admin access required",
-    });
-  }
+    if (!isAdmin) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
+    }
 
-  return next({ ctx });
-});
+    return next({ ctx });
+  },
+);

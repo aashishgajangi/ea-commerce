@@ -53,6 +53,8 @@
     "@trpc/next": "^11.6.0",
     "@trpc/react-query": "^11.6.0",
     "@trpc/server": "^11.6.0",
+    "@types/nodemailer": "^7.0.2",
+    "nodemailer": "^6.10.1",
     "superjson": "^2.2.2"
   }
 }

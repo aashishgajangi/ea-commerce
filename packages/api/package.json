@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@repo/database": "*",
-    "@trpc/server": "^10.45.2",
+    "@trpc/server": "^11.6.0",
     "zod": "^3.23.8",
-    "superjson": "^2.2.1",
+    "superjson": "^2.2.2",
     "sharp": "^0.33.1"
   },
   "devDependencies": {

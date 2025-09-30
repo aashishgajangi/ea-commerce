@@ -244,7 +244,7 @@ export const productsRouter: any = createTRPCRouter({
   // Create new product (Admin only)
   create: adminProcedure
     .input(createProductSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const { categoryIds, ...productData } = input;
 
       try {
@@ -285,7 +285,7 @@ export const productsRouter: any = createTRPCRouter({
             isFeatured: productData.isFeatured,
             publishedAt: productData.status === "ACTIVE" ? new Date() : null,
             productCategories: {
-              create: categoryIds.map((categoryId) => ({
+              create: categoryIds.map((categoryId: string) => ({
                 categoryId,
               })),
             },
@@ -315,7 +315,7 @@ export const productsRouter: any = createTRPCRouter({
   // Update product (Admin only)
   update: adminProcedure
     .input(updateProductSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const { id, categoryIds, ...productData } = input;
 
       try {
@@ -377,7 +377,7 @@ export const productsRouter: any = createTRPCRouter({
           // Add new categories
           if (categoryIds.length > 0) {
             await ctx.prisma.productCategory.createMany({
-              data: categoryIds.map((categoryId) => ({
+              data: categoryIds.map((categoryId: string) => ({
                 productId: id,
                 categoryId,
               })),
@@ -401,7 +401,7 @@ export const productsRouter: any = createTRPCRouter({
   // Delete product (Admin only)
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
         const product = await ctx.prisma.product.findUnique({
           where: { id: input.id },
@@ -434,7 +434,7 @@ export const productsRouter: any = createTRPCRouter({
   // Toggle product featured status (Admin only)
   toggleFeatured: adminProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
         const product = await ctx.prisma.product.findUnique({
           where: { id: input.id },
@@ -479,7 +479,7 @@ export const productsRouter: any = createTRPCRouter({
           .default("GALLERY"),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
         // Check if product exists
         const product = await ctx.prisma.product.findUnique({
@@ -561,7 +561,7 @@ export const productsRouter: any = createTRPCRouter({
   // Delete product image (Admin only)
   deleteImage: adminProcedure
     .input(z.object({ imageId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
         const image = await ctx.prisma.productImage.findUnique({
           where: { id: input.imageId },
@@ -598,13 +598,14 @@ export const productsRouter: any = createTRPCRouter({
         imageIds: z.array(z.string()),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
-        const updatePromises = input.imageIds.map((imageId, index) =>
-          ctx.prisma.productImage.update({
-            where: { id: imageId },
-            data: { sortOrder: index },
-          }),
+        const updatePromises = input.imageIds.map(
+          (imageId: string, index: number) =>
+            ctx.prisma.productImage.update({
+              where: { id: imageId },
+              data: { sortOrder: index },
+            }),
         );
 
         await Promise.all(updatePromises);

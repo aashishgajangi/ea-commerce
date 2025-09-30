@@ -1,17 +1,41 @@
-// tRPC client implementation for Phase 2.1
-// Note: Full integration will be completed in Phase 2.2 after resolving version compatibility
+import { createTRPCReact, type CreateTRPCReact } from "@trpc/react-query";
+import { httpBatchLink } from "@trpc/client";
+import type { AppRouter } from "@repo/api";
+import superjson from "superjson";
 
-// Placeholder implementations to pass build
-export const trpc = {
-  // Mock tRPC client structure for build compatibility
-} as unknown;
+// Create the tRPC React hooks
+export const trpc: CreateTRPCReact<AppRouter, unknown> =
+  createTRPCReact<AppRouter>();
 
-export const serverClient = {
-  // Mock server client for SSR
-} as unknown;
+// Get base URL based on environment
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // Browser should use relative URL
+    return "";
+  }
 
-// TODO: Implement full tRPC client in Phase 2.2
-// Current backend APIs are ready at /api/trpc endpoints:
-// - products.list, products.create, products.update, products.delete
-// - categories.list, categories.tree, categories.create, categories.update
-// - Image upload endpoints with Sharp optimization
+  // SSR should use absolute URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return `http://localhost:${process.env.PORT ?? 3001}`;
+}
+
+// Create tRPC client
+export function createTRPCClient() {
+  return trpc.createClient({
+    links: [
+      httpBatchLink({
+        url: `${getBaseUrl()}/api/trpc`,
+        transformer: superjson,
+        // You can pass additional headers here
+        headers() {
+          return {
+            // Add any custom headers if needed
+          };
+        },
+      }),
+    ],
+  });
+}

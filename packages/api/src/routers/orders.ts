@@ -476,7 +476,7 @@ export const ordersRouter: any = createTRPCRouter({
 
         // Handle stock restoration for cancelled orders
         if (status === "CANCELLED" && order.status !== "CANCELLED") {
-          await ctx.prisma.$transaction(async (tx) => {
+          await ctx.prisma.$transaction(async (tx: any) => {
             await tx.order.update({
               where: { id: orderId },
               data: { status },

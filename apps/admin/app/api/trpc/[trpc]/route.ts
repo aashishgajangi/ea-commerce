@@ -1,16 +1,25 @@
-// Temporarily disabled for Phase 2.1 quality gates
-// Will be re-enabled in Phase 2.2 with proper tRPC client integration
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { appRouter, createTRPCContext } from "@repo/api";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../lib/auth";
 
-export function GET() {
-  return new Response("tRPC API will be available in Phase 2.2", {
-    status: 503,
-    headers: { "Content-Type": "text/plain" },
-  });
-}
+const handler = async (req: Request) => {
+  // Get session from NextAuth
+  const session = await getServerSession(authOptions);
 
-export function POST() {
-  return new Response("tRPC API will be available in Phase 2.2", {
-    status: 503,
-    headers: { "Content-Type": "text/plain" },
+  return fetchRequestHandler({
+    endpoint: "/api/trpc",
+    req,
+    router: appRouter,
+    createContext: () => createTRPCContext({ session }),
+    ...(process.env.NODE_ENV === "development" && {
+      onError: ({ path, error }) => {
+        console.error(
+          `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
+        );
+      },
+    }),
   });
-}
+};
+
+export { handler as GET, handler as POST };

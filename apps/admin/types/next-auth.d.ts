@@ -8,7 +8,6 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       role: string;
-      emailVerified?: Date | null;
     };
   }
 
@@ -18,7 +17,6 @@ declare module "next-auth" {
     name?: string | null;
     image?: string | null;
     role: string;
-    emailVerified?: Date | null;
   }
 }
 

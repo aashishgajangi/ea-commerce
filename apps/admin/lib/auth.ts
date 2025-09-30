@@ -1,7 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma, hashPassword, verifyPassword } from "@repo/database";
 import { z } from "zod";
@@ -21,17 +20,6 @@ const registerSchema = z.object({
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST!,
-        port: Number(process.env.EMAIL_SERVER_PORT || "587"),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER!,
-          pass: process.env.EMAIL_SERVER_PASSWORD!,
-        },
-      },
-      from: process.env.EMAIL_FROM!,
-    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
@@ -69,6 +57,11 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // Check if user is admin for admin panel access
+          if (user.role !== "ADMIN") {
+            return null;
+          }
+
           return {
             id: user.id,
             email: user.email,
@@ -88,54 +81,31 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    jwt({ token, user, trigger, session }) {
+    jwt({ token, user }) {
       if (user) {
         token.role = user.role;
-        token.emailVerified = user.emailVerified;
       }
-
-      // Update token when session is updated
-      if (trigger === "update" && session?.emailVerified) {
-        token.emailVerified = session.emailVerified;
-      }
-
       return token;
     },
-    session: async ({ session, token }) => {
+    session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
-
-        // Fetch fresh user data from database to get current emailVerified status
-        try {
-          const user = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: { emailVerified: true },
-          });
-          session.user.emailVerified = user?.emailVerified || null;
-        } catch (error) {
-          console.error("Error fetching user emailVerified status:", error);
-          session.user.emailVerified = token.emailVerified as Date | null;
-        }
       }
       return session;
     },
     signIn({ user, account }) {
-      // Allow OAuth sign-ins
-      if (account?.provider === "google") {
-        return true;
+      // Only allow admin users to access admin panel
+      if (user.role !== "ADMIN") {
+        return false;
       }
 
-      // For email provider, allow sign in (user clicks email link)
-      if (account?.provider === "email") {
+      // Allow OAuth sign-ins
+      if (account?.provider !== "credentials") {
         return true;
       }
 
       // For credentials, user is already verified in authorize function
-      if (account?.provider === "credentials") {
-        return true;
-      }
-
       return true;
     },
   },
@@ -145,55 +115,17 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     signIn({ user, account, isNewUser }) {
-      console.warn(`User ${user.email} signed in with ${account?.provider}`);
+      console.warn(`Admin ${user.email} signed in with ${account?.provider}`);
       if (isNewUser) {
-        console.warn(`New user registered: ${user.email}`);
+        console.warn(`New admin registered: ${user.email}`);
       }
     },
     signOut({ session, token }) {
-      console.warn(`User signed out: ${session?.user?.email || token?.email}`);
+      console.warn(`Admin signed out: ${session?.user?.email || token?.email}`);
     },
   },
   debug: process.env.NODE_ENV === "development",
 };
-
-// Helper function for user registration
-export async function registerUser(
-  email: string,
-  password: string,
-  name: string,
-) {
-  try {
-    const validatedFields = registerSchema.safeParse({ email, password, name });
-    if (!validatedFields.success) {
-      throw new Error("Invalid input fields");
-    }
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new Error("User already exists");
-    }
-
-    const hashedPassword = await hashPassword(password);
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role: "USER",
-      },
-    });
-
-    return { success: true, userId: user.id };
-  } catch (error) {
-    console.error("Registration error:", error);
-    throw error;
-  }
-}
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

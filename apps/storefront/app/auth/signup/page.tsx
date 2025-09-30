@@ -10,6 +10,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -73,6 +74,33 @@ export default function SignUpPage() {
     }
   };
 
+  const handleEmailVerification = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address first");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn("email", {
+        email: formData.email,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Failed to send verification email. Please try again.");
+      } else {
+        setEmailSent(true);
+      }
+    } catch {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     await signIn("google", { callbackUrl: "/" });
@@ -84,6 +112,50 @@ export default function SignUpPage() {
       [e.target.name]: e.target.value,
     }));
   };
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+              <svg
+                className="h-6 w-6 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Check your email!
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              We've sent a verification link to{" "}
+              <strong>{formData.email}</strong>
+            </p>
+            <p className="mt-1 text-center text-sm text-gray-500">
+              Click the link in your email to verify your account.
+            </p>
+            <div className="mt-4">
+              <Link
+                href="/auth/signin"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Back to Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -109,7 +181,7 @@ export default function SignUpPage() {
               Account Created Successfully!
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              You&apos;re being signed in automatically...
+              You're being signed in automatically...
             </p>
           </div>
         </div>
@@ -243,7 +315,32 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
+              {/* Email Verification Button */}
+              <button
+                type="button"
+                onClick={handleEmailVerification}
+                disabled={loading || emailSent || !formData.email}
+                className="w-full inline-flex justify-center py-2 px-4 border border-blue-300 rounded-md shadow-sm bg-blue-50 text-sm font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {emailSent
+                  ? "Verification Email Sent!"
+                  : "Send Email Verification"}
+              </button>
+
               <button
                 type="button"
                 onClick={handleGoogleSignIn}

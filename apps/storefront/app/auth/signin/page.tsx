@@ -10,6 +10,7 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -62,6 +63,33 @@ function SignInContent() {
     await signIn("google", { callbackUrl });
   };
 
+  const handleEmailSignIn = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn("email", {
+        email: formData.email,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Failed to send email. Please try again.");
+      } else {
+        setEmailSent(true);
+      }
+    } catch {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -90,6 +118,16 @@ function SignInContent() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
             {error}
+          </div>
+        )}
+
+        {emailSent && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+            <p className="font-medium">Check your email!</p>
+            <p className="text-sm mt-1">
+              We've sent a verification link to {formData.email}. Click the link
+              in your email to sign in.
+            </p>
           </div>
         )}
 
@@ -157,7 +195,29 @@ function SignInContent() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleEmailSignIn}
+                disabled={loading || emailSent}
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {emailSent ? "Email Sent!" : "Sign in with Email Link"}
+              </button>
+
               <button
                 type="button"
                 onClick={handleGoogleSignIn}

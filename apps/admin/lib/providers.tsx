@@ -1,13 +1,28 @@
 "use client";
 
-// Providers placeholder for Phase 2.1
-// Full tRPC integration will be implemented in Phase 2.2
+import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { trpc, createTRPCClient } from "./trpc";
+import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 1000, // 5 seconds
+          },
+        },
+      }),
+  );
+  const [trpcClient] = useState(() => createTRPCClient());
 
-// TODO: Implement full tRPC providers in Phase 2.2
-// - QueryClient setup
-// - tRPC client configuration
-// - Error boundary integration
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+}
