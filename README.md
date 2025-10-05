@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Commerce Platform
 
-## Getting Started
+A modern, WordPress-like e-commerce platform built with Next.js 15 that deploys on any VPS in 5 minutes.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### 1. Clone & Install
+
+```bash
+git clone <your-repo-url>
+cd ea-commerce
+npm install
+```
+
+### 2. Setup Environment
+
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
+
+### 3. Setup Database
+
+Choose one option:
+
+**Using Docker (Recommended):**
+```bash
+docker run --name ecommerce-db \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=ecommerce \
+  -p 5432:5432 -d postgres:15
+```
+
+**Or use a managed service:** [Neon](https://neon.tech), [Supabase](https://supabase.com), [Railway](https://railway.app)
+
+### 4. Push Schema & Verify
+
+```bash
+npm run db:push    # Create database tables
+npm run verify     # Verify everything works
+```
+
+### 5. Start Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📚 Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **[SETUP.md](SETUP.md)** - Complete setup instructions with troubleshooting
+- **[PROJECT.md](PROJECT.md)** - Development phases and progress tracker
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** Next.js 15 with TypeScript
+- **Database:** PostgreSQL 15+ with Prisma ORM
+- **Cache:** Redis (optional)
+- **UI:** Tailwind CSS + shadcn/ui
+- **Auth:** NextAuth v5
+- **Deploy:** PM2, Nginx, Docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📋 Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build           # Production build
 
-## Deploy on Vercel
+# Quality Checks
+npm run quality         # Run all checks
+npm run type-check      # TypeScript
+npm run lint            # ESLint
+npm run test            # Jest tests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Database
+npm run db:push         # Push schema
+npm run db:seed         # Seed data
+npm run db:reset        # Reset database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Verification
+npm run verify          # Test DB & Redis connectivity
+```
+
+## 🎯 Project Status
+
+- ✅ Phase 1: Foundation Setup
+- ✅ Phase 2: Database & Config
+- ⬜ Phase 3: Setup Wizard
+- ⬜ Phase 4: Content Management
+- ⬜ Phase 5: Product Management
+- ⬜ Phase 6: Performance
+- ⬜ Phase 7: Customer Features
+- ⬜ Phase 8: Orders & Payments
+- ⬜ Phase 9: Advanced Features
+- ⬜ Phase 10: Deployment
+
+See [PROJECT.md](PROJECT.md) for detailed progress and next steps.
+
+## 🤝 Contributing
+
+1. Check [PROJECT.md](PROJECT.md) for current phase
+2. All code must pass quality checks: `npm run quality`
+3. Follow the established patterns and conventions
+
+## 📄 License
+
+[Your License Here]
