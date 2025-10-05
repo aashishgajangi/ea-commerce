@@ -103,7 +103,7 @@ export default function SetupPage() {
     setError('');
     
     try {
-      // TODO: Create admin user
+      // Create admin user
       const adminResponse = await fetch('/api/setup/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,10 +111,11 @@ export default function SetupPage() {
       });
 
       if (!adminResponse.ok) {
-        throw new Error('Failed to create admin user');
+        const adminResult = await adminResponse.json();
+        throw new Error(adminResult.error || 'Failed to create admin user');
       }
 
-      // TODO: Save site settings
+      // Save site settings
       const settingsResponse = await fetch('/api/setup/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

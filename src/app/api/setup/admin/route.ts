@@ -32,11 +32,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if any user exists
-    const existingUsers = await db.user.count();
-    if (existingUsers > 0) {
+    // Check if email already exists
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: 'Admin user already exists' },
+        { error: `Admin with email "${email}" already exists. Use a different email or run full reset: npm run setup:reset:full` },
         { status: 400 }
       );
     }

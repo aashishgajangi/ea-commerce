@@ -177,13 +177,46 @@ Expected output:
 ═══════════════════════════════════════════════════
 ```
 
-### 7. Start Development Server
+### 7. Run Setup Wizard
+
+After starting the dev server, complete the setup wizard:
 
 ```bash
 npm run dev
 ```
 
-Visit http://localhost:3000
+Visit **http://localhost:3000/setup**
+
+The setup wizard will guide you through:
+1. **System Tests** - Verifies database, Redis, environment
+2. **Admin Account** - Create your first admin user
+3. **Basic Settings** - Configure store name, currency, timezone
+4. **Complete** - Finish setup and access admin dashboard
+
+**Note:** Setup runs only once. After completion, `/setup` redirects to `/admin`.
+
+### 8. Managing Setup Wizard
+
+**Check what's in database:**
+```bash
+npm run verify:setup
+```
+
+**Rerun setup (keeps admin & settings):**
+```bash
+npm run setup:reset
+npm run dev
+# Visit: http://localhost:3000/setup
+```
+
+**Full reset (clean slate - deletes everything):**
+```bash
+npm run setup:reset:full
+npm run dev
+# Visit: http://localhost:3000/setup
+```
+
+**Important:** If you try to create an admin with an existing email after soft reset, you'll get an error. Use full reset or choose a different email.
 
 ## Common Issues
 
@@ -236,6 +269,11 @@ npm run db:reset        # Reset database
 
 # Verification
 npm run verify          # Verify database & Redis connectivity
+npm run verify:setup    # Check setup wizard data (admin, settings)
+
+# Setup Wizard Management
+npm run setup:reset     # Reset setup (keeps admin & settings)
+npm run setup:reset:full # Full reset (deletes everything)
 ```
 
 ## Environment Variables Reference

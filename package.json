@@ -11,6 +11,9 @@
     "test": "jest --passWithNoTests",
     "quality": "npm run type-check && npm run lint && npm run test",
     "verify": "tsx scripts/verify-setup.ts",
+    "verify:setup": "tsx scripts/verify-setup-data.ts",
+    "setup:reset": "tsx scripts/reset-setup.ts 1",
+    "setup:reset:full": "tsx scripts/reset-setup.ts 2",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force"

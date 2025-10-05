@@ -79,7 +79,34 @@ npm run test            # Run tests
 npm run db:push         # Push schema
 npm run db:seed         # Seed data
 npm run db:reset        # Reset DB
+
+# Setup Management
+npm run verify:setup    # Check setup data
+npm run setup:reset     # Reset setup (keeps admin)
+npm run setup:reset:full # Full reset (clean slate)
 ```
+
+## 🔄 Setup Wizard Management
+
+**After completing setup once:**
+- Setup wizard redirects to `/admin` automatically
+- To rerun setup, use reset commands below
+
+**Soft Reset** (keeps admin user and settings):
+```bash
+npm run setup:reset
+npm run dev
+```
+Use when: Testing wizard UI, updating settings
+
+**Full Reset** (deletes everything):
+```bash
+npm run setup:reset:full
+npm run dev
+```
+Use when: Starting fresh, need different admin email
+
+**Note:** If you try to create an admin with an existing email after soft reset, you'll get an error. Use full reset or choose a different email.
 
 ---
 
