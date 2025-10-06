@@ -61,56 +61,62 @@ export default function AdminDashboard() {
                 </Card>
               </Link>
 
-              <Card className="opacity-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-green-500" />
-                    Pages
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    Create and manage static pages with SEO
-                  </p>
-                  <Button variant="ghost" size="sm" className="w-full" disabled>
-                    Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link href="/admin/pages" aria-label="Pages">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-500" role="img" aria-label="Pages icon" />
+                      Pages
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Create and manage static pages with SEO
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Pages <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
 
-              <Card className="opacity-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Menu className="h-5 w-5 text-purple-500" />
-                    Menus
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    Build navigation menus for your site
-                  </p>
-                  <Button variant="ghost" size="sm" className="w-full" disabled>
-                    Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link href="/admin/menus" aria-label="Menus">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Menu className="h-5 w-5 text-purple-500" role="img" aria-label="Menus icon" />
+                      Menus
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Build navigation menus for your site
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Menus <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
 
-              <Card className="opacity-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-orange-500" />
-                    Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    Configure site settings and appearance
-                  </p>
-                  <Button variant="ghost" size="sm" className="w-full" disabled>
-                    Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link href="/admin/settings" aria-label="Settings">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-orange-500" role="img" aria-label="Settings icon" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Configure site settings and appearance
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Settings <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </div>
 
@@ -127,16 +133,16 @@ export default function AdminDashboard() {
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Media Library - Upload and manage media
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Static Pages - Create content pages with SEO
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Site Settings - Logo, header, footer configuration
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Navigation Menus - Build custom menus
                 </li>
                 <li className="flex items-center gap-2 opacity-50">

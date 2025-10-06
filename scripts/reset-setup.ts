@@ -1,5 +1,7 @@
 import { db } from '../src/lib/db';
 import { config } from '../src/lib/config';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 async function resetSetup() {
   console.log('🔄 Resetting Setup...\n');
@@ -25,9 +27,36 @@ async function resetSetup() {
 
       // Delete all configurations
       const deletedConfigs = await db.configuration.deleteMany({});
-      console.log(`   ✅ Deleted ${deletedConfigs.count} configurations\n`);
+      console.log(`   ✅ Deleted ${deletedConfigs.count} configurations`);
 
-      console.log('✅ Full reset complete! You can now run setup again.\n');
+      // Delete all media files and records (Phase 4)
+      const deletedMedia = await db.media.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedMedia.count} media records`);
+
+      // Delete all site settings (Phase 4)
+      const deletedSiteSettings = await db.siteSettings.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedSiteSettings.count} site settings`);
+
+      // Delete all pages (Phase 4)
+      const deletedPages = await db.page.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedPages.count} pages`);
+
+      // Delete all menus and menu items (Phase 4)
+      const deletedMenuItems = await db.menuItem.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedMenuItems.count} menu items`);
+      const deletedMenus = await db.menu.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedMenus.count} menus`);
+
+      // Clean up uploaded files from filesystem
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      try {
+        await fs.rm(uploadsDir, { recursive: true, force: true });
+        console.log('   ✅ Deleted uploaded files from filesystem');
+      } catch (error) {
+        console.log('   ℹ️  No uploaded files to clean up');
+      }
+
+      console.log('\n✅ Full reset complete! You can now run setup again.\n');
     } else {
       console.log('🔄 Soft Reset - Resetting setup flag and admin...\n');
 
@@ -50,7 +79,7 @@ async function resetSetup() {
         console.log('   ℹ️  Setup flag was not set');
       }
 
-      console.log('   ℹ️  Settings and audit logs are preserved\n');
+      console.log('   ℹ️  Settings, audit logs, and media files are preserved\n');
       console.log('✅ Soft reset complete! You can now run setup again.\n');
     }
 
