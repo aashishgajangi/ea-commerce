@@ -30,6 +30,10 @@ model User {
   role      String   @default("customer")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Relations (Phase 4)
+  media     Media[]
+  pages     Page[]
 
   @@map("users")
 }
@@ -43,4 +47,134 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+// Media model for file uploads (Phase 4)
+model Media {
+  id           String   @id @default(cuid())
+  filename     String   // Stored filename
+  originalName String   // Original upload name
+  mimeType     String   // image/jpeg, etc.
+  size         Int      // File size in bytes
+  path         String   // /uploads/2024/01/filename.jpg
+  alt          String?  // Alt text for SEO
+  title        String?  // Media title
+  userId       String?  // Who uploaded (nullable for system uploads)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  pages        Page[]   @relation("PageFeaturedImage")
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("media")
+}
+
+// Page model for static pages and homepage (Phase 4)
+model Page {
+  id               String    @id @default(cuid())
+  title            String
+  slug             String    @unique
+  content          String    @db.Text // TipTap JSON content
+  excerpt          String?   @db.Text
+  status           String    @default("draft") // draft, published
+  isHomepage       Boolean   @default(false)
+  
+  // SEO fields
+  metaTitle        String?
+  metaDescription  String?   @db.Text
+  metaKeywords     String?
+  canonicalUrl     String?
+  
+  // Open Graph
+  ogTitle          String?
+  ogDescription    String?   @db.Text
+  ogImageId        String?
+  
+  // Twitter Card
+  twitterTitle     String?
+  twitterDescription String? @db.Text
+  twitterImageId   String?
+  
+  // Featured image
+  featuredImageId  String?
+  
+  // Author and timestamps
+  authorId         String?
+  publishedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  // Relations
+  author           User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  featuredImage    Media?    @relation("PageFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+  menuItems        MenuItem[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("pages")
+}
+
+// Site settings model (Phase 4)
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text // JSON value
+  type      String   @default("general") // general, appearance, seo, social
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@map("site_settings")
+}
+
+// Menu model for navigation (Phase 4)
+model Menu {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  location  String     // header, footer, sidebar
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  // Relations
+  items     MenuItem[]
+  
+  @@index([location])
+  @@map("menus")
+}
+
+// Menu item model for menu entries (Phase 4)
+model MenuItem {
+  id        String     @id @default(cuid())
+  menuId    String
+  label     String
+  url       String?    // For custom/external links
+  type      String     @default("custom") // page, custom, external
+  pageId    String?    // Link to Page if type is "page"
+  target    String     @default("_self") // _self, _blank
+  cssClass  String?    // Custom CSS classes
+  
+  // Hierarchy
+  parentId  String?    // For nested menus
+  order     Int        @default(0)
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  // Relations
+  menu      Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  page      Page?      @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  parent    MenuItem?  @relation("MenuItemHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  MenuItem[] @relation("MenuItemHierarchy")
+  
+  @@index([menuId])
+  @@index([pageId])
+  @@index([parentId])
+  @@index([order])
+  @@map("menu_items")
 }

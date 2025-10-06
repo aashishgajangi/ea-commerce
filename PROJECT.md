@@ -183,13 +183,21 @@ Use when: Complete fresh start, delete all data including settings
 
 ### Phase 4: Content Management ⬜
 **Features:**
-- [ ] Media library (local/cloud)
-- [ ] Static pages with full SEO control
+- [ ] Media library (LOCAL storage only)
+- [ ] Static pages with full SEO control (TipTap WYSIWYG editor)
+- [ ] Homepage management (Hybrid: pre-defined editable sections)
 - [ ] Navigation menu manager
-- [ ] Site settings (logo, footer, etc.)
-- [ ] Meta tags & structured data
-- [ ] Sitemap generation
+- [ ] Site settings (logo, header, footer, social links)
+- [ ] Meta tags & JSON-LD structured data
+- [ ] XML sitemap generation
 - [ ] Open Graph & Twitter cards
+
+**Technical Decisions:**
+- Editor: TipTap (ProseMirror-based WYSIWYG)
+- Storage: JSON in PostgreSQL (structured content)
+- Rendering: SSG for static pages, ISR for homepage
+- Media: Local file system (/public/uploads)
+- i18n: Deferred to Phase 9
 
 **SEO Capabilities:**
 - Per-page meta titles & descriptions
@@ -353,14 +361,23 @@ RAZORPAY_KEY=""
 
 ---
 
-## 🎯 Current Phase: Phase 4
-**Next Actions:**
-1. Create media library system (local/cloud)
-2. Build static pages with SEO control
-3. Implement navigation menu manager
-4. Add site settings interface
-5. Setup meta tags & structured data
-6. Create sitemap generation
+## 🎯 Current Phase: Phase 4 - Content Management System
+
+**Implementation Order:**
+1. **Database Schema** - Add models for Media, Pages, Menus, SiteSettings
+2. **Media Library** - Upload system, file management, local storage
+3. **Site Settings** - Logo, header, footer, social links, appearance
+4. **Static Pages** - TipTap editor, SEO fields, CRUD operations
+5. **Homepage Builder** - Pre-defined sections (Hero, Featured, CTA, About)
+6. **Navigation Menus** - Menu builder, item management, hierarchy
+7. **SEO System** - Meta tags, JSON-LD, Open Graph, Twitter Cards
+8. **Sitemap Generator** - Dynamic XML sitemap for all pages
+
+**Technical Stack:**
+- Editor: TipTap (WYSIWYG rich text)
+- Storage: PostgreSQL (JSON content), Local filesystem (media)
+- Rendering: SSG (static pages), ISR (homepage)
+- Admin Routes: `/admin/media`, `/admin/pages`, `/admin/menus`, `/admin/settings`
 
 **Phase 3 Completed:** ✅
 - Setup wizard with 4-step flow:
