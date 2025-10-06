@@ -6,7 +6,7 @@
 [✅] Phase 1: Foundation Setup
 [✅] Phase 2: Database & Config
 [✅] Phase 3: Setup Wizard
-[✅] Phase 4: Content Management (Complete)
+[🔧] Phase 4: Content Management (Testing Required)
 [⬜] Phase 5: Product Management
 [⬜] Phase 6: Performance
 [⬜] Phase 7: Customer Features
@@ -181,25 +181,67 @@ Use when: Complete fresh start, delete all data including settings
 
 ---
 
-### Phase 4: Content Management ✅ (Complete - 2025-10-06)
-**Features:**
-- [x] Media library (LOCAL storage only) ✅
-- [x] Site settings (logo, header, footer, social links) ✅
-- [x] Static pages with full SEO control (Lexical WYSIWYG editor) ✅
-- [x] Homepage management (using empty slug pages) ✅
-- [x] Navigation menu manager ✅
-- [x] Meta tags & JSON-LD structured data ✅
-- [x] XML sitemap generation ✅
-- [x] Open Graph & Twitter cards ✅
-- [x] Frontend Header/Footer components ✅
+### Phase 4: Content Management 🔧 (Testing Required - 2025-10-06)
 
-**Technical Decisions:**
-- Editor: Lexical (Meta's open-source WYSIWYG - 100% free)
-- Storage: HTML in PostgreSQL (structured content)
-- Rendering: SSG for static pages, ISR for homepage
-- Media: Local file system (/public/uploads)
-- Drag & Drop: @dnd-kit for menu reordering
-- i18n: Deferred to Phase 9
+**Implementation Status:**
+- [x] Media library (LOCAL storage only)
+- [x] Site settings (logo, header, footer, social links)
+- [x] Static pages with full SEO control
+- [x] Homepage management (using empty slug pages)
+- [x] Navigation menu manager
+- [x] Meta tags & JSON-LD structured data
+- [x] XML sitemap generation
+- [x] Open Graph & Twitter cards
+- [x] Frontend Header/Footer components
+- [⚠️] **Requires thorough testing before marking complete**
+
+**Technical Stack & Decisions:**
+- **Editor:** Lexical (Meta's open-source WYSIWYG)
+  - 100% free and MIT licensed
+  - Modern, extensible, framework-agnostic
+  - Built-in plugins for rich text, lists, links, headings
+  - HTML export/import for database storage
+  - Toolbar with formatting, undo/redo
+  - Located at: [`src/components/editor/LexicalEditor.tsx`](src/components/editor/LexicalEditor.tsx)
+  
+- **Content Storage:** HTML in PostgreSQL
+  - Lexical generates clean HTML
+  - Stored in `Page.content` field (Text type)
+  - Easy to render on frontend with `dangerouslySetInnerHTML`
+  
+- **Media Storage:** Local file system only
+  - Path: `/public/uploads/YYYY/MM/`
+  - Image optimization with Sharp library
+  - 10MB file size limit
+  - Image types only (JPEG, PNG, GIF, WebP, SVG)
+  
+- **Page Rendering:**
+  - SSG (Static Site Generation) for static pages
+  - ISR (Incremental Static Regeneration) with 60s revalidate
+  - Dynamic routes: `[slug]` for pages, empty slug for homepage
+  
+- **Menu System:**
+  - Drag & Drop: @dnd-kit library for reordering
+  - Hierarchical structure (parent-child relationships)
+  - Three types: Page links, Custom links, External links
+  
+- **SEO:**
+  - Per-page meta tags (title, description, keywords)
+  - Open Graph for Facebook sharing
+  - Twitter Card meta tags
+  - JSON-LD structured data (WebPage, BreadcrumbList)
+  - Canonical URLs
+  - Dynamic sitemap.xml and robots.txt
+  
+- **Frontend Layout:**
+  - Reusable Header component with logo, menu, search
+  - Reusable Footer component with social links, copyright
+  - PublicLayout wrapper for all public pages
+  - Fully responsive with Tailwind CSS
+  
+- **Future:**
+  - i18n deferred to Phase 9
+  - Cloud storage (S3, Cloudinary) deferred to future phase
 
 **SEO Capabilities:**
 - Per-page meta titles & descriptions
@@ -230,6 +272,16 @@ Use when: Complete fresh start, delete all data including settings
 - ✅ Frontend Header with logo, menu, search
 - ✅ Frontend Footer with social links, copyright
 - ✅ All builds passing cleanly
+
+**Key Files:**
+- Editor: [`src/components/editor/LexicalEditor.tsx`](src/components/editor/LexicalEditor.tsx)
+- Header: [`src/components/layout/Header.tsx`](src/components/layout/Header.tsx)
+- Footer: [`src/components/layout/Footer.tsx`](src/components/layout/Footer.tsx)
+- Layout: [`src/components/layout/PublicLayout.tsx`](src/components/layout/PublicLayout.tsx)
+- Pages API: [`src/app/api/admin/pages/route.ts`](src/app/api/admin/pages/route.ts)
+- Settings API: [`src/app/api/admin/settings/`](src/app/api/admin/settings/)
+- Menus API: [`src/app/api/admin/menus/`](src/app/api/admin/menus/)
+- Public Rendering: [`src/app/[slug]/page.tsx`](src/app/[slug]/page.tsx)
 
 **Deliverable:** Simple, maintainable content system with maximum SEO
 
@@ -414,25 +466,48 @@ RAZORPAY_KEY=""
 - Audit logging for setup events
 - All quality checks passing (TypeScript, ESLint, Tests, Build)
 
-**Phase 4 Progress:** ✅ 100% Complete (Fixed 2025-10-06)
+**Phase 4 Progress:** 🔧 Implementation Complete - Testing Required (2025-10-06)
+
+**✅ Implemented Features:**
 - ✅ Database models (Media, Page, SiteSettings, Menu, MenuItem)
 - ✅ Media library with upload, optimization, CRUD operations
 - ✅ Settings system (General, Appearance, Social, Header, Footer)
 - ✅ Logo/favicon selection from media library
-- ✅ Lexical WYSIWYG editor with full toolbar (100% free & open-source)
+- ✅ **Lexical WYSIWYG editor** (Meta's open-source editor)
+  - Rich text formatting (bold, italic, underline, strikethrough, code)
+  - Headings (H1-H5), quotes, lists (ordered/unordered)
+  - Links with URL input
+  - Undo/Redo functionality
+  - HTML export for database storage
+  - Clean, extensible architecture
 - ✅ Static pages system with CRUD operations
 - ✅ Homepage using empty slug pages (flexible solution)
-- ✅ Navigation menu manager with drag-and-drop reordering
+- ✅ Navigation menu manager with @dnd-kit drag-and-drop reordering
 - ✅ SEO meta tags, Open Graph, Twitter Cards
-- ✅ JSON-LD structured data generation
+- ✅ JSON-LD structured data generation (WebPage, BreadcrumbList)
 - ✅ Dynamic sitemap.xml and robots.txt
-- ✅ Public page rendering with SSG/ISR
+- ✅ Public page rendering with SSG/ISR (60s revalidate)
 - ✅ Frontend Header component (logo, menu, search, sticky)
 - ✅ Frontend Footer component (social links, copyright, payment icons)
+- ✅ PublicLayout wrapper for consistent layout
 - ✅ All builds passing (0 errors, 0 warnings)
 
-**Recent Fixes (2025-10-06):**
-- ✅ Fixed: Menu items now show all pages (draft + published)
-- ✅ Fixed: Tagline saving and loading correctly
-- ✅ Added: Complete frontend Header/Footer layout
-- 🎯 Phase 4 Complete - Ready for Phase 5 (Product Management)
+**🔧 Recent Fixes (2025-10-06):**
+- ✅ Fixed: Menu items now show all pages (draft + published) in dropdown
+- ✅ Fixed: Tagline saving and loading correctly from Configuration table
+- ✅ Added: Complete frontend Header/Footer layout components
+- ✅ Added: PublicLayout wrapper with Header + Content + Footer
+
+**⚠️ Pending Testing:**
+Before marking Phase 4 complete, the following areas need thorough testing:
+1. **Media Library:** Upload, delete, search, pagination with real images
+2. **Settings:** All tabs (General, Appearance, Social, Header, Footer) - save and verify persistence
+3. **Pages:** Create, edit, delete with Lexical editor - verify HTML rendering
+4. **Menus:** Create menu items, drag-drop reordering, verify frontend display
+5. **Homepage:** Empty slug page creation and display
+6. **SEO:** Verify meta tags, Open Graph, Twitter Cards in browser
+7. **Frontend Layout:** Header and Footer display on all pages
+8. **Responsive:** Test on mobile, tablet, desktop viewports
+9. **Browser Testing:** Chrome, Firefox, Safari compatibility
+
+**🎯 Next Action:** Complete testing checklist above, then proceed to Phase 5
