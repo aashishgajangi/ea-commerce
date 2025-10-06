@@ -92,21 +92,19 @@ npm run setup:reset:full # Full reset (clean slate)
 - Setup wizard redirects to `/admin` automatically
 - To rerun setup, use reset commands below
 
-**Soft Reset** (keeps admin user and settings):
+**Soft Reset** (keeps settings and logs, deletes admin):
 ```bash
 npm run setup:reset
 npm run dev
 ```
-Use when: Testing wizard UI, updating settings
+Use when: Testing wizard, want to create new admin, keep site settings
 
 **Full Reset** (deletes everything):
 ```bash
 npm run setup:reset:full
 npm run dev
 ```
-Use when: Starting fresh, need different admin email
-
-**Note:** If you try to create an admin with an existing email after soft reset, you'll get an error. Use full reset or choose a different email.
+Use when: Complete fresh start, delete all data including settings
 
 ---
 

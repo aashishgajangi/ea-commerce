@@ -5,9 +5,9 @@ async function resetSetup() {
   console.log('🔄 Resetting Setup...\n');
 
   try {
-    // Option 1: Just reset setup flag (keeps data)
+    // Option 1: Reset setup flag and admin (keeps settings and logs)
     console.log('Choose reset option:');
-    console.log('1. Soft Reset - Only reset setup flag (keeps admin and settings)');
+    console.log('1. Soft Reset - Reset setup flag and admin (keeps settings and logs)');
     console.log('2. Full Reset - Delete all data and start fresh\n');
 
     const resetType = process.argv[2] || '1';
@@ -29,19 +29,29 @@ async function resetSetup() {
 
       console.log('✅ Full reset complete! You can now run setup again.\n');
     } else {
-      console.log('🔄 Soft Reset - Resetting setup flag only...\n');
+      console.log('🔄 Soft Reset - Resetting setup flag and admin...\n');
 
-      // Just delete the setup_complete flag
-      try {
+      // Delete all users (so you can create new admin)
+      const deletedUsers = await db.user.deleteMany({});
+      console.log(`   ✅ Deleted ${deletedUsers.count} user(s)`);
+
+      // Check if setup_complete flag exists
+      const setupFlag = await db.configuration.findUnique({
+        where: { key: 'setup_complete' },
+      });
+
+      if (setupFlag) {
+        // Delete the setup_complete flag
         await db.configuration.delete({
           where: { key: 'setup_complete' },
         });
         console.log('   ✅ Setup flag removed');
-        console.log('   ℹ️  Admin user and settings are preserved\n');
-        console.log('✅ Soft reset complete! You can now run setup again.\n');
-      } catch (error) {
-        console.log('   ℹ️  Setup flag was not set (already in fresh state)\n');
+      } else {
+        console.log('   ℹ️  Setup flag was not set');
       }
+
+      console.log('   ℹ️  Settings and audit logs are preserved\n');
+      console.log('✅ Soft reset complete! You can now run setup again.\n');
     }
 
     console.log('📝 Next steps:');

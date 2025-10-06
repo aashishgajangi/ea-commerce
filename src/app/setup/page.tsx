@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle2, XCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft, Info } from 'lucide-react';
 import type { DiagnosticsResponse, DiagnosticResult } from '@/app/api/setup/diagnostics/route';
 
 type SetupStep = 1 | 2 | 3 | 4;
@@ -18,6 +18,10 @@ export default function SetupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [diagnostics, setDiagnostics] = useState<DiagnosticsResponse | null>(null);
   const [error, setError] = useState<string>('');
+  const [existingSettings, setExistingSettings] = useState<{
+    siteName?: string;
+    currency?: string;
+  } | null>(null);
 
   // Form state
   const [adminData, setAdminData] = useState({
@@ -38,6 +42,37 @@ export default function SetupPage() {
   useEffect(() => {
     loadDiagnostics();
   }, []);
+
+  // Load existing settings when reaching step 3
+  useEffect(() => {
+    if (currentStep === 3) {
+      loadExistingSettings();
+    }
+  }, [currentStep]);
+
+  const loadExistingSettings = async () => {
+    try {
+      const response = await fetch('/api/setup/check-settings');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.exists) {
+          setExistingSettings({
+            siteName: data.settings.siteName,
+            currency: data.settings.currency,
+          });
+          // Pre-fill form with existing values
+          setSiteData({
+            siteName: data.settings.siteName || 'My Store',
+            siteDescription: data.settings.siteDescription || 'Your amazing online store',
+            currency: data.settings.currency || 'USD',
+            timezone: data.settings.timezone || 'UTC',
+          });
+        }
+      }
+    } catch {
+      // Ignore errors - settings might not exist yet
+    }
+  };
 
   const loadDiagnostics = async () => {
     setIsLoading(true);
@@ -77,7 +112,29 @@ export default function SetupPage() {
         setError('Password must be at least 8 characters');
         return;
       }
-      setCurrentStep(3);
+      
+      // Create admin user immediately after validation
+      setIsLoading(true);
+      try {
+        const adminResponse = await fetch('/api/setup/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(adminData)
+        });
+
+        if (!adminResponse.ok) {
+          const adminResult = await adminResponse.json();
+          throw new Error(adminResult.error || 'Failed to create admin user');
+        }
+        
+        // Success - move to next step
+        setCurrentStep(3);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create admin user');
+      } finally {
+        setIsLoading(false);
+      }
+      return; // Return to prevent further execution
     } else if (currentStep === 3) {
       // Validate site data
       if (!siteData.siteName) {
@@ -103,18 +160,8 @@ export default function SetupPage() {
     setError('');
     
     try {
-      // Create admin user
-      const adminResponse = await fetch('/api/setup/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(adminData)
-      });
-
-      if (!adminResponse.ok) {
-        const adminResult = await adminResponse.json();
-        throw new Error(adminResult.error || 'Failed to create admin user');
-      }
-
+      // Admin already created in Step 2, just save settings
+      
       // Save site settings
       const settingsResponse = await fetch('/api/setup/settings', {
         method: 'POST',
@@ -315,6 +362,20 @@ export default function SetupPage() {
                 Configure your store&apos;s basic information
               </CardDescription>
             </CardHeader>
+            {existingSettings && (
+              <CardContent>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Settings already exist. Your changes will update the current values:
+                    <br />
+                    <strong>Current Site Name:</strong> {existingSettings.siteName}
+                    <br />
+                    <strong>Current Currency:</strong> {existingSettings.currency}
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            )}
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="siteName">Store Name</Label>

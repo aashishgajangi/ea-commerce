@@ -202,21 +202,24 @@ The setup wizard will guide you through:
 npm run verify:setup
 ```
 
-**Rerun setup (keeps admin & settings):**
+**Soft Reset (deletes admin, keeps settings):**
 ```bash
 npm run setup:reset
 npm run dev
 # Visit: http://localhost:3000/setup
 ```
+Deletes: Admin users, setup flag
+Keeps: Site settings, audit logs
+Use when: Want to create new admin but keep site configuration
 
-**Full reset (clean slate - deletes everything):**
+**Full Reset (clean slate):**
 ```bash
 npm run setup:reset:full
 npm run dev
 # Visit: http://localhost:3000/setup
 ```
-
-**Important:** If you try to create an admin with an existing email after soft reset, you'll get an error. Use full reset or choose a different email.
+Deletes: Everything (admin, settings, logs)
+Use when: Complete fresh start
 
 ## Common Issues
 
@@ -272,7 +275,7 @@ npm run verify          # Verify database & Redis connectivity
 npm run verify:setup    # Check setup wizard data (admin, settings)
 
 # Setup Wizard Management
-npm run setup:reset     # Reset setup (keeps admin & settings)
+npm run setup:reset     # Soft reset (deletes admin, keeps settings)
 npm run setup:reset:full # Full reset (deletes everything)
 ```
 
