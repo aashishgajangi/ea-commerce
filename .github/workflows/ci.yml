@@ -10,6 +10,31 @@ jobs:
   quality-checks:
     runs-on: ubuntu-latest
     
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
     strategy:
       matrix:
         node-version: [22.x]
@@ -27,6 +52,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      - name: Push database schema
+        run: npx prisma db push --accept-data-loss
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+      
       - name: Run TypeScript type check
         run: npm run type-check
       
@@ -34,17 +67,22 @@ jobs:
         run: npm run lint
       
       - name: Run tests
-        run: npm run test -- --testPathIgnorePatterns=redis.test.ts
+        run: npm run test -- --testPathIgnorePatterns="tests/lib/redis.test.ts"
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
-          REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379' }}
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          REDIS_URL: redis://localhost:6379
+          APP_NAME: Test Store
+          APP_URL: http://localhost:3000
       
       - name: Build application
         run: npm run build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
-          REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379' }}
-          SKIP_ENV_VALIDATION: true
+          NODE_ENV: production
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          REDIS_URL: redis://localhost:6379
+          APP_NAME: Test Store
+          APP_URL: http://localhost:3000
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
