@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getPublishedPages } from '@/lib/pages';
 
+// Force dynamic rendering - don't try to pre-render during build
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   
   // Fetch all published pages
-  const pages = await getPublishedPages();
+  let pages: Awaited<ReturnType<typeof getPublishedPages>> = [];
+  try {
+    pages = await getPublishedPages();
+  } catch (error) {
+    console.error('Failed to fetch pages for sitemap:', error);
+  }
 
   // Generate XML sitemap
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
