@@ -35,9 +35,16 @@ jobs:
       
       - name: Run tests
         run: npm run test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
+          REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379' }}
       
       - name: Build application
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
+          REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379' }}
+          SKIP_ENV_VALIDATION: true
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -17,11 +17,17 @@ interface PageProps {
 
 // Generate static params for all published pages
 export async function generateStaticParams() {
-  const pages = await getPublishedPages();
-  
-  return pages.map((page) => ({
-    slug: page.slug,
-  }));
+  try {
+    const pages = await getPublishedPages();
+    
+    return pages.map((page) => ({
+      slug: page.slug,
+    }));
+  } catch (error) {
+    // Return empty array if database is not available (e.g., during CI builds)
+    console.warn('Could not generate static params, database may not be available:', error);
+    return [];
+  }
 }
 
 // Generate metadata for SEO
