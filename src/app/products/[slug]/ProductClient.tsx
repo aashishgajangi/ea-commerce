@@ -174,6 +174,7 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
                 fill
                 className="object-cover"
                 priority
+                unoptimized={true}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -202,6 +203,7 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
                     alt={image.alt || product.name}
                     fill
                     className="object-cover"
+                    unoptimized={true}
                   />
                 </div>
               ))}

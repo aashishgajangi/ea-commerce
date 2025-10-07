@@ -100,6 +100,7 @@ export default async function Page({ params }: PageProps) {
               fill
               className="object-cover rounded-lg shadow-lg"
               priority
+              unoptimized={true}
             />
           </div>
         )}

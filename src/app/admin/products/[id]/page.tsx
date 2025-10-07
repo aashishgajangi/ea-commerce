@@ -837,7 +837,7 @@ export default function ProductEditPage() {
                   .map((image) => (
                     <div key={image.id} className="relative group">
                       <div className="aspect-square bg-gray-100 rounded overflow-hidden relative">
-                        <Image src={image.url} alt={image.alt || ''} fill className="object-cover" />
+                        <Image src={image.url} alt={image.alt || ''} fill className="object-cover" unoptimized={true} />
                         {image.isPrimary && (
                           <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
                             Primary
@@ -1205,6 +1205,7 @@ function MediaLibrarySelector({ onSelect }: { onSelect: (url: string, alt?: stri
                   alt={item.alt || item.originalName}
                   fill
                   className="object-cover"
+                  unoptimized={true}
                 />
               </div>
               <p className="text-xs mt-2 truncate">{item.originalName}</p>

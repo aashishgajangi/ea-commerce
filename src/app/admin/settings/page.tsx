@@ -444,6 +444,7 @@ export default function SettingsPage() {
                         width={128}
                         height={128}
                         className="object-cover w-full h-full"
+                        unoptimized={true}
                       />
                     </div>
                     <Button
@@ -487,6 +488,7 @@ export default function SettingsPage() {
                         width={64}
                         height={64}
                         className="object-cover w-full h-full"
+                        unoptimized={true}
                       />
                     </div>
                     <Button
@@ -872,6 +874,7 @@ export default function SettingsPage() {
                                   width={100}
                                   height={100}
                                   className="object-cover w-full h-full"
+                                  unoptimized={true}
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">

@@ -41,6 +41,7 @@ export default async function Header() {
                 width={180}
                 height={60}
                 className="h-12 w-auto object-contain"
+                unoptimized={true}
               />
             )}
             {settings.header.showLogoText && (

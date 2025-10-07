@@ -76,6 +76,7 @@ export default async function Home() {
                 fill
                 className="object-cover rounded-lg shadow-lg"
                 priority
+                unoptimized={true}
               />
             </div>
           )}

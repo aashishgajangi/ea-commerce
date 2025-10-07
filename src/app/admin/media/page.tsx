@@ -289,6 +289,7 @@ export default function MediaLibraryPage() {
                         alt={item.alt || item.originalName}
                         fill
                         className="object-cover"
+                        unoptimized={true}
                       />
                     ) : (
                       <ImageIcon className="w-12 h-12 text-gray-400" />
@@ -374,6 +375,7 @@ export default function MediaLibraryPage() {
                     width={800}
                     height={600}
                     className="max-w-full max-h-96 object-contain"
+                    unoptimized={true}
                   />
                 ) : (
                   <ImageIcon className="w-24 h-24 text-gray-400" />
