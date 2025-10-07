@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,12 @@ import { ArrowLeft, Save } from 'lucide-react';
 interface Category {
   id: string;
   name: string;
+}
+
+interface CategoryData {
+  id: string;
+  name: string;
+  children?: CategoryData[];
 }
 
 export default function NewProductPage() {
@@ -36,18 +42,18 @@ export default function NewProductPage() {
   });
 
   // Fetch categories on mount
-  useState(() => {
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/admin/categories');
         if (!response.ok) return;
         const data = await response.json();
 
-        const flattenCategories = (cats: any[]): Category[] => {
+        const flattenCategories = (cats: CategoryData[]): Category[] => {
           let result: Category[] = [];
-          cats.forEach((cat: any) => {
+          cats.forEach((cat) => {
             result.push({ id: cat.id, name: cat.name });
-            if (cat.children?.length > 0) {
+            if (cat.children && cat.children.length > 0) {
               result = result.concat(flattenCategories(cat.children));
             }
           });
@@ -61,7 +67,7 @@ export default function NewProductPage() {
     };
 
     fetchCategories();
-  });
+  }, []);
 
   const handleNameChange = (name: string) => {
     // Auto-generate slug from name

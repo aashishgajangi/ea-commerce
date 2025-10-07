@@ -6,6 +6,28 @@ import { Package, Search } from 'lucide-react';
 import { getProducts } from '@/lib/products';
 import PublicLayout from '@/components/layout/PublicLayout';
 
+interface ProductImage {
+  id: string;
+  url: string;
+  alt: string | null;
+  order: number;
+  isPrimary: boolean;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  price: number;
+  compareAtPrice: number | null;
+  stockQuantity: number;
+  isFeatured: boolean;
+  category?: { id: string; name: string } | null;
+  images: ProductImage[];
+  shortDescription?: string | null;
+}
+
 async function ProductsContent({ searchParams }: { searchParams: Promise<{
   category?: string;
   search?: string;
@@ -78,8 +100,8 @@ async function ProductsContent({ searchParams }: { searchParams: Promise<{
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product: any) => {
-              const primaryImage = product.images.find((img: any) => img.isPrimary) || product.images[0];
+            {products.map((product: Product) => {
+              const primaryImage = product.images.find((img: ProductImage) => img.isPrimary) || product.images[0];
               const discount = calculateDiscount(product.price, product.compareAtPrice);
 
               return (

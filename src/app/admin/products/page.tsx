@@ -35,6 +35,12 @@ interface ProductsResponse {
   hasMore: boolean;
 }
 
+interface CategoryData {
+  id: string;
+  name: string;
+  children?: CategoryData[];
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
@@ -77,11 +83,11 @@ export default function ProductsPage() {
       const data = await response.json();
       
       // Flatten categories
-      const flattenCategories = (cats: any[]): any[] => {
-        let result: any[] = [];
+      const flattenCategories = (cats: CategoryData[]): Array<{ id: string; name: string }> => {
+        let result: Array<{ id: string; name: string }> = [];
         cats.forEach((cat) => {
           result.push({ id: cat.id, name: cat.name });
-          if (cat.children?.length > 0) {
+          if (cat.children && cat.children.length > 0) {
             result = result.concat(flattenCategories(cat.children));
           }
         });

@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
  * Generate a unique slug for a category
  */
 export async function generateUniqueCategorySlug(name: string, excludeId?: string): Promise<string> {
-  let slug = name
+  const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
@@ -313,7 +313,7 @@ async function checkCircularReference(categoryId: string, targetParentId: string
     }
     visited.add(currentParentId);
 
-    const parent: any = await db.category.findUnique({
+    const parent: { parentId: string | null } | null = await db.category.findUnique({
       where: { id: currentParentId },
       select: { parentId: true },
     });
@@ -347,7 +347,7 @@ export async function getCategoryBreadcrumb(categoryId: string) {
   let currentId: string | null = categoryId;
 
   while (currentId) {
-    const category: any = await db.category.findUnique({
+    const category: { id: string; name: string; slug: string; parentId: string | null } | null = await db.category.findUnique({
       where: { id: currentId },
       select: { id: true, name: true, slug: true, parentId: true },
     });

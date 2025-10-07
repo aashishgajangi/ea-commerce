@@ -15,8 +15,6 @@ import {
   X,
   Upload,
   Package,
-  MoveUp,
-  MoveDown,
   Edit,
 } from 'lucide-react';
 
@@ -74,6 +72,12 @@ interface Category {
   name: string;
 }
 
+interface CategoryData {
+  id: string;
+  name: string;
+  children?: CategoryData[];
+}
+
 export default function ProductEditPage() {
   const params = useParams();
   const router = useRouter();
@@ -124,11 +128,11 @@ export default function ProductEditPage() {
       if (!response.ok) return;
       const data = await response.json();
 
-      const flattenCategories = (cats: any[]): Category[] => {
+      const flattenCategories = (cats: CategoryData[]): Category[] => {
         let result: Category[] = [];
         cats.forEach((cat) => {
           result.push({ id: cat.id, name: cat.name });
-          if (cat.children?.length > 0) {
+          if (cat.children && cat.children.length > 0) {
             result = result.concat(flattenCategories(cat.children));
           }
         });

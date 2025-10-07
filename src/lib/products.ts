@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
  * Generate a unique slug for a product
  */
 export async function generateUniqueProductSlug(name: string, excludeId?: string): Promise<string> {
-  let slug = name
+  const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');

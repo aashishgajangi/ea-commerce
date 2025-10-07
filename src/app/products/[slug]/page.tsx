@@ -9,14 +9,36 @@ import { getProductBySlug } from '@/lib/products';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Metadata } from 'next';
 
+interface ProductImage {
+  id: string;
+  url: string;
+  alt: string | null;
+  order: number;
+  isPrimary: boolean;
+}
+
+interface ProductVariant {
+  id: string;
+  name: string;
+  sku: string | null;
+  options: string;
+  price: number | null;
+  compareAtPrice: number | null;
+  costPerItem: number | null;
+  stockQuantity: number;
+  weight: number | null;
+  isActive: boolean;
+}
+
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug);
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return {
@@ -24,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const primaryImage = product.images.find((img: any) => img.isPrimary) || product.images[0];
+  const primaryImage = product.images.find((img: ProductImage) => img.isPrimary) || product.images[0];
 
   return {
     title: product.metaTitle || product.name,
@@ -52,8 +74,8 @@ async function ProductContent({ slug }: { slug: string }) {
     notFound();
   }
 
-  const primaryImage = product.images.find((img: any) => img.isPrimary) || product.images[0];
-  const otherImages = product.images.filter((img: any) => !img.isPrimary);
+  const primaryImage = product.images.find((img: ProductImage) => img.isPrimary) || product.images[0];
+  const otherImages = product.images.filter((img: ProductImage) => !img.isPrimary);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -112,7 +134,7 @@ async function ProductContent({ slug }: { slug: string }) {
           {/* Thumbnail Gallery */}
           {otherImages.length > 0 && (
             <div className="grid grid-cols-4 gap-4">
-              {otherImages.map((image: any) => (
+              {otherImages.map((image: ProductImage) => (
                 <div key={image.id} className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 cursor-pointer hover:opacity-75">
                   <Image
                     src={image.url}
@@ -176,7 +198,7 @@ async function ProductContent({ slug }: { slug: string }) {
             <div className="space-y-3">
               <h3 className="font-semibold">Available Options:</h3>
               <div className="space-y-2">
-                {product.variants.map((variant: any) => (
+                {product.variants.map((variant: ProductVariant) => (
                   <div
                     key={variant.id}
                     className={`border rounded-lg p-3 ${
@@ -286,6 +308,8 @@ async function ProductContent({ slug }: { slug: string }) {
 }
 
 export default async function ProductPage({ params }: PageProps) {
+  const { slug } = await params;
+
   return (
     <PublicLayout>
       <Suspense
@@ -298,7 +322,7 @@ export default async function ProductPage({ params }: PageProps) {
           </div>
         }
       >
-        <ProductContent slug={params.slug} />
+        <ProductContent slug={slug} />
       </Suspense>
     </PublicLayout>
   );

@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Package, AlertTriangle, XCircle, Plus, Minus, Search, History } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, History } from 'lucide-react';
 
 interface InventorySummary {
   totalProducts: number;

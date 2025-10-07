@@ -1,5 +1,4 @@
 import { db } from '../src/lib/db';
-import { config } from '../src/lib/config';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -52,7 +51,7 @@ async function resetSetup() {
       try {
         await fs.rm(uploadsDir, { recursive: true, force: true });
         console.log('   ✅ Deleted uploaded files from filesystem');
-      } catch (error) {
+      } catch {
         console.log('   ℹ️  No uploaded files to clean up');
       }
 

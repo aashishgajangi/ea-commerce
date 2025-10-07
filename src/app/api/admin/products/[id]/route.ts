@@ -2,6 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getProductById, updateProduct, deleteProduct } from '@/lib/products';
 import { z } from 'zod';
 
+type UpdateProductData = {
+  name?: string;
+  slug?: string;
+  sku?: string;
+  description?: string;
+  shortDescription?: string;
+  categoryId?: string | null;
+  price?: number;
+  compareAtPrice?: number;
+  costPerItem?: number;
+  trackInventory?: boolean;
+  stockQuantity?: number;
+  lowStockThreshold?: number;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  status?: string;
+  weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  publishedAt?: Date;
+};
+
 // Validation schema for updating a product
 const updateProductSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -81,10 +107,10 @@ export async function PUT(
     const data = validationResult.data;
 
     // Convert publishedAt string to Date if provided
-    const updateData: any = { ...data };
-    if (data.publishedAt) {
-      updateData.publishedAt = new Date(data.publishedAt);
-    }
+    const updateData = {
+      ...data,
+      ...(data.publishedAt && { publishedAt: new Date(data.publishedAt) }),
+    } as UpdateProductData;
 
     // Update the product
     const product = await updateProduct(id, updateData);
