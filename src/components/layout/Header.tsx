@@ -5,6 +5,7 @@ import { getAllSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
 import { config, ConfigKeys } from '@/lib/config';
 import { Search } from 'lucide-react';
+import MobileMenu from './MobileMenu';
 
 export default async function Header() {
   // Get settings
@@ -28,7 +29,7 @@ export default async function Header() {
     : '';
 
   return (
-    <header className={`border-b ${stickyClass}`}>
+    <header className={`border-b ${stickyClass} relative`}>
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Site Name */}
@@ -50,7 +51,7 @@ export default async function Header() {
             </div>
           </Link>
 
-          {/* Navigation Menu */}
+          {/* Desktop Navigation Menu */}
           {menu && menu.items && menu.items.length > 0 && (
             <nav className="hidden md:flex items-center gap-6">
               {menu.items.map((item) => {
@@ -70,6 +71,11 @@ export default async function Header() {
                 );
               })}
             </nav>
+          )}
+
+          {/* Mobile Menu Button */}
+          {menu && menu.items && menu.items.length > 0 && (
+            <MobileMenu menuItems={menu.items} />
           )}
 
           {/* Search Bar */}
