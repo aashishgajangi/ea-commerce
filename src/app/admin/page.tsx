@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -120,34 +120,98 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              Product Management
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Link href="/admin/categories" aria-label="Categories">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FolderTree className="h-5 w-5 text-indigo-500" role="img" aria-label="Categories icon" />
+                      Categories
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Manage product categories and hierarchy
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Categories <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/products" aria-label="Products">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-pink-500" role="img" aria-label="Products icon" />
+                      Products
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Manage products, variants, and pricing
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Products <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/inventory" aria-label="Inventory">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Warehouse className="h-5 w-5 text-teal-500" role="img" aria-label="Inventory icon" />
+                      Inventory
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Track stock levels and manage inventory
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Inventory <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle>Phase 4: Content Management System</CardTitle>
+              <CardTitle>Phase 5: Product Management System</CardTitle>
               <CardDescription>
-                Building WordPress-like CMS features
+                Building complete e-commerce product management
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Media Library - Upload and manage media
+                  Category Management - Hierarchical categories
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Static Pages - Create content pages with SEO
+                  Product Management - Full CRUD with variants
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Site Settings - Logo, header, footer configuration
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Navigation Menus - Build custom menus
+                  Inventory Tracking - Stock management and logs
                 </li>
                 <li className="flex items-center gap-2 opacity-50">
                   <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  SEO Tools - Meta tags, sitemaps, structured data
+                  CSV Import/Export - Bulk operations
+                </li>
+                <li className="flex items-center gap-2 opacity-50">
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  Frontend Product Pages - Customer-facing views
                 </li>
               </ul>
             </CardContent>

@@ -178,3 +178,205 @@ model MenuItem {
   @@index([order])
   @@map("menu_items")
 }
+
+// ============================================
+// PHASE 5: PRODUCT MANAGEMENT MODELS
+// ============================================
+
+// Category model with hierarchy support (Phase 5)
+model Category {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?     @db.Text
+  image       String?     // Category image path
+  
+  // Hierarchy
+  parentId    String?
+  order       Int         @default(0)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  
+  // Status
+  isActive    Boolean     @default(true)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  parent      Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[]  @relation("CategoryHierarchy")
+  products    Product[]
+  
+  @@index([slug])
+  @@index([parentId])
+  @@index([order])
+  @@index([isActive])
+  @@map("categories")
+}
+
+// Product model (Phase 5)
+model Product {
+  id              String      @id @default(cuid())
+  name            String
+  slug            String      @unique
+  sku             String?     @unique
+  description     String?     @db.Text
+  shortDescription String?    @db.Text
+  
+  // Categorization
+  categoryId      String?
+  
+  // Pricing
+  price           Float       // Base price
+  compareAtPrice  Float?      // Original price (for showing discounts)
+  costPerItem     Float?      // Cost to track profit
+  
+  // Inventory (aggregate from variants or direct)
+  trackInventory  Boolean     @default(true)
+  stockQuantity   Int         @default(0)
+  lowStockThreshold Int?
+  
+  // Product settings
+  isFeatured      Boolean     @default(false)
+  isActive        Boolean     @default(true)
+  status          String      @default("draft") // draft, published, archived
+  
+  // Shipping
+  weight          Float?      // in kg
+  length          Float?      // in cm
+  width           Float?      // in cm
+  height          Float?      // in cm
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?     @db.Text
+  metaKeywords    String?
+  
+  // Dates
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  category        Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants        ProductVariant[]
+  images          ProductImage[]
+  inventoryLogs   InventoryLog[]
+  
+  @@index([slug])
+  @@index([sku])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([isActive])
+  @@index([publishedAt])
+  @@map("products")
+}
+
+// Product variant model for variations (Phase 5)
+model ProductVariant {
+  id              String      @id @default(cuid())
+  productId       String
+  
+  // Variant details
+  name            String      // e.g., "Small / Red"
+  sku             String?     @unique
+  
+  // Variant options (stored as JSON for flexibility)
+  // e.g., {"size": "Small", "color": "Red"}
+  options         String      @db.Text
+  
+  // Pricing (can override product price)
+  price           Float?
+  compareAtPrice  Float?
+  costPerItem     Float?
+  
+  // Inventory
+  stockQuantity   Int         @default(0)
+  
+  // Physical attributes
+  weight          Float?
+  length          Float?
+  width           Float?
+  height          Float?
+  
+  // Status
+  isActive        Boolean     @default(true)
+  
+  // Image
+  imageId         String?     // Primary image for this variant
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryLogs   InventoryLog[]
+  
+  @@index([productId])
+  @@index([sku])
+  @@index([isActive])
+  @@map("product_variants")
+}
+
+// Product image model for multiple images (Phase 5)
+model ProductImage {
+  id          String      @id @default(cuid())
+  productId   String
+  mediaId     String?     // Link to Media table
+  
+  // Image details (if not using Media table)
+  url         String      // Image URL or path
+  alt         String?     // Alt text for SEO
+  
+  // Ordering
+  order       Int         @default(0)
+  isPrimary   Boolean     @default(false)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@index([productId])
+  @@index([order])
+  @@index([isPrimary])
+  @@map("product_images")
+}
+
+// Inventory log for tracking stock changes (Phase 5)
+model InventoryLog {
+  id              String      @id @default(cuid())
+  productId       String?
+  variantId       String?
+  
+  // Stock change
+  type            String      // add, remove, set, sale, return, adjustment
+  quantity        Int         // Positive for add, negative for remove
+  previousStock   Int
+  newStock        Int
+  
+  // Details
+  reason          String?     // Reason for stock change
+  reference       String?     // Order ID, PO number, etc.
+  notes           String?     @db.Text
+  
+  // User tracking
+  userId          String?
+  
+  createdAt       DateTime    @default(now())
+  
+  // Relations
+  product         Product?    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  @@index([productId])
+  @@index([variantId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("inventory_logs")
+}
