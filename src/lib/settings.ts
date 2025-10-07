@@ -31,7 +31,9 @@ export interface SocialSettings {
 }
 
 export interface HeaderSettings {
-  showLogo: boolean;
+  showLogoImage: boolean;
+  showLogoText: boolean;
+  logoText: string;
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
@@ -81,7 +83,9 @@ export const DEFAULT_SOCIAL_SETTINGS: SocialSettings = {
 };
 
 export const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
-  showLogo: true,
+  showLogoImage: true,
+  showLogoText: false,
+  logoText: "",
   showTagline: true,
   showSearch: true,
   sticky: true,

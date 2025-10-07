@@ -34,7 +34,7 @@ export default async function Header() {
         <div className="flex items-center justify-between">
           {/* Logo & Site Name */}
           <Link href="/" className="flex items-center gap-3">
-            {settings.header.showLogo && logo && (
+            {settings.header.showLogoImage && logo && (
               <Image
                 src={logo.path}
                 alt={logo.alt || siteName}
@@ -43,12 +43,24 @@ export default async function Header() {
                 className="h-12 w-auto object-contain"
               />
             )}
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{siteName}</h1>
-              {settings.header.showTagline && tagline && (
-                <p className="text-sm text-gray-600">{tagline}</p>
-              )}
-            </div>
+            {settings.header.showLogoText && (
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {settings.header.logoText || siteName}
+                </h1>
+                {settings.header.showTagline && tagline && (
+                  <p className="text-sm text-gray-600">{tagline}</p>
+                )}
+              </div>
+            )}
+            {!settings.header.showLogoImage && !settings.header.showLogoText && (
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">{siteName}</h1>
+                {settings.header.showTagline && tagline && (
+                  <p className="text-sm text-gray-600">{tagline}</p>
+                )}
+              </div>
+            )}
           </Link>
 
           {/* Desktop Navigation Menu */}

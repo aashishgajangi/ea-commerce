@@ -36,7 +36,9 @@ interface SocialSettings {
 }
 
 interface HeaderSettings {
-  showLogo: boolean;
+  showLogoImage: boolean;
+  showLogoText: boolean;
+  logoText: string;
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
@@ -116,7 +118,9 @@ export default function SettingsPage() {
   });
 
   const [header, setHeader] = useState<HeaderSettings>({
-    showLogo: true,
+    showLogoImage: true,
+    showLogoText: false,
+    logoText: "",
     showTagline: true,
     showSearch: true,
     sticky: true,
@@ -158,11 +162,20 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error("Failed to fetch settings");
 
       const data = await response.json();
-      setGeneral(data.general);
-      setAppearance(data.appearance);
-      setSocial(data.social);
-      setHeader(data.header);
-      setFooter(data.footer);
+
+      // Ensure all fields have proper defaults when merging
+      setGeneral(prev => ({ ...prev, ...data.general }));
+      setAppearance(prev => ({ ...prev, ...data.appearance }));
+      setSocial(prev => ({ ...prev, ...data.social }));
+      setHeader(prev => ({
+        showLogoImage: data.header?.showLogoImage ?? prev.showLogoImage,
+        showLogoText: data.header?.showLogoText ?? prev.showLogoText,
+        logoText: data.header?.logoText ?? prev.logoText,
+        showTagline: data.header?.showTagline ?? prev.showTagline,
+        showSearch: data.header?.showSearch ?? prev.showSearch,
+        sticky: data.header?.sticky ?? prev.sticky,
+      }));
+      setFooter(prev => ({ ...prev, ...data.footer }));
 
       // Fetch logo and favicon media details
       if (data.appearance.logoId) {
@@ -645,16 +658,42 @@ export default function SettingsPage() {
             <CardDescription>Configure your site header</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showLogo"
-                checked={header.showLogo}
-                onChange={(e) => setHeader({ ...header, showLogo: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <Label htmlFor="showLogo">Show Logo</Label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showLogoImage"
+                  checked={header.showLogoImage}
+                  onChange={(e) => setHeader({ ...header, showLogoImage: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="showLogoImage">Show Logo Image</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showLogoText"
+                  checked={header.showLogoText}
+                  onChange={(e) => setHeader({ ...header, showLogoText: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="showLogoText">Show Logo Text</Label>
+              </div>
             </div>
+            {header.showLogoText && (
+              <div>
+                <Label htmlFor="logoText">Logo Text</Label>
+                <Input
+                  id="logoText"
+                  value={header.logoText}
+                  onChange={(e) => setHeader({ ...header, logoText: e.target.value })}
+                  placeholder="Your Brand Name"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Text to display as logo in the header
+                </p>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"

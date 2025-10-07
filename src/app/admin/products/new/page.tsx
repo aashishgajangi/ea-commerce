@@ -30,9 +30,10 @@ export default function NewProductPage() {
     description: '',
     shortDescription: '',
     categoryId: '',
-    price: '0',
+    price: '',
     compareAtPrice: '',
     costPerItem: '',
+    weightBasedPricing: false,
     trackInventory: true,
     stockQuantity: '0',
     lowStockThreshold: '',
@@ -97,10 +98,11 @@ export default function NewProductPage() {
           sku: formData.sku || undefined,
           description: formData.description || undefined,
           shortDescription: formData.shortDescription || undefined,
-          categoryId: formData.categoryId || undefined,
+          categoryId: formData.categoryId,
           price: parseFloat(formData.price),
           compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
           costPerItem: formData.costPerItem ? parseFloat(formData.costPerItem) : undefined,
+          weightBasedPricing: formData.weightBasedPricing,
           trackInventory: formData.trackInventory,
           stockQuantity: parseInt(formData.stockQuantity),
           lowStockThreshold: formData.lowStockThreshold ? parseInt(formData.lowStockThreshold) : undefined,
@@ -178,14 +180,15 @@ export default function NewProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category">Category *</Label>
                 <select
                   id="category"
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  required
                   className="w-full px-3 py-2 border rounded-md"
                 >
-                  <option value="">No Category</option>
+                  <option value="">Select a category</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -195,7 +198,9 @@ export default function NewProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Price *</Label>
+                <Label htmlFor="price">
+                  Price * {formData.weightBasedPricing ? '(per kg)' : ''}
+                </Label>
                 <Input
                   id="price"
                   type="number"
@@ -204,6 +209,15 @@ export default function NewProductPage() {
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   required
                 />
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="weightBasedPricing"
+                    checked={formData.weightBasedPricing}
+                    onChange={(e) => setFormData({ ...formData, weightBasedPricing: e.target.checked })}
+                  />
+                  <Label htmlFor="weightBasedPricing" className="text-sm">Weight-based pricing (price per kg)</Label>
+                </div>
               </div>
 
               <div className="space-y-2">

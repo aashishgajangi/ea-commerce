@@ -9,10 +9,11 @@ const createProductSchema = z.object({
   sku: z.string().optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
-  categoryId: z.string().optional(),
-  price: z.number().min(0, 'Price must be positive'),
+  categoryId: z.string().min(1, 'Category is required'),
+  price: z.number().min(0, 'Price must be non-negative'),
   compareAtPrice: z.number().min(0).optional(),
   costPerItem: z.number().min(0).optional(),
+  weightBasedPricing: z.boolean().default(false),
   trackInventory: z.boolean().default(true),
   stockQuantity: z.number().int().default(0),
   lowStockThreshold: z.number().int().optional(),
@@ -89,6 +90,8 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validationResult = createProductSchema.safeParse(body);
     if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.issues);
+      console.error('Received body:', body);
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 }

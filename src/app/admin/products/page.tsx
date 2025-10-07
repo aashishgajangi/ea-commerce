@@ -132,28 +132,75 @@ export default function ProductsPage() {
     try {
       const response = await fetch(`/api/admin/products/${id}`);
       if (!response.ok) throw new Error('Failed to fetch product');
-      
+
       const product = await response.json();
-      
-      // Create duplicate with modified name
+
+      // Create duplicate with only the basic product fields (exclude nested objects)
+      // The API will automatically generate a unique slug from the name
+      const duplicateData = {
+        name: `${product.name} (Copy)`,
+        sku: product.sku ? `${product.sku}-COPY` : undefined,
+        description: product.description || undefined,
+        shortDescription: product.shortDescription || undefined,
+        categoryId: product.categoryId || undefined,
+        price: product.price,
+        compareAtPrice: product.compareAtPrice || undefined,
+        costPerItem: product.costPerItem || undefined,
+        weightBasedPricing: product.weightBasedPricing || false,
+        trackInventory: product.trackInventory !== undefined ? product.trackInventory : true,
+        stockQuantity: product.stockQuantity || 0,
+        lowStockThreshold: product.lowStockThreshold || undefined,
+        isFeatured: false, // Don't copy featured status
+        isActive: product.isActive !== undefined ? product.isActive : true,
+        status: 'draft', // Always create as draft
+        weight: product.weight || undefined,
+        length: product.length || undefined,
+        width: product.width || undefined,
+        height: product.height || undefined,
+        metaTitle: product.metaTitle || undefined,
+        metaDescription: product.metaDescription || undefined,
+        metaKeywords: product.metaKeywords || undefined,
+      };
+
       const duplicateResponse = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...product,
-          id: undefined,
-          name: `${product.name} (Copy)`,
-          slug: `${product.slug}-copy`,
-          sku: product.sku ? `${product.sku}-COPY` : null,
-          status: 'draft',
-        }),
+        body: JSON.stringify(duplicateData),
       });
 
-      if (!duplicateResponse.ok) throw new Error('Failed to duplicate product');
+      if (!duplicateResponse.ok) {
+        const errorData = await duplicateResponse.json();
+        throw new Error(errorData.error || 'Failed to duplicate product');
+      }
+
+      const newProduct = await duplicateResponse.json();
+
+      // Copy images to the new product
+      if (product.images && product.images.length > 0) {
+        for (const image of product.images) {
+          try {
+            await fetch(`/api/admin/products/${newProduct.id}/images`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                url: image.url,
+                alt: image.alt || newProduct.name,
+                order: image.order,
+                isPrimary: image.isPrimary,
+              }),
+            });
+          } catch (error) {
+            console.error('Error copying image:', error);
+            // Continue with other images even if one fails
+          }
+        }
+      }
+
       fetchProducts();
+      alert('Product duplicated successfully!');
     } catch (error) {
       console.error('Error duplicating product:', error);
-      alert('Failed to duplicate product');
+      alert(`Failed to duplicate product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

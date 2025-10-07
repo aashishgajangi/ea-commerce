@@ -16,6 +16,7 @@ import {
   Upload,
   Package,
   Edit,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface Product {
@@ -29,6 +30,7 @@ interface Product {
   price: number;
   compareAtPrice: number | null;
   costPerItem: number | null;
+  weightBasedPricing: boolean;
   trackInventory: boolean;
   stockQuantity: number;
   lowStockThreshold: number | null;
@@ -91,6 +93,7 @@ export default function ProductEditPage() {
 
   // Image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
 
   // Variant form state
   const [showVariantForm, setShowVariantForm] = useState(false);
@@ -150,6 +153,29 @@ export default function ProductEditPage() {
     fetchCategories();
   }, [fetchProduct, fetchCategories]);
 
+  // Handle ESC key to close modals
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (showMediaLibrary) {
+          setShowMediaLibrary(false);
+        }
+        if (showVariantForm) {
+          setShowVariantForm(false);
+          setEditingVariant(null);
+        }
+      }
+    };
+
+    if (showMediaLibrary || showVariantForm) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showMediaLibrary, showVariantForm]);
+
   const handleSave = async () => {
     if (!product) return;
 
@@ -166,6 +192,7 @@ export default function ProductEditPage() {
         price: product.price,
         compareAtPrice: product.compareAtPrice || undefined,
         costPerItem: product.costPerItem || undefined,
+        weightBasedPricing: product.weightBasedPricing,
         trackInventory: product.trackInventory,
         stockQuantity: product.stockQuantity,
         lowStockThreshold: product.lowStockThreshold || undefined,
@@ -228,6 +255,29 @@ export default function ProductEditPage() {
     } finally {
       setUploadingImage(false);
       e.target.value = '';
+    }
+  };
+
+  const handleSelectFromMedia = async (mediaUrl: string, alt?: string) => {
+    try {
+      const response = await fetch(`/api/admin/products/${productId}/images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: mediaUrl,
+          alt: alt || product?.name || '',
+          order: 0,
+          isPrimary: false,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to add image from media library');
+
+      setShowMediaLibrary(false);
+      fetchProduct();
+    } catch (error) {
+      console.error('Error adding image from media library:', error);
+      alert('Failed to add image from media library');
     }
   };
 
@@ -294,13 +344,13 @@ export default function ProductEditPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: variantForm.name,
-          sku: variantForm.sku || null,
-          options: variantForm.options,
-          price: variantForm.price ? parseFloat(variantForm.price) : null,
-          compareAtPrice: variantForm.compareAtPrice ? parseFloat(variantForm.compareAtPrice) : null,
-          costPerItem: variantForm.costPerItem ? parseFloat(variantForm.costPerItem) : null,
-          stockQuantity: parseInt(variantForm.stockQuantity),
-          weight: variantForm.weight ? parseFloat(variantForm.weight) : null,
+          sku: variantForm.sku || undefined,
+          options: variantForm.options || '{}',
+          price: variantForm.price && variantForm.price.trim() ? parseFloat(variantForm.price) : undefined,
+          compareAtPrice: variantForm.compareAtPrice && variantForm.compareAtPrice.trim() ? parseFloat(variantForm.compareAtPrice) : undefined,
+          costPerItem: variantForm.costPerItem && variantForm.costPerItem.trim() ? parseFloat(variantForm.costPerItem) : undefined,
+          stockQuantity: variantForm.stockQuantity && variantForm.stockQuantity.trim() ? parseInt(variantForm.stockQuantity) : 0,
+          weight: variantForm.weight && variantForm.weight.trim() ? parseFloat(variantForm.weight) : undefined,
           isActive: variantForm.isActive,
         }),
       });
@@ -468,16 +518,17 @@ export default function ProductEditPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">Category *</Label>
                   <select
                     id="category"
                     value={product.categoryId || ''}
                     onChange={(e) =>
                       setProduct({ ...product, categoryId: e.target.value || null })
                     }
+                    required
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">No Category</option>
+                    <option value="">Select a category</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -514,9 +565,21 @@ export default function ProductEditPage() {
               <CardTitle>Pricing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="weightBasedPricing"
+                  checked={product.weightBasedPricing}
+                  onChange={(e) => setProduct({ ...product, weightBasedPricing: e.target.checked })}
+                />
+                <Label htmlFor="weightBasedPricing">Weight-based pricing (price per kg)</Label>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price *</Label>
+                  <Label htmlFor="price">
+                    Price * {product.weightBasedPricing ? '(per kg)' : ''}
+                  </Label>
                   <Input
                     id="price"
                     type="number"
@@ -728,7 +791,7 @@ export default function ProductEditPage() {
                 <CardTitle>Product Images</CardTitle>
                 <CardDescription>Upload and manage product images</CardDescription>
               </div>
-              <div>
+              <div className="flex gap-2">
                 <Input
                   type="file"
                   multiple
@@ -746,6 +809,13 @@ export default function ProductEditPage() {
                     </span>
                   </Button>
                 </label>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowMediaLibrary(true)}
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Select from Media Library
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -1025,6 +1095,122 @@ export default function ProductEditPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Media Library Modal */}
+      {showMediaLibrary && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Select from Media Library</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMediaLibrary(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Choose an image from your media library to add to this product
+              </p>
+            </div>
+            <div className="p-6">
+              <MediaLibrarySelector onSelect={handleSelectFromMedia} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Media Library Selector Component
+interface MediaItem {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  alt: string | null;
+  title: string | null;
+  createdAt: string;
+}
+
+function MediaLibrarySelector({ onSelect }: { onSelect: (url: string, alt?: string) => void }) {
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  const fetchMedia = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '12',
+        type: 'image',
+      });
+
+      if (search) {
+        params.append('search', search);
+      }
+
+      const response = await fetch(`/api/admin/media?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch media');
+
+      const data = await response.json();
+      setMedia(data.media || []);
+    } catch (error) {
+      console.error('Error fetching media:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    fetchMedia();
+  }, [fetchMedia]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input
+          type="text"
+          placeholder="Search images..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1"
+        />
+      </div>
+
+      {loading ? (
+        <div className="text-center py-8">Loading media...</div>
+      ) : media.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          No images found. Upload some images first.
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+          {media.map((item) => (
+            <div
+              key={item.id}
+              className="border rounded-lg p-2 cursor-pointer hover:border-blue-500 transition-colors"
+              onClick={() => onSelect(item.path, item.alt || undefined)}
+            >
+              <div className="aspect-square bg-gray-100 rounded overflow-hidden relative">
+                <Image
+                  src={item.path}
+                  alt={item.alt || item.originalName}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-xs mt-2 truncate">{item.originalName}</p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

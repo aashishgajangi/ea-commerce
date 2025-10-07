@@ -6,15 +6,15 @@ import { z } from 'zod';
 const createVariantSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   sku: z.string().optional(),
-  options: z.string().min(1, 'Options are required'), // JSON string
-  price: z.number().min(0).optional(),
-  compareAtPrice: z.number().min(0).optional(),
-  costPerItem: z.number().min(0).optional(),
+  options: z.string().min(1, 'Options are required').default('{}'), // JSON string
+  price: z.number().min(0).optional().nullable(),
+  compareAtPrice: z.number().min(0).optional().nullable(),
+  costPerItem: z.number().min(0).optional().nullable(),
   stockQuantity: z.number().int().default(0),
-  weight: z.number().min(0).optional(),
-  length: z.number().min(0).optional(),
-  width: z.number().min(0).optional(),
-  height: z.number().min(0).optional(),
+  weight: z.number().min(0).optional().nullable(),
+  length: z.number().min(0).optional().nullable(),
+  width: z.number().min(0).optional().nullable(),
+  height: z.number().min(0).optional().nullable(),
   isActive: z.boolean().default(true),
   imageId: z.string().optional(),
 });
@@ -55,6 +55,8 @@ export async function POST(
     // Validate input
     const validationResult = createVariantSchema.safeParse(body);
     if (!validationResult.success) {
+      console.error('Variant validation failed:', validationResult.error.issues);
+      console.error('Received variant body:', body);
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 }
@@ -63,11 +65,26 @@ export async function POST(
 
     const data = validationResult.data;
 
-    // Create the variant
-    const variant = await createProductVariant({
+    // Transform null values to undefined for the database function
+    const variantData = {
       productId,
-      ...data,
-    });
+      name: data.name,
+      sku: data.sku,
+      options: data.options,
+      price: data.price ?? undefined,
+      compareAtPrice: data.compareAtPrice ?? undefined,
+      costPerItem: data.costPerItem ?? undefined,
+      stockQuantity: data.stockQuantity,
+      weight: data.weight ?? undefined,
+      length: data.length ?? undefined,
+      width: data.width ?? undefined,
+      height: data.height ?? undefined,
+      isActive: data.isActive,
+      imageId: data.imageId,
+    };
+
+    // Create the variant
+    const variant = await createProductVariant(variantData);
 
     return NextResponse.json(variant, { status: 201 });
   } catch (error) {

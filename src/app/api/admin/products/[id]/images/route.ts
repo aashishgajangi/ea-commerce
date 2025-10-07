@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addProductImage } from '@/lib/products';
-import { z } from 'zod';
-
-// Validation schema for adding an image
-const addImageSchema = z.object({
-  url: z.string().url('Valid URL is required'),
-  alt: z.string().optional(),
-  order: z.number().int().default(0),
-  isPrimary: z.boolean().default(false),
-});
+import { uploadFile } from '@/lib/media';
 
 /**
- * POST /api/admin/products/[id]/images - Add an image to a product
+ * POST /api/admin/products/[id]/images - Upload or add an image to a product
  */
 export async function POST(
   request: NextRequest,
@@ -19,29 +11,54 @@ export async function POST(
 ) {
   try {
     const { id: productId } = await params;
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
 
-    // Validate input
-    const validationResult = addImageSchema.safeParse(body);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.issues },
-        { status: 400 }
-      );
+    let url: string;
+    let alt: string | undefined;
+
+    if (contentType.includes('multipart/form-data')) {
+      // Handle file upload
+      const formData = await request.formData();
+      const file = formData.get('file') as File;
+      alt = formData.get('alt') as string || undefined;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: 'No file provided' },
+          { status: 400 }
+        );
+      }
+
+      // Upload the file using the media library
+      const uploadResult = await uploadFile(file);
+      url = uploadResult.url;
+    } else {
+      // Handle URL-based image addition (from media library)
+      const body = await request.json();
+      url = body.url;
+      alt = body.alt;
+
+      if (!url) {
+        return NextResponse.json(
+          { error: 'URL is required' },
+          { status: 400 }
+        );
+      }
     }
 
-    const data = validationResult.data;
-
-    // Add the image
+    // Add the image to the product
     const image = await addProductImage({
       productId,
-      ...data,
+      url,
+      alt,
+      order: 0,
+      isPrimary: false,
     });
 
     return NextResponse.json(image, { status: 201 });
   } catch (error) {
     console.error('Error adding product image:', error);
-    
+
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },

@@ -230,9 +230,10 @@ model Product {
   categoryId      String?
   
   // Pricing
-  price           Float       // Base price
+  price           Float       // Base price (or price per kg if weightBasedPricing is true)
   compareAtPrice  Float?      // Original price (for showing discounts)
   costPerItem     Float?      // Cost to track profit
+  weightBasedPricing Boolean  @default(false) // If true, price is per kg
   
   // Inventory (aggregate from variants or direct)
   trackInventory  Boolean     @default(true)
