@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Package, Eye, Copy } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Package, Eye, Copy, Download, Upload, Filter, X } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -51,6 +51,28 @@ export default function ProductsPage() {
   const [deleting, setDeleting] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
 
+  // Advanced filters
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [stockStatus, setStockStatus] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+  const [createdAfter, setCreatedAfter] = useState('');
+  const [createdBefore, setCreatedBefore] = useState('');
+  const [updatedAfter, setUpdatedAfter] = useState('');
+  const [updatedBefore, setUpdatedBefore] = useState('');
+  const [orderBy, setOrderBy] = useState<'createdAt' | 'updatedAt' | 'name' | 'price' | 'stockQuantity'>('createdAt');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Bulk operations
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [bulkAction, setBulkAction] = useState('');
+  const [bulkValue, setBulkValue] = useState('');
+  const [performingBulkAction, setPerformingBulkAction] = useState(false);
+
+  // Import/Export
+  const [importing, setImporting] = useState(false);
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -58,10 +80,19 @@ export default function ProductsPage() {
         search,
         limit: '20',
         offset: '0',
+        orderBy,
+        order,
       });
 
       if (status !== 'all') params.append('status', status);
       if (categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (minPrice) params.append('minPrice', minPrice);
+      if (maxPrice) params.append('maxPrice', maxPrice);
+      if (stockStatus !== 'all') params.append('stockStatus', stockStatus);
+      if (createdAfter) params.append('createdAfter', createdAfter);
+      if (createdBefore) params.append('createdBefore', createdBefore);
+      if (updatedAfter) params.append('updatedAfter', updatedAfter);
+      if (updatedBefore) params.append('updatedBefore', updatedBefore);
 
       const response = await fetch(`/api/admin/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
@@ -74,7 +105,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [status, search, categoryFilter]);
+  }, [status, search, categoryFilter, minPrice, maxPrice, stockStatus, createdAfter, createdBefore, updatedAfter, updatedBefore, orderBy, order]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -204,6 +235,159 @@ export default function ProductsPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams({
+        search,
+        orderBy,
+        order,
+      });
+
+      if (status !== 'all') params.append('status', status);
+      if (categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (minPrice) params.append('minPrice', minPrice);
+      if (maxPrice) params.append('maxPrice', maxPrice);
+      if (stockStatus !== 'all') params.append('stockStatus', stockStatus);
+      if (createdAfter) params.append('createdAfter', createdAfter);
+      if (createdBefore) params.append('createdBefore', createdBefore);
+      if (updatedAfter) params.append('updatedAfter', updatedAfter);
+      if (updatedBefore) params.append('updatedBefore', updatedBefore);
+
+      const response = await fetch(`/api/admin/products/export?${params}`);
+      if (!response.ok) throw new Error('Failed to export products');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'products-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting products:', error);
+      alert('Failed to export products');
+    }
+  };
+
+  const handleImport = async (file: File) => {
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/products/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Import failed');
+      }
+
+      alert(`Import completed!\nCreated: ${result.results.created}\nUpdated: ${result.results.updated}\nErrors: ${result.results.errors.length}`);
+      if (result.results.errors.length > 0) {
+        console.log('Import errors:', result.results.errors);
+      }
+
+      fetchProducts();
+    } catch (error) {
+      console.error('Error importing products:', error);
+      alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedProducts.length === 0) return;
+
+    setPerformingBulkAction(true);
+    try {
+      let value: any = undefined;
+
+      if (bulkAction === 'update_price') {
+        const price = parseFloat(bulkValue);
+        if (isNaN(price)) {
+          alert('Please enter a valid price');
+          return;
+        }
+        value = { price };
+      } else if (bulkAction === 'update_category') {
+        value = bulkValue || null;
+      } else if (bulkAction === 'update_stock') {
+        const stock = parseInt(bulkValue);
+        if (isNaN(stock)) {
+          alert('Please enter a valid stock quantity');
+          return;
+        }
+        value = stock;
+      }
+
+      const response = await fetch('/api/admin/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ids: selectedProducts,
+          action: bulkAction,
+          value,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Bulk operation failed');
+      }
+
+      alert(result.message);
+      setSelectedProducts([]);
+      setShowBulkActions(false);
+      setBulkAction('');
+      setBulkValue('');
+      fetchProducts();
+    } catch (error) {
+      console.error('Error performing bulk action:', error);
+      alert(`Bulk operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setPerformingBulkAction(false);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setStatus('all');
+    setCategoryFilter('all');
+    setMinPrice('');
+    setMaxPrice('');
+    setStockStatus('all');
+    setCreatedAfter('');
+    setCreatedBefore('');
+    setUpdatedAfter('');
+    setUpdatedBefore('');
+    setOrderBy('createdAt');
+    setOrder('desc');
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const selectAllProducts = () => {
+    setSelectedProducts(products.map(p => p.id));
+  };
+
+  const clearSelection = () => {
+    setSelectedProducts([]);
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -231,29 +415,77 @@ export default function ProductsPage() {
               <CardTitle>All Products</CardTitle>
               <CardDescription>
                 {total} {total === 1 ? 'product' : 'products'} total
+                {selectedProducts.length > 0 && ` • ${selectedProducts.length} selected`}
               </CardDescription>
             </div>
-            <Link href="/admin/products/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Product
+            <div className="flex flex-wrap gap-2">
+              {selectedProducts.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBulkActions(!showBulkActions)}
+                >
+                  Bulk Actions
+                </Button>
+              )}
+              <Button variant="outline" onClick={handleExport}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
               </Button>
-            </Link>
+              <label className="cursor-pointer">
+                <Button variant="outline" disabled={importing} asChild>
+                  <span>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {importing ? 'Importing...' : 'Import CSV'}
+                  </span>
+                </Button>
+                <input
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImport(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              <Link href="/admin/products/new">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Product
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {/* Filters */}
           <div className="flex flex-col gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex-1 relative min-w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                size="sm"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+              <Button variant="ghost" onClick={clearFilters} size="sm">
+                <X className="h-4 w-4 mr-2" />
+                Clear
+              </Button>
             </div>
+
             <div className="flex flex-wrap gap-2">
               <Button
                 variant={status === 'all' ? 'default' : 'outline'}
@@ -296,6 +528,184 @@ export default function ProductsPage() {
                 ))}
               </select>
             </div>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+              <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Min Price</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Max Price</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="999.99"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Stock Status</label>
+                    <select
+                      value={stockStatus}
+                      onChange={(e) => setStockStatus(e.target.value as any)}
+                      className="w-full px-3 py-2 border rounded-md text-sm"
+                    >
+                      <option value="all">All Stock</option>
+                      <option value="in_stock">In Stock</option>
+                      <option value="low_stock">Low Stock</option>
+                      <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Sort By</label>
+                    <select
+                      value={orderBy}
+                      onChange={(e) => setOrderBy(e.target.value as any)}
+                      className="w-full px-3 py-2 border rounded-md text-sm"
+                    >
+                      <option value="createdAt">Created Date</option>
+                      <option value="updatedAt">Updated Date</option>
+                      <option value="name">Name</option>
+                      <option value="price">Price</option>
+                      <option value="stockQuantity">Stock</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Created After</label>
+                    <Input
+                      type="date"
+                      value={createdAfter}
+                      onChange={(e) => setCreatedAfter(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Created Before</label>
+                    <Input
+                      type="date"
+                      value={createdBefore}
+                      onChange={(e) => setCreatedBefore(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Updated After</label>
+                    <Input
+                      type="date"
+                      value={updatedAfter}
+                      onChange={(e) => setUpdatedAfter(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Updated Before</label>
+                    <Input
+                      type="date"
+                      value={updatedBefore}
+                      onChange={(e) => setUpdatedBefore(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant={order === 'asc' ? 'default' : 'outline'}
+                    onClick={() => setOrder('asc')}
+                    size="sm"
+                  >
+                    Ascending
+                  </Button>
+                  <Button
+                    variant={order === 'desc' ? 'default' : 'outline'}
+                    onClick={() => setOrder('desc')}
+                    size="sm"
+                  >
+                    Descending
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Bulk Actions */}
+            {showBulkActions && selectedProducts.length > 0 && (
+              <div className="border rounded-lg p-4 bg-blue-50 space-y-4">
+                <h3 className="font-medium">Bulk Actions ({selectedProducts.length} selected)</h3>
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Action</label>
+                    <select
+                      value={bulkAction}
+                      onChange={(e) => setBulkAction(e.target.value)}
+                      className="px-3 py-2 border rounded-md text-sm"
+                    >
+                      <option value="">Select action...</option>
+                      <option value="publish">Publish</option>
+                      <option value="draft">Move to Draft</option>
+                      <option value="archive">Archive</option>
+                      <option value="delete">Delete</option>
+                      <option value="update_price">Update Price</option>
+                      <option value="update_category">Change Category</option>
+                      <option value="update_stock">Update Stock</option>
+                    </select>
+                  </div>
+
+                  {(bulkAction === 'update_price' || bulkAction === 'update_stock') && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        {bulkAction === 'update_price' ? 'New Price' : 'Stock Quantity'}
+                      </label>
+                      <Input
+                        type="number"
+                        step={bulkAction === 'update_price' ? '0.01' : '1'}
+                        min="0"
+                        value={bulkValue}
+                        onChange={(e) => setBulkValue(e.target.value)}
+                        placeholder={bulkAction === 'update_price' ? '0.00' : '0'}
+                      />
+                    </div>
+                  )}
+
+                  {bulkAction === 'update_category' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">New Category</label>
+                      <select
+                        value={bulkValue}
+                        onChange={(e) => setBulkValue(e.target.value)}
+                        className="px-3 py-2 border rounded-md text-sm"
+                      >
+                        <option value="">No Category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={handleBulkAction}
+                    disabled={performingBulkAction || !bulkAction}
+                  >
+                    {performingBulkAction ? 'Processing...' : 'Apply'}
+                  </Button>
+
+                  <Button variant="outline" onClick={clearSelection}>
+                    Clear Selection
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Products List */}
@@ -324,16 +734,50 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Select All */}
+              {products.length > 0 && (
+                <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.length === products.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        selectAllProducts();
+                      } else {
+                        clearSelection();
+                      }
+                    }}
+                    className="rounded"
+                  />
+                  <span className="text-sm text-gray-600">
+                    {selectedProducts.length === products.length ? 'Deselect all' : 'Select all'}
+                  </span>
+                </div>
+              )}
+
               {products.map((product) => {
                 const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
                 const stockStatus = getStockStatus(product.stockQuantity);
+                const isSelected = selectedProducts.includes(product.id);
 
                 return (
                   <div
                     key={product.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className={`border rounded-lg p-4 hover:bg-gray-50 transition-colors ${
+                      isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                    }`}
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
+                      {/* Selection Checkbox */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleProductSelection(product.id)}
+                          className="rounded mr-3"
+                        />
+                      </div>
+
                       {/* Product Image */}
                       <div className="w-20 h-20 bg-gray-100 rounded flex-shrink-0 overflow-hidden relative">
                         {primaryImage ? (

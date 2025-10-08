@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProducts, createProduct, generateUniqueProductSlug, bulkUpdateProductStatus, bulkDeleteProducts } from '@/lib/products';
+import { getProducts, createProduct, generateUniqueProductSlug, bulkUpdateProductStatus, bulkDeleteProducts, bulkUpdateProductPrice, bulkUpdateProductCategory, bulkUpdateProductStock } from '@/lib/products';
 import { z } from 'zod';
 
 // Validation schema for creating a product
@@ -32,7 +32,8 @@ const createProductSchema = z.object({
 // Validation schema for bulk operations
 const bulkOperationSchema = z.object({
   ids: z.array(z.string()),
-  action: z.enum(['delete', 'publish', 'draft', 'archive']),
+  action: z.enum(['delete', 'publish', 'draft', 'archive', 'update_price', 'update_category', 'update_stock']),
+  value: z.any().optional(), // For actions that need a value
 });
 
 /**
@@ -50,9 +51,14 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined;
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
     const inStock = searchParams.get('inStock') === 'true' ? true : undefined;
+    const stockStatus = searchParams.get('stockStatus') || undefined; // 'in_stock', 'low_stock', 'out_of_stock'
+    const createdAfter = searchParams.get('createdAfter') ? new Date(searchParams.get('createdAfter')!) : undefined;
+    const createdBefore = searchParams.get('createdBefore') ? new Date(searchParams.get('createdBefore')!) : undefined;
+    const updatedAfter = searchParams.get('updatedAfter') ? new Date(searchParams.get('updatedAfter')!) : undefined;
+    const updatedBefore = searchParams.get('updatedBefore') ? new Date(searchParams.get('updatedBefore')!) : undefined;
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
-    const orderBy = (searchParams.get('orderBy') || 'createdAt') as 'name' | 'price' | 'createdAt' | 'updatedAt' | 'publishedAt';
+    const orderBy = (searchParams.get('orderBy') || 'createdAt') as 'name' | 'price' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'stockQuantity';
     const order = (searchParams.get('order') || 'desc') as 'asc' | 'desc';
 
     const result = await getProducts({
@@ -143,11 +149,38 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { ids, action } = validationResult.data;
+    const { ids, action, value } = validationResult.data;
 
     if (action === 'delete') {
       await bulkDeleteProducts(ids);
       return NextResponse.json({ success: true, message: `${ids.length} products deleted` });
+    } else if (action === 'update_price') {
+      if (!value || typeof value !== 'object' || !('price' in value)) {
+        return NextResponse.json(
+          { error: 'Price value is required for update_price action' },
+          { status: 400 }
+        );
+      }
+      await bulkUpdateProductPrice(ids, value.price, value.compareAtPrice);
+      return NextResponse.json({ success: true, message: `${ids.length} products price updated` });
+    } else if (action === 'update_category') {
+      if (value === undefined || (typeof value !== 'string' && value !== null)) {
+        return NextResponse.json(
+          { error: 'Category ID is required for update_category action' },
+          { status: 400 }
+        );
+      }
+      await bulkUpdateProductCategory(ids, value);
+      return NextResponse.json({ success: true, message: `${ids.length} products category updated` });
+    } else if (action === 'update_stock') {
+      if (typeof value !== 'number') {
+        return NextResponse.json(
+          { error: 'Stock quantity is required for update_stock action' },
+          { status: 400 }
+        );
+      }
+      await bulkUpdateProductStock(ids, value);
+      return NextResponse.json({ success: true, message: `${ids.length} products stock updated` });
     } else {
       // Map action to status
       const statusMap: Record<string, string> = {
@@ -155,7 +188,7 @@ export async function PATCH(request: NextRequest) {
         draft: 'draft',
         archive: 'archived',
       };
-      
+
       await bulkUpdateProductStatus(ids, statusMap[action]);
       return NextResponse.json({ success: true, message: `${ids.length} products updated` });
     }

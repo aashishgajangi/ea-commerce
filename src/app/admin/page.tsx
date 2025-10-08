@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
               Product Management
             </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Link href="/admin/categories" aria-label="Categories">
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
@@ -158,6 +158,25 @@ export default function AdminDashboard() {
                     </p>
                     <Button variant="ghost" size="sm" className="w-full">
                       Open Products <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/reviews" aria-label="Reviews">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-yellow-500" role="img" aria-label="Reviews icon" />
+                      Reviews
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Manage customer reviews and ratings
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Reviews <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>

@@ -51,9 +51,14 @@ export async function getProducts(options: {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  createdAfter?: Date;
+  createdBefore?: Date;
+  updatedAfter?: Date;
+  updatedBefore?: Date;
   limit?: number;
   offset?: number;
-  orderBy?: 'name' | 'price' | 'createdAt' | 'updatedAt' | 'publishedAt';
+  orderBy?: 'name' | 'price' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'stockQuantity';
   order?: 'asc' | 'desc';
 }) {
   const {
@@ -65,6 +70,11 @@ export async function getProducts(options: {
     minPrice,
     maxPrice,
     inStock,
+    stockStatus,
+    createdAfter,
+    createdBefore,
+    updatedAfter,
+    updatedBefore,
     limit = 20,
     offset = 0,
     orderBy = 'createdAt',
@@ -90,6 +100,28 @@ export async function getProducts(options: {
       },
     } : {}),
     ...(inStock ? { stockQuantity: { gt: 0 } } : {}),
+    ...(stockStatus ? {
+      ...(stockStatus === 'in_stock' ? { stockQuantity: { gt: 0 } } : {}),
+      ...(stockStatus === 'out_of_stock' ? { stockQuantity: { lte: 0 } } : {}),
+      ...(stockStatus === 'low_stock' ? {
+        AND: [
+          { stockQuantity: { gt: 0 } },
+          { stockQuantity: { lte: db.product.fields.lowStockThreshold } }
+        ]
+      } : {}),
+    } : {}),
+    ...(createdAfter || createdBefore ? {
+      createdAt: {
+        ...(createdAfter ? { gte: createdAfter } : {}),
+        ...(createdBefore ? { lte: createdBefore } : {}),
+      },
+    } : {}),
+    ...(updatedAfter || updatedBefore ? {
+      updatedAt: {
+        ...(updatedAfter ? { gte: updatedAfter } : {}),
+        ...(updatedBefore ? { lte: updatedBefore } : {}),
+      },
+    } : {}),
   };
 
   const [products, total] = await Promise.all([
@@ -482,5 +514,340 @@ export async function getProductsByCategory(
     orderBy: { [orderBy]: order },
     skip: offset,
     take: limit,
+  });
+}
+
+/**
+ * Export products to CSV
+ */
+export async function exportProductsToCSV(options: {
+  search?: string;
+  categoryId?: string;
+  status?: 'draft' | 'published' | 'archived' | 'all';
+  isFeatured?: boolean;
+  isActive?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  createdAfter?: Date;
+  createdBefore?: Date;
+  updatedAfter?: Date;
+  updatedBefore?: Date;
+}) {
+  const products = await getProducts({
+    ...options,
+    limit: 10000, // Large limit for export
+    offset: 0,
+  });
+
+  // CSV headers
+  const headers = [
+    'ID',
+    'Name',
+    'Slug',
+    'SKU',
+    'Description',
+    'Short Description',
+    'Category',
+    'Price',
+    'Compare At Price',
+    'Cost Per Item',
+    'Weight Based Pricing',
+    'Track Inventory',
+    'Stock Quantity',
+    'Low Stock Threshold',
+    'Is Featured',
+    'Is Active',
+    'Status',
+    'Weight',
+    'Length',
+    'Width',
+    'Height',
+    'Meta Title',
+    'Meta Description',
+    'Meta Keywords',
+    'Created At',
+    'Updated At',
+    'Published At',
+  ];
+
+  // Convert products to CSV rows
+  const rows = products.products.map(product => [
+    product.id,
+    product.name,
+    product.slug,
+    product.sku || '',
+    product.description || '',
+    product.shortDescription || '',
+    product.category?.name || '',
+    product.price.toString(),
+    product.compareAtPrice?.toString() || '',
+    product.costPerItem?.toString() || '',
+    product.weightBasedPricing ? 'true' : 'false',
+    product.trackInventory ? 'true' : 'false',
+    product.stockQuantity.toString(),
+    product.lowStockThreshold?.toString() || '',
+    product.isFeatured ? 'true' : 'false',
+    product.isActive ? 'true' : 'false',
+    product.status,
+    product.weight?.toString() || '',
+    product.length?.toString() || '',
+    product.width?.toString() || '',
+    product.height?.toString() || '',
+    product.metaTitle || '',
+    product.metaDescription || '',
+    product.metaKeywords || '',
+    product.createdAt.toISOString(),
+    product.updatedAt.toISOString(),
+    product.publishedAt?.toISOString() || '',
+  ]);
+
+  // Combine headers and rows
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  return csvContent;
+}
+/**
+ * Import products from CSV
+ */
+export async function importProductsFromCSV(csvContent: string) {
+  const lines = csvContent.split('\n').filter(line => line.trim());
+  if (lines.length < 2) {
+    throw new Error('CSV must contain at least a header row and one data row');
+  }
+
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  const expectedHeaders = [
+    'ID', 'Name', 'Slug', 'SKU', 'Description', 'Short Description', 'Category',
+    'Price', 'Compare At Price', 'Cost Per Item', 'Weight Based Pricing',
+    'Track Inventory', 'Stock Quantity', 'Low Stock Threshold', 'Is Featured',
+    'Is Active', 'Status', 'Weight', 'Length', 'Width', 'Height',
+    'Meta Title', 'Meta Description', 'Meta Keywords', 'Created At', 'Updated At', 'Published At'
+  ];
+
+  // Validate headers (allow partial match for flexibility)
+  const hasRequiredHeaders = expectedHeaders.slice(0, 8).every(expected =>
+    headers.some(header => header.toLowerCase() === expected.toLowerCase())
+  );
+
+  if (!hasRequiredHeaders) {
+    throw new Error('CSV must contain required columns: ID, Name, Slug, SKU, Description, Short Description, Category, Price');
+  }
+
+  const results = {
+    created: 0,
+    updated: 0,
+    errors: [] as string[],
+  };
+
+  // Get all categories for lookup
+  const categories = await db.category.findMany();
+  const categoryMap = new Map(categories.map(cat => [cat.name.toLowerCase(), cat.id]));
+
+  for (let i = 1; i < lines.length; i++) {
+    try {
+      const values = parseCSVLine(lines[i]);
+      if (values.length !== headers.length) {
+        results.errors.push(`Row ${i + 1}: Column count mismatch`);
+        continue;
+      }
+
+      const rowData: Record<string, string> = {};
+      headers.forEach((header, index) => {
+        rowData[header] = values[index] || '';
+      });
+
+      // Validate required fields
+      if (!rowData['Name']?.trim()) {
+        results.errors.push(`Row ${i + 1}: Name is required`);
+        continue;
+      }
+
+      if (!rowData['Price']?.trim() || isNaN(parseFloat(rowData['Price']))) {
+        results.errors.push(`Row ${i + 1}: Valid price is required`);
+        continue;
+      }
+
+      // Find or create category
+      let categoryId: string | undefined;
+      if (rowData['Category']?.trim()) {
+        const categoryName = rowData['Category'].trim();
+        categoryId = categoryMap.get(categoryName.toLowerCase());
+        if (!categoryId) {
+          // Create new category
+          const newCategory = await db.category.create({
+            data: {
+              name: categoryName,
+              slug: await generateUniqueCategorySlug(categoryName),
+            },
+          });
+          categoryId = newCategory.id;
+          categoryMap.set(categoryName.toLowerCase(), categoryId);
+        }
+      }
+
+      const productData = {
+        name: rowData['Name'].trim(),
+        slug: rowData['Slug']?.trim() || undefined,
+        sku: rowData['SKU']?.trim() || undefined,
+        description: rowData['Description']?.trim() || undefined,
+        shortDescription: rowData['Short Description']?.trim() || undefined,
+        categoryId,
+        price: parseFloat(rowData['Price']),
+        compareAtPrice: rowData['Compare At Price'] ? parseFloat(rowData['Compare At Price']) : undefined,
+        costPerItem: rowData['Cost Per Item'] ? parseFloat(rowData['Cost Per Item']) : undefined,
+        weightBasedPricing: rowData['Weight Based Pricing']?.toLowerCase() === 'true',
+        trackInventory: rowData['Track Inventory']?.toLowerCase() !== 'false', // Default true
+        stockQuantity: rowData['Stock Quantity'] ? parseInt(rowData['Stock Quantity']) : 0,
+        lowStockThreshold: rowData['Low Stock Threshold'] ? parseInt(rowData['Low Stock Threshold']) : undefined,
+        isFeatured: rowData['Is Featured']?.toLowerCase() === 'true',
+        isActive: rowData['Is Active']?.toLowerCase() !== 'false', // Default true
+        status: (rowData['Status']?.trim() || 'draft') as 'draft' | 'published' | 'archived',
+        weight: rowData['Weight'] ? parseFloat(rowData['Weight']) : undefined,
+        length: rowData['Length'] ? parseFloat(rowData['Length']) : undefined,
+        width: rowData['Width'] ? parseFloat(rowData['Width']) : undefined,
+        height: rowData['Height'] ? parseFloat(rowData['Height']) : undefined,
+        metaTitle: rowData['Meta Title']?.trim() || undefined,
+        metaDescription: rowData['Meta Description']?.trim() || undefined,
+        metaKeywords: rowData['Meta Keywords']?.trim() || undefined,
+      };
+
+      // Check if product exists (by ID or name/SKU)
+      let existingProduct = null;
+      if (rowData['ID']?.trim()) {
+        existingProduct = await db.product.findUnique({
+          where: { id: rowData['ID'].trim() },
+        });
+      }
+
+      if (!existingProduct && productData.sku) {
+        existingProduct = await db.product.findFirst({
+          where: { sku: productData.sku },
+        });
+      }
+
+      if (existingProduct) {
+        // Update existing product
+        await updateProduct(existingProduct.id, productData);
+        results.updated++;
+      } else {
+        // Create new product
+        await createProduct(productData);
+        results.created++;
+      }
+
+    } catch (error) {
+      results.errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Parse a CSV line handling quoted fields
+ */
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        // Escaped quote
+        current += '"';
+        i++; // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  // Add the last field
+  result.push(current);
+
+  return result;
+}
+
+/**
+ * Generate unique category slug (helper for import)
+ */
+async function generateUniqueCategorySlug(name: string, excludeId?: string): Promise<string> {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const existing = await db.category.findFirst({
+    where: {
+      slug,
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+    },
+  });
+
+  if (!existing) {
+    return slug;
+  }
+
+  let counter = 1;
+  let newSlug = `${slug}-${counter}`;
+
+  while (await db.category.findFirst({
+    where: {
+      slug: newSlug,
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+    },
+  })) {
+    counter++;
+    newSlug = `${slug}-${counter}`;
+  }
+
+  return newSlug;
+}
+/**
+ * Bulk update product price
+ */
+export async function bulkUpdateProductPrice(ids: string[], price: number, compareAtPrice?: number) {
+  const updateData: any = { price };
+  if (compareAtPrice !== undefined) {
+    updateData.compareAtPrice = compareAtPrice;
+  }
+
+  return db.product.updateMany({
+    where: { id: { in: ids } },
+    data: updateData,
+  });
+}
+
+/**
+ * Bulk update product category
+ */
+export async function bulkUpdateProductCategory(ids: string[], categoryId: string | null) {
+  return db.product.updateMany({
+    where: { id: { in: ids } },
+    data: { categoryId },
+  });
+}
+
+/**
+ * Bulk update product stock
+ */
+export async function bulkUpdateProductStock(ids: string[], stockQuantity: number) {
+  return db.product.updateMany({
+    where: { id: { in: ids } },
+    data: { stockQuantity },
   });
 }
