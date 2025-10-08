@@ -1,5 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { db } from "@/lib/db"
 import { z } from "zod"
@@ -38,6 +40,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -83,6 +89,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     })
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle OAuth sign in
+      if (account?.provider === "google") {
+        try {
+          // Check if user exists
+          const existingUser = await db.user.findUnique({
+            where: { email: user.email! }
+          })
+
+          if (!existingUser) {
+            // Create new user for OAuth
+            await db.user.create({
+              data: {
+                email: user.email!,
+                name: user.name,
+                image: user.image,
+                role: "customer",
+                emailVerified: new Date(), // OAuth emails are pre-verified
+              }
+            })
+          }
+          return true
+        } catch (error) {
+          console.error("OAuth sign in error:", error)
+          return false
+        }
+      }
+      return true
+    },
     async session({ session, token }) {
       console.log("Session callback:", { token, session })
       if (token) {
@@ -92,11 +127,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session
     },
-    async jwt({ token, user }) {
-      console.log("JWT callback:", { token, user })
+    async jwt({ token, user, account }) {
+      console.log("JWT callback:", { token, user, account })
       if (user) {
         token.role = user.role
         token.emailVerified = user.emailVerified
+      }
+      // For OAuth users, ensure emailVerified is set
+      if (account?.provider === "google" && !token.emailVerified) {
+        token.emailVerified = new Date()
       }
       return token
     }

@@ -26,7 +26,8 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  password  String
+  image     String?  // Profile image URL (for OAuth)
+  password  String?
   role      String   @default("customer")
 
   // Email verification
@@ -45,6 +46,10 @@ model User {
   pages     Page[]
   reviews   Review[]
   profile   CustomerProfile?
+
+  // NextAuth relations
+  accounts  Account[]
+  sessions  Session[]
 
   @@map("users")
 }
@@ -493,4 +498,44 @@ model Address {
   @@index([type])
   @@index([isDefault])
   @@map("addresses")
+}
+
+// NextAuth.js models for OAuth support
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
 }
