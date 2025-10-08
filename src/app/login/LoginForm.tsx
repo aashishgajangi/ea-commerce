@@ -20,6 +20,12 @@ export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Detect if user is on mobile device
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  }
+
   useEffect(() => {
     if (searchParams.get("verified") === "true") {
       setError("") // Clear any error
@@ -112,7 +118,15 @@ export default function LoginForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={() => {
+                const signInOptions = { callbackUrl: "/" }
+                // Use redirect flow on mobile devices to avoid popup issues
+                if (isMobile()) {
+                  signIn("google", { ...signInOptions, redirect: true })
+                } else {
+                  signIn("google", signInOptions)
+                }
+              }}
               className="w-full"
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
