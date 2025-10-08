@@ -307,7 +307,7 @@ export default function ProductsPage() {
 
     setPerformingBulkAction(true);
     try {
-      let value: any = undefined;
+      let value: { price?: number; compareAtPrice?: number } | string | number | null | undefined;
 
       if (bulkAction === 'update_price') {
         const price = parseFloat(bulkValue);
@@ -557,7 +557,7 @@ export default function ProductsPage() {
                     <label className="block text-sm font-medium mb-1">Stock Status</label>
                     <select
                       value={stockStatus}
-                      onChange={(e) => setStockStatus(e.target.value as any)}
+                      onChange={(e) => setStockStatus(e.target.value as 'all' | 'in_stock' | 'low_stock' | 'out_of_stock')}
                       className="w-full px-3 py-2 border rounded-md text-sm"
                     >
                       <option value="all">All Stock</option>
@@ -570,7 +570,7 @@ export default function ProductsPage() {
                     <label className="block text-sm font-medium mb-1">Sort By</label>
                     <select
                       value={orderBy}
-                      onChange={(e) => setOrderBy(e.target.value as any)}
+                      onChange={(e) => setOrderBy(e.target.value as 'createdAt' | 'updatedAt' | 'name' | 'price' | 'stockQuantity')}
                       className="w-full px-3 py-2 border rounded-md text-sm"
                     >
                       <option value="createdAt">Created Date</option>

@@ -821,7 +821,7 @@ async function generateUniqueCategorySlug(name: string, excludeId?: string): Pro
  * Bulk update product price
  */
 export async function bulkUpdateProductPrice(ids: string[], price: number, compareAtPrice?: number) {
-  const updateData: any = { price };
+  const updateData: { price: number; compareAtPrice?: number } = { price };
   if (compareAtPrice !== undefined) {
     updateData.compareAtPrice = compareAtPrice;
   }

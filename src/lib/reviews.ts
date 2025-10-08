@@ -82,7 +82,7 @@ export async function getAllReviews(options: {
     order = 'desc',
   } = options;
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     ...(productId ? { productId } : {}),
     ...(status !== 'all' ? { status } : {}),
     ...(rating ? { rating } : {}),

@@ -51,11 +51,6 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined;
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
     const inStock = searchParams.get('inStock') === 'true' ? true : undefined;
-    const stockStatus = searchParams.get('stockStatus') || undefined; // 'in_stock', 'low_stock', 'out_of_stock'
-    const createdAfter = searchParams.get('createdAfter') ? new Date(searchParams.get('createdAfter')!) : undefined;
-    const createdBefore = searchParams.get('createdBefore') ? new Date(searchParams.get('createdBefore')!) : undefined;
-    const updatedAfter = searchParams.get('updatedAfter') ? new Date(searchParams.get('updatedAfter')!) : undefined;
-    const updatedBefore = searchParams.get('updatedBefore') ? new Date(searchParams.get('updatedBefore')!) : undefined;
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
     const orderBy = (searchParams.get('orderBy') || 'createdAt') as 'name' | 'price' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'stockQuantity';

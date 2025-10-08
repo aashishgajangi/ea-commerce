@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Star, Check, X, Trash2, Search, Filter, X as XIcon, MessageSquare } from 'lucide-react';
+import { Star, Check, X, Trash2, Search, X as XIcon, MessageSquare } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -78,7 +78,7 @@ export default function ReviewsPage() {
       if (!response.ok) return;
       const data = await response.json();
 
-      setProducts(data.products.map((p: any) => ({ id: p.id, name: p.name })));
+      setProducts(data.products.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })));
     } catch (error) {
       console.error('Error fetching products:', error);
     }
