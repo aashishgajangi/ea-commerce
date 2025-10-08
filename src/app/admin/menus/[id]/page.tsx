@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Plus, Trash2, GripVertical, Menu as MenuIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, GripVertical, Menu as MenuIcon, Edit } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -58,7 +58,7 @@ interface MenuEditorProps {
   }>;
 }
 
-function SortableItem({ item, onDelete }: { item: MenuItem; onDelete: (id: string, label: string) => void }) {
+function SortableItem({ item, onDelete, onEdit }: { item: MenuItem; onDelete: (id: string, label: string) => void; onEdit: (item: MenuItem) => void }) {
   const {
     attributes,
     listeners,
@@ -108,13 +108,22 @@ function SortableItem({ item, onDelete }: { item: MenuItem; onDelete: (id: strin
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(item.id, item.label)}
-          >
-            <Trash2 className="h-4 w-4 text-red-600" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(item)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDelete(item.id, item.label)}
+            >
+              <Trash2 className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -127,6 +136,7 @@ export default function MenuEditor({ params }: MenuEditorProps) {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Add item form
@@ -227,8 +237,14 @@ export default function MenuEditor({ params }: MenuEditorProps) {
 
     setSaving(true);
     try {
-      const response = await fetch(`/api/admin/menus/${menuId}/items`, {
-        method: 'POST',
+      const isEditing = !!editingItem;
+      const url = isEditing
+        ? `/api/admin/menus/${menuId}/items/${editingItem.id}`
+        : `/api/admin/menus/${menuId}/items`;
+      const method = isEditing ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           label: itemLabel,
@@ -239,7 +255,7 @@ export default function MenuEditor({ params }: MenuEditorProps) {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to add menu item');
+      if (!response.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'add'} menu item`);
 
       // Refresh menu
       const menuResponse = await fetch(`/api/admin/menus/${menuId}`);
@@ -250,17 +266,28 @@ export default function MenuEditor({ params }: MenuEditorProps) {
 
       // Reset form
       setShowAddModal(false);
+      setEditingItem(null);
       setItemLabel('');
       setItemUrl('');
       setItemPageId('');
       setItemType('page');
       setItemTarget('_self');
     } catch (error) {
-      console.error('Error adding menu item:', error);
-      alert('Failed to add menu item');
+      console.error(`Error ${editingItem ? 'updating' : 'adding'} menu item:`, error);
+      alert(`Failed to ${editingItem ? 'update' : 'add'} menu item`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEditItem = (item: MenuItem) => {
+    setEditingItem(item);
+    setItemType(item.type as 'page' | 'custom' | 'external');
+    setItemLabel(item.label);
+    setItemUrl(item.url || '');
+    setItemPageId(item.pageId || '');
+    setItemTarget(item.target as '_self' | '_blank');
+    setShowAddModal(true);
   };
 
   const handleDeleteItem = async (itemId: string, label: string) => {
@@ -364,6 +391,7 @@ export default function MenuEditor({ params }: MenuEditorProps) {
                     key={item.id}
                     item={item}
                     onDelete={handleDeleteItem}
+                    onEdit={handleEditItem}
                   />
                 ))}
               </SortableContext>
@@ -377,8 +405,8 @@ export default function MenuEditor({ params }: MenuEditorProps) {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card className="max-w-lg w-full">
             <CardHeader>
-              <CardTitle>Add Menu Item</CardTitle>
-              <CardDescription>Add a new item to your navigation menu</CardDescription>
+              <CardTitle>{editingItem ? 'Edit Menu Item' : 'Add Menu Item'}</CardTitle>
+              <CardDescription>{editingItem ? 'Update the menu item details' : 'Add a new item to your navigation menu'}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -454,6 +482,7 @@ export default function MenuEditor({ params }: MenuEditorProps) {
                   variant="outline"
                   onClick={() => {
                     setShowAddModal(false);
+                    setEditingItem(null);
                     setItemLabel('');
                     setItemUrl('');
                     setItemPageId('');
@@ -464,7 +493,7 @@ export default function MenuEditor({ params }: MenuEditorProps) {
                   Cancel
                 </Button>
                 <Button onClick={handleAddItem} disabled={saving}>
-                  {saving ? 'Adding...' : 'Add Item'}
+                  {saving ? (editingItem ? 'Updating...' : 'Adding...') : (editingItem ? 'Update Item' : 'Add Item')}
                 </Button>
               </div>
             </CardContent>
