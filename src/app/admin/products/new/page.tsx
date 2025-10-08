@@ -98,14 +98,14 @@ export default function NewProductPage() {
           sku: formData.sku || undefined,
           description: formData.description || undefined,
           shortDescription: formData.shortDescription || undefined,
-          categoryId: formData.categoryId,
+          categoryId: formData.categoryId || undefined,
           price: parseFloat(formData.price),
-          compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
-          costPerItem: formData.costPerItem ? parseFloat(formData.costPerItem) : undefined,
+          compareAtPrice: formData.compareAtPrice.trim() ? parseFloat(formData.compareAtPrice) : undefined,
+          costPerItem: formData.costPerItem.trim() ? parseFloat(formData.costPerItem) : undefined,
           weightBasedPricing: formData.weightBasedPricing,
           trackInventory: formData.trackInventory,
-          stockQuantity: parseInt(formData.stockQuantity),
-          lowStockThreshold: formData.lowStockThreshold ? parseInt(formData.lowStockThreshold) : undefined,
+          stockQuantity: formData.stockQuantity.trim() ? parseInt(formData.stockQuantity) : '',
+          lowStockThreshold: formData.lowStockThreshold.trim() ? parseInt(formData.lowStockThreshold) : undefined,
           status: formData.status,
           isActive: formData.isActive,
           isFeatured: formData.isFeatured,
@@ -180,15 +180,14 @@ export default function NewProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category">Category</Label>
                 <select
                   id="category"
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  required
                   className="w-full px-3 py-2 border rounded-md"
                 >
-                  <option value="">Select a category</option>
+                  <option value="">Select a category (optional)</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}

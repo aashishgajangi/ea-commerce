@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getProducts, createProduct, generateUniqueProductSlug, bulkUpdateProductStatus, bulkDeleteProducts, bulkUpdateProductPrice, bulkUpdateProductCategory, bulkUpdateProductStock } from '@/lib/products';
 import { z } from 'zod';
 
+// Helper function to handle empty strings and null values for numeric fields
+const optionalNumber = (schema: z.ZodNumber) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    return val;
+  }, schema.optional());
+
 // Validation schema for creating a product
 const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -9,21 +17,24 @@ const createProductSchema = z.object({
   sku: z.string().optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
-  categoryId: z.string().min(1, 'Category is required'),
+  categoryId: z.string().optional(),
   price: z.number().min(0, 'Price must be non-negative'),
-  compareAtPrice: z.number().min(0).optional(),
-  costPerItem: z.number().min(0).optional(),
+  compareAtPrice: optionalNumber(z.number().min(0)),
+  costPerItem: optionalNumber(z.number().min(0)),
   weightBasedPricing: z.boolean().default(false),
   trackInventory: z.boolean().default(true),
-  stockQuantity: z.number().int().default(0),
-  lowStockThreshold: z.number().int().optional(),
+  stockQuantity: z.preprocess((val) => {
+    if (typeof val === 'string' && val.trim() === '') return 0;
+    return val;
+  }, z.number().int().default(0)),
+  lowStockThreshold: optionalNumber(z.number().int()),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
-  weight: z.number().min(0).optional(),
-  length: z.number().min(0).optional(),
-  width: z.number().min(0).optional(),
-  height: z.number().min(0).optional(),
+  weight: optionalNumber(z.number().min(0)),
+  length: optionalNumber(z.number().min(0)),
+  width: optionalNumber(z.number().min(0)),
+  height: optionalNumber(z.number().min(0)),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),

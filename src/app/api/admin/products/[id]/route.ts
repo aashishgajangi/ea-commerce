@@ -25,35 +25,44 @@ type UpdateProductData = {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
-  publishedAt?: Date;
 };
+
+// Helper function to handle empty strings and null values for numeric fields
+const optionalNumber = (schema: z.ZodNumber) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    return val;
+  }, schema.optional());
 
 // Validation schema for updating a product
 const updateProductSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  slug: z.string().optional(),
+  // Required fields
+  name: z.string().min(1, 'Name is required'),
+  slug: z.string().min(1, 'Slug is required'),
+  price: z.number().min(0, 'Price must be non-negative'),
+  weightBasedPricing: z.boolean(),
+  trackInventory: z.boolean(),
+  stockQuantity: z.number().int().min(0, 'Stock quantity cannot be negative'),
+  isFeatured: z.boolean(),
+  isActive: z.boolean(),
+  status: z.enum(['draft', 'published', 'archived'], { required_error: 'Status is required' }),
+
+  // Optional fields
   sku: z.string().optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
   categoryId: z.string().nullable().optional(),
-  price: z.number().min(0, 'Price must be non-negative').optional(),
-  compareAtPrice: z.number().min(0).optional(),
-  costPerItem: z.number().min(0).optional(),
-  weightBasedPricing: z.boolean().optional(),
-  trackInventory: z.boolean().optional(),
-  stockQuantity: z.number().int().optional(),
-  lowStockThreshold: z.number().int().optional(),
-  isFeatured: z.boolean().optional(),
-  isActive: z.boolean().optional(),
-  status: z.enum(['draft', 'published', 'archived']).optional(),
-  weight: z.number().min(0).optional(),
-  length: z.number().min(0).optional(),
-  width: z.number().min(0).optional(),
-  height: z.number().min(0).optional(),
+  compareAtPrice: optionalNumber(z.number().min(0)),
+  costPerItem: optionalNumber(z.number().min(0)),
+  lowStockThreshold: optionalNumber(z.number().int().min(0)),
+  weight: optionalNumber(z.number().min(0)),
+  length: optionalNumber(z.number().min(0)),
+  width: optionalNumber(z.number().min(0)),
+  height: optionalNumber(z.number().min(0)),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),
-  publishedAt: z.string().datetime().optional(),
 });
 
 /**
@@ -107,11 +116,7 @@ export async function PUT(
 
     const data = validationResult.data;
 
-    // Convert publishedAt string to Date if provided
-    const updateData = {
-      ...data,
-      ...(data.publishedAt && { publishedAt: new Date(data.publishedAt) }),
-    } as UpdateProductData;
+    const updateData = data as UpdateProductData;
 
     // Update the product
     const product = await updateProduct(id, updateData);

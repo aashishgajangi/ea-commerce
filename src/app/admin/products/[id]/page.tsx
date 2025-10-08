@@ -181,31 +181,34 @@ export default function ProductEditPage() {
 
     setSaving(true);
     try {
-      // Only send fields that can be updated
+      // Send all required fields and optional fields (null values are handled by validation)
       const updateData = {
+        // Required fields
         name: product.name,
         slug: product.slug,
-        sku: product.sku || undefined,
-        description: product.description,
-        shortDescription: product.shortDescription,
-        categoryId: product.categoryId || undefined,
         price: product.price,
-        compareAtPrice: product.compareAtPrice || undefined,
-        costPerItem: product.costPerItem || undefined,
         weightBasedPricing: product.weightBasedPricing,
         trackInventory: product.trackInventory,
         stockQuantity: product.stockQuantity,
-        lowStockThreshold: product.lowStockThreshold || undefined,
         isFeatured: product.isFeatured,
         isActive: product.isActive,
         status: product.status,
-        weight: product.weight || undefined,
-        length: product.length || undefined,
-        width: product.width || undefined,
-        height: product.height || undefined,
-        metaTitle: product.metaTitle || undefined,
-        metaDescription: product.metaDescription || undefined,
-        metaKeywords: product.metaKeywords || undefined,
+
+        // Optional fields - send null values, validation will handle them
+        sku: product.sku,
+        description: product.description,
+        shortDescription: product.shortDescription,
+        categoryId: product.categoryId,
+        compareAtPrice: product.compareAtPrice,
+        costPerItem: product.costPerItem,
+        lowStockThreshold: product.lowStockThreshold,
+        weight: product.weight,
+        length: product.length,
+        width: product.width,
+        height: product.height,
+        metaTitle: product.metaTitle,
+        metaDescription: product.metaDescription,
+        metaKeywords: product.metaKeywords,
       };
       
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -497,6 +500,7 @@ export default function ProductEditPage() {
                         slug: autoSlug || product.slug
                       });
                     }}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -506,6 +510,7 @@ export default function ProductEditPage() {
                     value={product.slug}
                     onChange={(e) => setProduct({ ...product, slug: e.target.value })}
                     placeholder="product-slug"
+                    required
                   />
                   <p className="text-xs text-gray-500">Automatically generated from product name, can be edited</p>
                 </div>
@@ -518,17 +523,16 @@ export default function ProductEditPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">Category</Label>
                   <select
                     id="category"
                     value={product.categoryId || ''}
                     onChange={(e) =>
                       setProduct({ ...product, categoryId: e.target.value || null })
                     }
-                    required
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">Select a category</option>
+                    <option value="">Select a category (optional)</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -586,6 +590,7 @@ export default function ProductEditPage() {
                     step="0.01"
                     value={product.price}
                     onChange={(e) => setProduct({ ...product, price: parseFloat(e.target.value) })}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
