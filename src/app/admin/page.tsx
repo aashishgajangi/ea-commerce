@@ -1,20 +1,37 @@
+'use client';
+
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              Admin Dashboard
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Welcome to your E-Commerce Platform
-            </p>
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                Admin Dashboard
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">
+                Welcome to your E-Commerce Platform
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => signOut()} variant="outline" size="sm">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/" target="_blank">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Visit Site
+                </Link>
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-6 mb-8">
