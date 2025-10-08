@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, Search, Trash2, Image as ImageIcon, X, Edit2, Save } from "lucide-react";
+import { Upload, Search, Trash2, Image as ImageIcon, X, Edit2, Save, ArrowLeft } from "lucide-react";
 
 interface Media {
   id: string;
@@ -209,7 +210,15 @@ export default function MediaLibraryPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Media Library</h1>
+            <div className="flex items-center gap-4">
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Media Library</h1>
+            </div>
         <div className="flex gap-2">
           <Input
             type="file"

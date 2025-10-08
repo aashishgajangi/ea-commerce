@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, Menu as MenuIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Menu as MenuIcon, ArrowLeft } from 'lucide-react';
 
 interface Menu {
   id: string;
@@ -115,9 +115,17 @@ export default function MenusPage() {
   return (
     <div className="container mx-auto max-w-7xl py-8 px-4">
       <div className="mb-8 flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Navigation Menus</h1>
-          <p className="text-gray-600">Manage your site navigation menus</p>
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Navigation Menus</h1>
+            <p className="text-gray-600">Manage your site navigation menus</p>
+          </div>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="h-4 w-4 mr-2" />

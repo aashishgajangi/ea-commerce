@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Eye, FileText } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, FileText, ArrowLeft } from 'lucide-react';
 
 interface Page {
   id: string;
@@ -99,9 +99,17 @@ export default function PagesPage() {
 
   return (
     <div className="container mx-auto max-w-7xl py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Pages</h1>
-        <p className="text-gray-600">Manage your static pages with full SEO control</p>
+      <div className="mb-8 flex items-center gap-4">
+        <Link href="/admin">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Pages</h1>
+          <p className="text-gray-600">Manage your static pages with full SEO control</p>
+        </div>
       </div>
 
       <Card>

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Save, Image as ImageIcon, X, Search } from "lucide-react";
+import { Save, Image as ImageIcon, X, Search, ArrowLeft } from "lucide-react";
 
 interface GeneralSettings {
   siteName: string;
@@ -316,9 +317,17 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Settings</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Manage your site configuration</p>
+          <div className="flex items-center gap-4">
+            <Link href="/admin">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Settings</h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">Manage your site configuration</p>
+            </div>
           </div>
 
       {error && (

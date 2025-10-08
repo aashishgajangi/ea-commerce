@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Package, Eye, Copy, Download, Upload, Filter, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Package, Eye, Copy, Download, Upload, Filter, X, ArrowLeft } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -403,9 +403,17 @@ export default function ProductsPage() {
 
   return (
     <div className="container mx-auto max-w-7xl py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Products</h1>
-        <p className="text-gray-600">Manage your product catalog</p>
+      <div className="mb-8 flex items-center gap-4">
+        <Link href="/admin">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Products</h1>
+          <p className="text-gray-600">Manage your product catalog</p>
+        </div>
       </div>
 
       <Card>
