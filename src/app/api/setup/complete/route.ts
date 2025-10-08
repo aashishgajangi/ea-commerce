@@ -15,7 +15,7 @@ export async function POST() {
 
     // Verify that at least one admin user exists
     const adminCount = await db.user.count({
-      where: { role: 'ADMIN' },
+      where: { role: 'admin' },
     });
 
     if (adminCount === 0) {

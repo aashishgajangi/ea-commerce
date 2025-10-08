@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { config, ConfigKeys } from '@/lib/config';
 import { Search } from 'lucide-react';
 import MobileMenu from './MobileMenu';
+import AuthLinks from '@/components/auth/AuthLinks';
 
 export default async function Header() {
   // Get settings
@@ -104,6 +105,9 @@ export default async function Header() {
               </div>
             </div>
           )}
+
+          {/* Auth Links */}
+          <AuthLinks />
         </div>
       </div>
     </header>

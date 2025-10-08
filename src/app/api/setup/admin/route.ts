@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
         email,
         name,
         password: hashedPassword,
-        role: 'ADMIN',
+        role: 'admin',
+        emailVerified: new Date(), // Admin users are pre-verified
       },
     });
 
