@@ -13,11 +13,11 @@ const optionalNumber = (schema: z.ZodNumber) =>
 // Validation schema for creating a product
 const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  slug: z.string().optional(),
-  sku: z.string().optional(),
-  description: z.string().optional(),
-  shortDescription: z.string().optional(),
-  categoryId: z.string().optional(),
+  slug: z.string().nullable().optional(),
+  sku: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  shortDescription: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
   price: z.number().min(0, 'Price must be non-negative'),
   compareAtPrice: optionalNumber(z.number().min(0)),
   costPerItem: optionalNumber(z.number().min(0)),
@@ -35,9 +35,9 @@ const createProductSchema = z.object({
   length: optionalNumber(z.number().min(0)),
   width: optionalNumber(z.number().min(0)),
   height: optionalNumber(z.number().min(0)),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: z.string().nullable().optional(),
+  metaDescription: z.string().nullable().optional(),
+  metaKeywords: z.string().nullable().optional(),
 });
 
 // Validation schema for bulk operations
@@ -115,10 +115,31 @@ export async function POST(request: NextRequest) {
     // Generate slug if not provided
     const slug = data.slug || await generateUniqueProductSlug(data.name);
 
-    // Create the product
+    // Create the product - transform null values to undefined for optional fields
     const product = await createProduct({
-      ...data,
+      name: data.name,
       slug,
+      sku: data.sku || undefined,
+      description: data.description || undefined,
+      shortDescription: data.shortDescription || undefined,
+      categoryId: data.categoryId || undefined,
+      price: data.price,
+      compareAtPrice: data.compareAtPrice,
+      costPerItem: data.costPerItem,
+      weightBasedPricing: data.weightBasedPricing,
+      trackInventory: data.trackInventory,
+      stockQuantity: data.stockQuantity,
+      lowStockThreshold: data.lowStockThreshold,
+      isFeatured: data.isFeatured,
+      isActive: data.isActive,
+      status: data.status,
+      weight: data.weight,
+      length: data.length,
+      width: data.width,
+      height: data.height,
+      metaTitle: data.metaTitle || undefined,
+      metaDescription: data.metaDescription || undefined,
+      metaKeywords: data.metaKeywords || undefined,
     });
 
     return NextResponse.json(product, { status: 201 });

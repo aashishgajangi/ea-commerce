@@ -25,13 +25,33 @@ export default async function Header() {
   // Get header menu
   const menu = await getMenuByLocation('header');
 
+  // Header height classes
+  const heightClasses = {
+    sm: 'py-2',
+    md: 'py-4',
+    lg: 'py-6',
+    xl: 'py-8'
+  };
+
+  // Header style classes
+  const styleClasses = {
+    normal: 'border-b',
+    bold: 'border-b-2 shadow-lg',
+    minimal: 'border-b border-gray-200',
+    modern: 'border-b-2 rounded-b-lg shadow-md bg-gradient-to-r from-white to-gray-50'
+  };
+
   const stickyClass = settings.header.sticky
     ? 'sticky top-0 z-50 backdrop-blur-sm bg-white/95'
     : '';
 
+  // Pass icon names as strings to client components
+  const hamburgerIconName = settings.header.hamburgerIcon;
+  const accountIconName = settings.header.accountIcon;
+
   return (
-    <header className={`border-b ${stickyClass} relative`}>
-      <div className="container mx-auto px-4 py-4">
+    <header className={`${styleClasses[settings.header.headerStyle]} ${stickyClass} relative`}>
+      <div className={`container mx-auto px-4 ${heightClasses[settings.header.headerHeight]}`}>
         <div className="flex items-center justify-between">
           {/* Logo & Site Name */}
           <Link href="/" className="flex items-center gap-3">
@@ -87,27 +107,30 @@ export default async function Header() {
             </nav>
           )}
 
-          {/* Mobile Menu Button */}
-          {menu && menu.items && menu.items.length > 0 && (
-            <MobileMenu menuItems={menu.items} />
-          )}
-
-          {/* Search Bar */}
-          {settings.header.showSearch && (
-            <div className="hidden lg:block">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                />
+          {/* Right Side: Search, Auth, Mobile Menu */}
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            {settings.header.showSearch && (
+              <div className="hidden lg:block">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="search"
+                    placeholder="Search..."
+                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Auth Links */}
-          <AuthLinks />
+            {/* Auth Links */}
+            <AuthLinks accountIconName={accountIconName} />
+
+            {/* Mobile Menu Button */}
+            {menu && menu.items && menu.items.length > 0 && (
+              <MobileMenu menuItems={menu.items} hamburgerIconName={hamburgerIconName} />
+            )}
+          </div>
         </div>
       </div>
     </header>

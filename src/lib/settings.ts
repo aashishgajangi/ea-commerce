@@ -37,6 +37,10 @@ export interface HeaderSettings {
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
+  headerHeight: 'sm' | 'md' | 'lg' | 'xl';
+  headerStyle: 'normal' | 'bold' | 'minimal' | 'modern';
+  hamburgerIcon: 'menu' | 'bars' | 'grid' | 'list' | 'more';
+  accountIcon: 'user' | 'person' | 'profile' | 'account' | 'avatar';
 }
 
 export interface FooterSettings {
@@ -89,6 +93,10 @@ export const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
   showTagline: true,
   showSearch: true,
   sticky: true,
+  headerHeight: 'md',
+  headerStyle: 'normal',
+  hamburgerIcon: 'menu',
+  accountIcon: 'user',
 };
 
 export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {

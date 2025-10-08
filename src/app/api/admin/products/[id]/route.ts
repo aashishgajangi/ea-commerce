@@ -49,9 +49,9 @@ const updateProductSchema = z.object({
   status: z.enum(['draft', 'published', 'archived'], { required_error: 'Status is required' }),
 
   // Optional fields
-  sku: z.string().optional(),
-  description: z.string().optional(),
-  shortDescription: z.string().optional(),
+  sku: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  shortDescription: z.string().nullable().optional(),
   categoryId: z.string().nullable().optional(),
   compareAtPrice: optionalNumber(z.number().min(0)),
   costPerItem: optionalNumber(z.number().min(0)),
@@ -60,9 +60,9 @@ const updateProductSchema = z.object({
   length: optionalNumber(z.number().min(0)),
   width: optionalNumber(z.number().min(0)),
   height: optionalNumber(z.number().min(0)),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: z.string().nullable().optional(),
+  metaDescription: z.string().nullable().optional(),
+  metaKeywords: z.string().nullable().optional(),
 });
 
 /**

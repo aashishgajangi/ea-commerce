@@ -181,34 +181,35 @@ export default function ProductEditPage() {
 
     setSaving(true);
     try {
-      // Send all required fields and optional fields (null values are handled by validation)
+      // Send only the product fields (not images or variants which are managed separately)
+      // Ensure proper data types
       const updateData = {
         // Required fields
-        name: product.name,
-        slug: product.slug,
-        price: product.price,
-        weightBasedPricing: product.weightBasedPricing,
-        trackInventory: product.trackInventory,
-        stockQuantity: product.stockQuantity,
-        isFeatured: product.isFeatured,
-        isActive: product.isActive,
-        status: product.status,
+        name: product.name?.trim() || '',
+        slug: product.slug?.trim() || '',
+        price: Number(product.price) || 0,
+        weightBasedPricing: Boolean(product.weightBasedPricing),
+        trackInventory: Boolean(product.trackInventory),
+        stockQuantity: Number(product.stockQuantity) || 0,
+        isFeatured: Boolean(product.isFeatured),
+        isActive: Boolean(product.isActive),
+        status: product.status || 'draft',
 
         // Optional fields - send null values, validation will handle them
-        sku: product.sku,
-        description: product.description,
-        shortDescription: product.shortDescription,
-        categoryId: product.categoryId,
-        compareAtPrice: product.compareAtPrice,
-        costPerItem: product.costPerItem,
-        lowStockThreshold: product.lowStockThreshold,
-        weight: product.weight,
-        length: product.length,
-        width: product.width,
-        height: product.height,
-        metaTitle: product.metaTitle,
-        metaDescription: product.metaDescription,
-        metaKeywords: product.metaKeywords,
+        sku: product.sku?.trim() || null,
+        description: product.description?.trim() || null,
+        shortDescription: product.shortDescription?.trim() || null,
+        categoryId: product.categoryId || null,
+        compareAtPrice: product.compareAtPrice !== null && product.compareAtPrice !== undefined ? Number(product.compareAtPrice) : null,
+        costPerItem: product.costPerItem !== null && product.costPerItem !== undefined ? Number(product.costPerItem) : null,
+        lowStockThreshold: product.lowStockThreshold !== null && product.lowStockThreshold !== undefined ? Number(product.lowStockThreshold) : null,
+        weight: product.weight !== null && product.weight !== undefined ? Number(product.weight) : null,
+        length: product.length !== null && product.length !== undefined ? Number(product.length) : null,
+        width: product.width !== null && product.width !== undefined ? Number(product.width) : null,
+        height: product.height !== null && product.height !== undefined ? Number(product.height) : null,
+        metaTitle: product.metaTitle?.trim() || null,
+        metaDescription: product.metaDescription?.trim() || null,
+        metaKeywords: product.metaKeywords?.trim() || null,
       };
       
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -219,6 +220,13 @@ export default function ProductEditPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData.details) {
+          // Show validation errors
+          const validationErrors = errorData.details.map((issue: { path: string[]; message: string }) =>
+            `${issue.path.join('.')}: ${issue.message}`
+          ).join('\n');
+          throw new Error(`Validation failed:\n${validationErrors}`);
+        }
         throw new Error(errorData.error || 'Failed to save product');
       }
       

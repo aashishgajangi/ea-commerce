@@ -43,6 +43,10 @@ interface HeaderSettings {
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
+  headerHeight: 'sm' | 'md' | 'lg' | 'xl';
+  headerStyle: 'normal' | 'bold' | 'minimal' | 'modern';
+  hamburgerIcon: 'menu' | 'bars' | 'grid' | 'list' | 'more';
+  accountIcon: 'user' | 'person' | 'profile' | 'account' | 'avatar';
 }
 
 interface FooterSettings {
@@ -125,6 +129,10 @@ export default function SettingsPage() {
     showTagline: true,
     showSearch: true,
     sticky: true,
+    headerHeight: 'md',
+    headerStyle: 'normal',
+    hamburgerIcon: 'menu',
+    accountIcon: 'user',
   });
 
   const [footer, setFooter] = useState<FooterSettings>({
@@ -175,6 +183,10 @@ export default function SettingsPage() {
         showTagline: data.header?.showTagline ?? prev.showTagline,
         showSearch: data.header?.showSearch ?? prev.showSearch,
         sticky: data.header?.sticky ?? prev.sticky,
+        headerHeight: data.header?.headerHeight ?? prev.headerHeight,
+        headerStyle: data.header?.headerStyle ?? prev.headerStyle,
+        hamburgerIcon: data.header?.hamburgerIcon ?? prev.hamburgerIcon,
+        accountIcon: data.header?.accountIcon ?? prev.accountIcon,
       }));
       setFooter(prev => ({ ...prev, ...data.footer }));
 
@@ -735,6 +747,81 @@ export default function SettingsPage() {
               />
               <Label htmlFor="sticky">Sticky Header (stays on scroll)</Label>
             </div>
+
+            <div>
+              <Label htmlFor="headerHeight">Header Height</Label>
+              <select
+                id="headerHeight"
+                value={header.headerHeight}
+                onChange={(e) => setHeader({ ...header, headerHeight: e.target.value as 'sm' | 'md' | 'lg' | 'xl' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="sm">Small (48px)</option>
+                <option value="md">Medium (64px)</option>
+                <option value="lg">Large (80px)</option>
+                <option value="xl">Extra Large (96px)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Controls the overall height of the header
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="headerStyle">Header Style</Label>
+              <select
+                id="headerStyle"
+                value={header.headerStyle}
+                onChange={(e) => setHeader({ ...header, headerStyle: e.target.value as 'normal' | 'bold' | 'minimal' | 'modern' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="normal">Normal</option>
+                <option value="bold">Bold (thicker borders, stronger shadows)</option>
+                <option value="minimal">Minimal (clean, subtle)</option>
+                <option value="modern">Modern (rounded corners, gradients)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Choose the visual style of your header
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="hamburgerIcon">Mobile Menu Icon</Label>
+              <select
+                id="hamburgerIcon"
+                value={header.hamburgerIcon}
+                onChange={(e) => setHeader({ ...header, hamburgerIcon: e.target.value as 'menu' | 'bars' | 'grid' | 'list' | 'more' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="menu">☰ Menu (Classic hamburger)</option>
+                <option value="bars">≡ Bars (Triple bar)</option>
+                <option value="grid">⊞ Grid (9 dots)</option>
+                <option value="list">☰ List (Bullet list)</option>
+                <option value="more">⋯ More (Three dots)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Icon used for the mobile navigation menu
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="accountIcon">Account Icon</Label>
+              <select
+                id="accountIcon"
+                value={header.accountIcon}
+                onChange={(e) => setHeader({ ...header, accountIcon: e.target.value as 'user' | 'person' | 'profile' | 'account' | 'avatar' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="user">👤 User (Simple silhouette)</option>
+                <option value="person">👨 Person (Detailed figure)</option>
+                <option value="profile">👤 Profile (Circle silhouette)</option>
+                <option value="account">⚙️ Account (Settings gear)</option>
+                <option value="avatar">🧑 Avatar (Generic person)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Icon used for the account dropdown on mobile
+              </p>
+            </div>
+
             <Button onClick={() => handleSave("header")} disabled={saving}>
               <Save className="w-4 h-4 mr-2" />
               {saving ? "Saving..." : "Save Changes"}

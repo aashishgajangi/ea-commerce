@@ -2,14 +2,25 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, AlignJustify, Grid3X3, List, MoreHorizontal } from 'lucide-react';
 import type { MenuItemWithChildren } from '@/lib/menus';
 
 interface MobileMenuProps {
   menuItems: MenuItemWithChildren[];
+  hamburgerIconName?: 'menu' | 'bars' | 'grid' | 'list' | 'more';
 }
 
-export default function MobileMenu({ menuItems }: MobileMenuProps) {
+export default function MobileMenu({ menuItems, hamburgerIconName = 'menu' }: MobileMenuProps) {
+  // Icon mapping
+  const hamburgerIcons = {
+    menu: Menu,
+    bars: AlignJustify,
+    grid: Grid3X3,
+    list: List,
+    more: MoreHorizontal
+  };
+
+  const HamburgerIcon = hamburgerIcons[hamburgerIconName] || Menu;
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -20,7 +31,7 @@ export default function MobileMenu({ menuItems }: MobileMenuProps) {
         className="p-2 text-gray-700 hover:text-gray-900"
         aria-label="Toggle menu"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isOpen ? <X className="w-6 h-6" /> : <HamburgerIcon className="w-6 h-6" />}
       </button>
 
       {/* Dropdown Menu */}
