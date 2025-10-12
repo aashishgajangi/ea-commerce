@@ -38,11 +38,11 @@ export default async function Header() {
     normal: 'border-b',
     bold: 'border-b-2 shadow-lg',
     minimal: 'border-b border-gray-200',
-    modern: 'border-b-2 rounded-b-lg shadow-md bg-gradient-to-r from-white to-gray-50'
+    modern: 'border-b-2 rounded-b-lg shadow-md'
   };
 
   const stickyClass = settings.header.sticky
-    ? 'sticky top-0 z-50 backdrop-blur-sm bg-white/95'
+    ? 'sticky top-0 z-50 backdrop-blur-sm'
     : '';
 
   // Pass icon names as strings to client components
@@ -50,7 +50,13 @@ export default async function Header() {
   const accountIconName = settings.header.accountIcon;
 
   return (
-    <header className={`${styleClasses[settings.header.headerStyle]} ${stickyClass} relative`}>
+    <header
+      className={`${styleClasses[settings.header.headerStyle]} ${stickyClass} relative`}
+      style={{
+        backgroundColor: 'var(--theme-header-background)',
+        borderColor: 'var(--theme-header-text)',
+      }}
+    >
       <div className={`container mx-auto px-4 ${heightClasses[settings.header.headerHeight]}`}>
         <div className="flex items-center justify-between">
           {/* Logo & Site Name */}
@@ -67,19 +73,19 @@ export default async function Header() {
             )}
             {settings.header.showLogoText && (
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold" style={{ color: 'var(--theme-header-text)' }}>
                   {settings.header.logoText || siteName}
                 </h1>
                 {settings.header.showTagline && tagline && (
-                  <p className="text-sm text-gray-600">{tagline}</p>
+                  <p className="text-sm" style={{ color: 'var(--theme-header-text)' }}>{tagline}</p>
                 )}
               </div>
             )}
             {!settings.header.showLogoImage && !settings.header.showLogoText && (
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{siteName}</h1>
+                <h1 className="text-xl font-bold" style={{ color: 'var(--theme-header-text)' }}>{siteName}</h1>
                 {settings.header.showTagline && tagline && (
-                  <p className="text-sm text-gray-600">{tagline}</p>
+                  <p className="text-sm" style={{ color: 'var(--theme-header-text)' }}>{tagline}</p>
                 )}
               </div>
             )}
@@ -98,7 +104,11 @@ export default async function Header() {
                     key={item.id}
                     href={href}
                     target={item.target}
-                    className={`text-gray-700 hover:text-gray-900 font-medium ${item.cssClass || ''}`}
+                    className={`font-medium hover:opacity-80 ${item.cssClass || ''}`}
+                    style={{
+                      color: 'var(--theme-header-text)',
+                      textDecorationColor: 'var(--theme-primary)'
+                    }}
                   >
                     {item.label}
                   </Link>
@@ -113,11 +123,17 @@ export default async function Header() {
             {settings.header.showSearch && (
               <div className="hidden lg:block">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'var(--theme-text)' }} />
                   <input
                     type="search"
                     placeholder="Search..."
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 w-64"
+                    style={{
+                      borderColor: 'var(--theme-text)',
+                      backgroundColor: 'var(--theme-background)',
+                      color: 'var(--theme-text)',
+                      '--tw-ring-color': 'var(--theme-primary)'
+                    } as React.CSSProperties}
                   />
                 </div>
               </div>

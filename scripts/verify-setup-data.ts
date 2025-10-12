@@ -13,7 +13,7 @@ async function verifySetupData() {
     // Check admin users
     console.log('2️⃣ Admin Users:');
     const admins = await db.user.findMany({
-      where: { role: 'ADMIN' },
+      where: { role: 'admin' },
       select: {
         id: true,
         email: true,

@@ -4,19 +4,19 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Home } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-background, #f8fafc)' }}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-3xl font-bold" style={{ color: 'var(--theme-text, #0f172a)' }}>
                 Admin Dashboard
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
+              <p className="mt-2" style={{ color: 'var(--theme-text, #64748b)' }}>
                 Welcome to your E-Commerce Platform
               </p>
             </div>
@@ -111,6 +111,25 @@ export default function AdminDashboard() {
                     </p>
                     <Button variant="ghost" size="sm" className="w-full">
                       Open Menus <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/homepage" aria-label="Homepage">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Home className="h-5 w-5 text-green-500" role="img" aria-label="Homepage icon" />
+                      Homepage
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Customize homepage layout and sections
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Configure Homepage <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>

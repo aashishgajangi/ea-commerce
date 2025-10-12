@@ -2,6 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { generateSiteMetadata } from "@/lib/metadata";
 import AuthSessionProvider from "@/components/providers/SessionProvider";
+import ThemeProvider from "@/components/providers/ThemeProvider";
+import { getThemeSettings } from "@/lib/settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,7 @@ export default async function RootLayout({
     const { getAllSettings } = await import("@/lib/settings");
     const { db } = await import("@/lib/db");
     const settings = await getAllSettings();
-    
+
     if (settings.appearance.faviconId) {
       const media = await db.media.findUnique({
         where: { id: settings.appearance.faviconId },
@@ -42,6 +44,9 @@ export default async function RootLayout({
     console.error("Failed to load favicon:", error);
   }
 
+  // Get theme settings for global theme provider
+  const themeSettings = await getThemeSettings();
+
   return (
     <html lang="en">
       <head>
@@ -51,9 +56,11 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthSessionProvider>
-          {children}
-        </AuthSessionProvider>
+        <ThemeProvider initialTheme={themeSettings}>
+          <AuthSessionProvider>
+            {children}
+          </AuthSessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

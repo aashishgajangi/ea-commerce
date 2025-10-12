@@ -67,7 +67,7 @@ interface Media {
   title: string | null;
 }
 
-type TabType = "general" | "appearance" | "social" | "header" | "footer";
+type TabType = "general" | "appearance" | "theme" | "social" | "header" | "footer";
 type MediaSelectType = "logo" | "favicon" | null;
 
 // Valid font families for validation
@@ -142,6 +142,18 @@ export default function SettingsPage() {
     showPaymentMethods: true,
   });
 
+  const [theme, setTheme] = useState({
+    accentColor: "#ff6b35",
+    backgroundColor: "#ffffff",
+    textColor: "#1a1a1a",
+    headerBackgroundColor: "#ffffff",
+    headerTextColor: "#1a1a1a",
+    footerBackgroundColor: "#1a1a1a",
+    footerTextColor: "#ffffff",
+    borderRadius: "md",
+    darkMode: false,
+  });
+
   // Media selection state
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [mediaSelectType, setMediaSelectType] = useState<MediaSelectType>(null);
@@ -189,6 +201,7 @@ export default function SettingsPage() {
         accountIcon: data.header?.accountIcon ?? prev.accountIcon,
       }));
       setFooter(prev => ({ ...prev, ...data.footer }));
+      setTheme(prev => ({ ...prev, ...data.theme }));
 
       // Fetch logo and favicon media details
       if (data.appearance.logoId) {
@@ -290,6 +303,9 @@ export default function SettingsPage() {
         case "footer":
           data = footer;
           break;
+        case "theme":
+          data = theme;
+          break;
       }
 
       const response = await fetch(`/api/admin/settings/${type}`, {
@@ -312,6 +328,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: "general" as TabType, label: "General" },
     { id: "appearance" as TabType, label: "Appearance" },
+    { id: "theme" as TabType, label: "Theme" },
     { id: "social" as TabType, label: "Social Media" },
     { id: "header" as TabType, label: "Header" },
     { id: "footer" as TabType, label: "Footer" },
@@ -598,6 +615,303 @@ export default function SettingsPage() {
             <Button onClick={() => handleSave("appearance")} disabled={saving}>
               <Save className="w-4 h-4 mr-2" />
               {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Theme Settings */}
+      {activeTab === "theme" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Theme Settings</CardTitle>
+            <CardDescription>Advanced color and styling options for your site</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Quick Presets */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Presets</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button
+                  onClick={() => setTheme({
+                    ...theme,
+                    accentColor: "#ff6b35",
+                    backgroundColor: "#ffffff",
+                    textColor: "#1a1a1a",
+                    headerBackgroundColor: "#ffffff",
+                    headerTextColor: "#1a1a1a",
+                    footerBackgroundColor: "#1a1a1a",
+                    footerTextColor: "#ffffff"
+                  })}
+                  className="p-3 border rounded-lg text-left hover:border-blue-500 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-4 h-4 rounded bg-blue-500"></div>
+                    <div className="w-4 h-4 rounded bg-gray-500"></div>
+                    <div className="w-4 h-4 rounded bg-orange-500"></div>
+                  </div>
+                  <div className="text-sm font-medium">Default Blue</div>
+                  <div className="text-xs text-gray-500">Clean & Professional</div>
+                </button>
+                
+                <button
+                  onClick={() => setTheme({
+                    ...theme,
+                    accentColor: "#f59e0b",
+                    backgroundColor: "#ffffff",
+                    textColor: "#1f2937",
+                    headerBackgroundColor: "#f9fafb",
+                    headerTextColor: "#1f2937",
+                    footerBackgroundColor: "#111827",
+                    footerTextColor: "#f9fafb"
+                  })}
+                  className="p-3 border rounded-lg text-left hover:border-green-500 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-4 h-4 rounded bg-green-500"></div>
+                    <div className="w-4 h-4 rounded bg-gray-500"></div>
+                    <div className="w-4 h-4 rounded bg-yellow-500"></div>
+                  </div>
+                  <div className="text-sm font-medium">Nature Green</div>
+                  <div className="text-xs text-gray-500">Fresh & Natural</div>
+                </button>
+                
+                <button
+                  onClick={() => setTheme({
+                    ...theme,
+                    accentColor: "#06b6d4",
+                    backgroundColor: "#ffffff",
+                    textColor: "#1e293b",
+                    headerBackgroundColor: "#f8fafc",
+                    headerTextColor: "#1e293b",
+                    footerBackgroundColor: "#1e1b4b",
+                    footerTextColor: "#f8fafc"
+                  })}
+                  className="p-3 border rounded-lg text-left hover:border-purple-500 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-4 h-4 rounded bg-purple-500"></div>
+                    <div className="w-4 h-4 rounded bg-pink-500"></div>
+                    <div className="w-4 h-4 rounded bg-cyan-500"></div>
+                  </div>
+                  <div className="text-sm font-medium">Vibrant Purple</div>
+                  <div className="text-xs text-gray-500">Creative & Modern</div>
+                </button>
+                
+                <button
+                  onClick={() => setTheme({
+                    ...theme,
+                    accentColor: "#d97706",
+                    backgroundColor: "#ffffff",
+                    textColor: "#1c1917",
+                    headerBackgroundColor: "#fef2f2",
+                    headerTextColor: "#1c1917",
+                    footerBackgroundColor: "#450a0a",
+                    footerTextColor: "#fef2f2"
+                  })}
+                  className="p-3 border rounded-lg text-left hover:border-red-500 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-4 h-4 rounded bg-red-600"></div>
+                    <div className="w-4 h-4 rounded bg-orange-500"></div>
+                    <div className="w-4 h-4 rounded bg-amber-500"></div>
+                  </div>
+                  <div className="text-sm font-medium">Warm Red</div>
+                  <div className="text-xs text-gray-500">Bold & Energetic</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Main Colors */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Accent & Background Colors */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Accent & Background</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="accentColor">Accent Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="accentColor"
+                        type="color"
+                        value={theme.accentColor}
+                        onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.accentColor}
+                        onChange={(e) => setTheme({ ...theme, accentColor: e.target.value })}
+                        placeholder="#ff6b35"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Highlights, special elements</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="backgroundColor">Background Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="backgroundColor"
+                        type="color"
+                        value={theme.backgroundColor}
+                        onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.backgroundColor}
+                        onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Main page background</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="textColor">Text Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="textColor"
+                        type="color"
+                        value={theme.textColor}
+                        onChange={(e) => setTheme({ ...theme, textColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.textColor}
+                        onChange={(e) => setTheme({ ...theme, textColor: e.target.value })}
+                        placeholder="#1a1a1a"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Main text color</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Header & Footer Colors */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Header & Footer</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="headerBackgroundColor">Header Background</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="headerBackgroundColor"
+                        type="color"
+                        value={theme.headerBackgroundColor}
+                        onChange={(e) => setTheme({ ...theme, headerBackgroundColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.headerBackgroundColor}
+                        onChange={(e) => setTheme({ ...theme, headerBackgroundColor: e.target.value })}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Header background color</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="headerTextColor">Header Text</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="headerTextColor"
+                        type="color"
+                        value={theme.headerTextColor}
+                        onChange={(e) => setTheme({ ...theme, headerTextColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.headerTextColor}
+                        onChange={(e) => setTheme({ ...theme, headerTextColor: e.target.value })}
+                        placeholder="#1a1a1a"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Header text and navigation color</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="footerBackgroundColor">Footer Background</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="footerBackgroundColor"
+                        type="color"
+                        value={theme.footerBackgroundColor}
+                        onChange={(e) => setTheme({ ...theme, footerBackgroundColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.footerBackgroundColor}
+                        onChange={(e) => setTheme({ ...theme, footerBackgroundColor: e.target.value })}
+                        placeholder="#1a1a1a"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Footer background color</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="footerTextColor">Footer Text</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="footerTextColor"
+                        type="color"
+                        value={theme.footerTextColor}
+                        onChange={(e) => setTheme({ ...theme, footerTextColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        value={theme.footerTextColor}
+                        onChange={(e) => setTheme({ ...theme, footerTextColor: e.target.value })}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Footer text color</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Styling Options */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Styling Options</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="borderRadius">Border Radius</Label>
+                  <select
+                    id="borderRadius"
+                    value={theme.borderRadius}
+                    onChange={(e) => setTheme({ ...theme, borderRadius: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="none">None (0px)</option>
+                    <option value="sm">Small (0.125rem)</option>
+                    <option value="md">Medium (0.375rem)</option>
+                    <option value="lg">Large (0.5rem)</option>
+                    <option value="xl">Extra Large (0.75rem)</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Corner rounding for elements</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Options */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Advanced Options</h3>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="darkMode"
+                  checked={theme.darkMode}
+                  onChange={(e) => setTheme({ ...theme, darkMode: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="darkMode">Enable Dark Mode</Label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Switch to dark color scheme (experimental)</p>
+            </div>
+
+            <Button onClick={() => handleSave("theme")} disabled={saving}>
+              <Save className="w-4 h-4 mr-2" />
+              {saving ? "Saving..." : "Save Theme Settings"}
             </Button>
           </CardContent>
         </Card>

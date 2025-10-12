@@ -2,8 +2,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPageBySlug } from '@/lib/pages';
 import { generateSEOData, generateStructuredData, generateBreadcrumbData } from '@/lib/seo';
+import { getHomepageSettings } from '@/lib/settings';
 import StructuredData from '@/components/seo/StructuredData';
 import PublicLayout from '@/components/layout/PublicLayout';
+import HeroSection from '@/components/homepage/HeroSection';
+import FeaturedProductsSection from '@/components/homepage/FeaturedProductsSection';
+import CategoriesShowcaseSection from '@/components/homepage/CategoriesShowcaseSection';
+import NewsletterSection from '@/components/homepage/NewsletterSection';
 import type { Metadata } from 'next';
 
 // Enable ISR - revalidate every 60 seconds
@@ -47,14 +52,29 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  // Try to fetch a page with empty slug (homepage)
+  // Get homepage settings
+  const homepageSettings = await getHomepageSettings();
+
+  // Check if using sections layout
+  if (homepageSettings.layout === 'sections') {
+    return (
+      <PublicLayout>
+        <HeroSection settings={homepageSettings} />
+        <FeaturedProductsSection settings={homepageSettings} />
+        <CategoriesShowcaseSection settings={homepageSettings} />
+        <NewsletterSection settings={homepageSettings} />
+      </PublicLayout>
+    );
+  }
+
+  // Fallback to simple page layout
   const page = await getPageBySlug('');
 
   // If homepage exists and is published, render it
   if (page && page.status === 'published') {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'My Store';
-    
+
     // Generate structured data
     const structuredData = generateStructuredData(page, siteUrl);
     const breadcrumbData = generateBreadcrumbData(page, siteUrl, siteName);
@@ -86,7 +106,7 @@ export default async function Home() {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               {page.title}
             </h1>
-            
+
             {page.excerpt && (
               <p className="text-xl text-gray-600 leading-relaxed">
                 {page.excerpt}
@@ -104,7 +124,7 @@ export default async function Home() {
                   })}
                 </time>
               )}
-              
+
               {page.author && (
                 <span>by {page.author.name || page.author.email}</span>
               )}

@@ -1,7 +1,7 @@
 import { db as prisma } from "./db";
 
 // Setting types
-export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo";
+export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage";
 
 // Setting interfaces
 export interface GeneralSettings {
@@ -59,6 +59,40 @@ export interface SEOSettings {
   facebookPixelId: string;
 }
 
+export interface ThemeSettings {
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  headerBackgroundColor: string;
+  headerTextColor: string;
+  footerBackgroundColor: string;
+  footerTextColor: string;
+  borderRadius: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  fontFamily: string;
+  darkMode: boolean;
+}
+
+export interface HomepageSettings {
+  layout: 'simple' | 'hero' | 'sections';
+  showHero: boolean;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImageId: string | null;
+  heroButtonText: string;
+  heroButtonUrl: string;
+  showFeaturedProducts: boolean;
+  featuredProductsTitle: string;
+  featuredProductsCount: number;
+  showCategories: boolean;
+  categoriesTitle: string;
+  categoriesCount: number;
+  showNewsletter: boolean;
+  newsletterTitle: string;
+  newsletterSubtitle: string;
+}
+
 // Default settings
 export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   siteName: "My Store",
@@ -113,6 +147,40 @@ export const DEFAULT_SEO_SETTINGS: SEOSettings = {
   googleAnalyticsId: "",
   googleTagManagerId: "",
   facebookPixelId: "",
+};
+
+export const DEFAULT_THEME_SETTINGS: ThemeSettings = {
+  primaryColor: "#0070f3",
+  secondaryColor: "#6c757d",
+  accentColor: "#ff6b35",
+  backgroundColor: "#ffffff",
+  textColor: "#1a1a1a",
+  headerBackgroundColor: "#ffffff",
+  headerTextColor: "#1a1a1a",
+  footerBackgroundColor: "#1a1a1a",
+  footerTextColor: "#ffffff",
+  borderRadius: "md",
+  fontFamily: "Inter, sans-serif",
+  darkMode: false,
+};
+
+export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
+  layout: "sections",
+  showHero: true,
+  heroTitle: "Welcome to Our Store",
+  heroSubtitle: "Discover amazing products at great prices",
+  heroImageId: null,
+  heroButtonText: "Shop Now",
+  heroButtonUrl: "/products",
+  showFeaturedProducts: true,
+  featuredProductsTitle: "Featured Products",
+  featuredProductsCount: 8,
+  showCategories: true,
+  categoriesTitle: "Shop by Category",
+  categoriesCount: 6,
+  showNewsletter: true,
+  newsletterTitle: "Stay Updated",
+  newsletterSubtitle: "Subscribe to get special offers and updates",
 };
 
 /**
@@ -271,16 +339,46 @@ export async function setSEOSettings(settings: SEOSettings): Promise<void> {
 }
 
 /**
+ * Get theme settings
+ */
+export async function getThemeSettings(): Promise<ThemeSettings> {
+  return await getSetting("theme", DEFAULT_THEME_SETTINGS);
+}
+
+/**
+ * Set theme settings
+ */
+export async function setThemeSettings(settings: ThemeSettings): Promise<void> {
+  await setSetting("theme", settings, "theme");
+}
+
+/**
+ * Get homepage settings
+ */
+export async function getHomepageSettings(): Promise<HomepageSettings> {
+  return await getSetting("homepage", DEFAULT_HOMEPAGE_SETTINGS);
+}
+
+/**
+ * Set homepage settings
+ */
+export async function setHomepageSettings(settings: HomepageSettings): Promise<void> {
+  await setSetting("homepage", settings, "homepage");
+}
+
+/**
  * Get all settings
  */
 export async function getAllSettings() {
-  const [general, appearance, social, header, footer, seo] = await Promise.all([
+  const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
     getGeneralSettings(),
     getAppearanceSettings(),
     getSocialSettings(),
     getHeaderSettings(),
     getFooterSettings(),
     getSEOSettings(),
+    getThemeSettings(),
+    getHomepageSettings(),
   ]);
 
   return {
@@ -290,6 +388,8 @@ export async function getAllSettings() {
     header,
     footer,
     seo,
+    theme,
+    homepage,
   };
 }
 
