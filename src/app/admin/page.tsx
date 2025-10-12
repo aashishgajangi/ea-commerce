@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Home } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Home, Palette } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
               Content Management
             </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Link href="/admin/media" aria-label="Media Library">
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
@@ -149,6 +149,25 @@ export default function AdminDashboard() {
                     </p>
                     <Button variant="ghost" size="sm" className="w-full">
                       Open Settings <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/theme" aria-label="Theme">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Palette className="h-5 w-5 text-violet-500" role="img" aria-label="Theme icon" />
+                      Theme
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Customize colors and styling options
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Open Theme <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>
