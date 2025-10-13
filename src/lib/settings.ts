@@ -60,8 +60,8 @@ export interface SEOSettings {
 }
 
 export interface ThemeSettings {
-  primaryColor: string;
-  secondaryColor: string;
+  primaryColor: string; // Synced from AppearanceSettings
+  secondaryColor: string; // Synced from AppearanceSettings
   accentColor: string;
   backgroundColor: string;
   textColor: string;
@@ -70,12 +70,12 @@ export interface ThemeSettings {
   footerBackgroundColor: string;
   footerTextColor: string;
   borderRadius: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  fontFamily: string;
+  fontFamily: string; // Synced from AppearanceSettings
   darkMode: boolean;
 }
 
 export interface HomepageSettings {
-  layout: 'simple' | 'hero' | 'sections';
+  layout: 'sections'; // Always use modern sections layout
   showHero: boolean;
   heroTitle: string;
   heroSubtitle: string;

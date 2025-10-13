@@ -1,21 +1,22 @@
+'use client';
+
 import Image from 'next/image';
 import { HomepageSettings } from '@/lib/settings';
-import { db } from '@/lib/db';
 import { ThemedButton } from '@/components/ui/themed-button';
+
+interface HeroImage {
+  id: string;
+  path: string;
+  alt: string | null;
+}
 
 interface HeroSectionProps {
   settings: HomepageSettings;
+  heroImage?: HeroImage | null;
 }
 
-export default async function HeroSection({ settings }: HeroSectionProps) {
+export default function HeroSection({ settings, heroImage }: HeroSectionProps) {
   if (!settings.showHero) return null;
-
-  let heroImage = null;
-  if (settings.heroImageId) {
-    heroImage = await db.media.findUnique({
-      where: { id: settings.heroImageId },
-    });
-  }
 
   return (
     <section

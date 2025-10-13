@@ -44,8 +44,17 @@ export default async function RootLayout({
     console.error("Failed to load favicon:", error);
   }
 
-  // Get theme settings for global theme provider
+  // Get theme and appearance settings for global theme provider
   const themeSettings = await getThemeSettings();
+  const { getAppearanceSettings } = await import("@/lib/settings");
+  const appearanceSettings = await getAppearanceSettings();
+  
+  // Merge appearance colors into theme settings
+  const mergedTheme = {
+    ...themeSettings,
+    primaryColor: appearanceSettings.primaryColor,
+    secondaryColor: appearanceSettings.secondaryColor,
+  };
 
   return (
     <html lang="en">
@@ -56,7 +65,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider initialTheme={themeSettings}>
+        <ThemeProvider initialTheme={mergedTheme}>
           <AuthSessionProvider>
             {children}
           </AuthSessionProvider>

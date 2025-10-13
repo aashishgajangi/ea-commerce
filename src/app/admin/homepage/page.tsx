@@ -7,14 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { HomepageSettings } from '@/lib/settings';
 
 export default function HomepageSettingsPage() {
   const [settings, setSettings] = useState<HomepageSettings>({
-    layout: 'sections',
+    layout: 'sections', // Always use sections layout (modern homepage)
     showHero: true,
     heroTitle: 'Welcome to Our Store',
     heroSubtitle: 'Discover amazing products at great prices',
@@ -102,30 +101,16 @@ export default function HomepageSettingsPage() {
       </div>
 
       <div className="space-y-6">
-        {/* Layout Settings */}
+        {/* Layout Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Layout Configuration</CardTitle>
-            <CardDescription>Choose how your homepage is structured</CardDescription>
+            <CardTitle>Modern Homepage Layout</CardTitle>
+            <CardDescription>Your homepage uses a modern sections-based layout with customizable components</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="layout">Homepage Layout</Label>
-              <Select
-                value={settings.layout}
-                onValueChange={(value: 'simple' | 'sections') =>
-                  setSettings({ ...settings, layout: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="simple">Simple Page (Content Editor)</SelectItem>
-                  <SelectItem value="sections">Sections Layout (Modern)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <CardContent>
+            <p className="text-sm text-gray-600">
+              Configure the sections below to customize your homepage appearance. All sections use your theme colors from the Theme Settings page.
+            </p>
           </CardContent>
         </Card>
 

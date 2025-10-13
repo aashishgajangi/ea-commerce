@@ -57,29 +57,53 @@ export function generateStructuredData(
   const structuredData: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
+    '@id': pageUrl,
     name: page.title,
+    headline: page.title,
     description: page.excerpt || page.metaDescription || '',
     url: pageUrl,
     datePublished: page.publishedAt?.toISOString(),
     dateModified: page.updatedAt.toISOString(),
+    inLanguage: 'en-US',
+    isPartOf: {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+    },
+    potentialAction: {
+      '@type': 'ReadAction',
+      target: [pageUrl],
+    },
   };
 
   // Add author if available
   if (page.author) {
     structuredData.author = {
       '@type': 'Person',
+      '@id': `${siteUrl}/#/schema/person/${page.author.email}`,
       name: page.author.name || page.author.email,
       email: page.author.email,
     };
   }
 
-  // Add image if available
+  // Add image if available with enhanced metadata
   if (page.featuredImage) {
     structuredData.image = {
       '@type': 'ImageObject',
+      '@id': `${pageUrl}#primaryimage`,
       url: `${siteUrl}${page.featuredImage.path}`,
+      contentUrl: `${siteUrl}${page.featuredImage.path}`,
+      caption: page.featuredImage.alt || page.title,
       description: page.featuredImage.alt || page.title,
     };
+    structuredData.primaryImageOfPage = {
+      '@id': `${pageUrl}#primaryimage`,
+    };
+  }
+
+  // Add keywords if available
+  if (page.metaKeywords) {
+    structuredData.keywords = page.metaKeywords;
   }
 
   return structuredData;
@@ -114,6 +138,79 @@ export function generateBreadcrumbData(
 }
 
 /**
+ * Generate Organization schema for the site
+ */
+export function generateOrganizationSchema(
+  siteName: string,
+  siteUrl: string,
+  logoUrl?: string,
+  socialLinks?: {
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    linkedin?: string;
+  }
+): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${siteUrl}/#organization`,
+    name: siteName,
+    url: siteUrl,
+  };
+
+  if (logoUrl) {
+    schema.logo = {
+      '@type': 'ImageObject',
+      url: logoUrl,
+    };
+  }
+
+  if (socialLinks) {
+    const sameAs: string[] = [];
+    if (socialLinks.facebook) sameAs.push(socialLinks.facebook);
+    if (socialLinks.twitter) sameAs.push(socialLinks.twitter);
+    if (socialLinks.instagram) sameAs.push(socialLinks.instagram);
+    if (socialLinks.linkedin) sameAs.push(socialLinks.linkedin);
+    
+    if (sameAs.length > 0) {
+      schema.sameAs = sameAs;
+    }
+  }
+
+  return schema;
+}
+
+/**
+ * Generate WebSite schema with search action
+ */
+export function generateWebsiteSchema(
+  siteName: string,
+  siteUrl: string,
+  description?: string
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteUrl}/#website`,
+    name: siteName,
+    description: description || '',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/products?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+  };
+}
+
+/**
  * Extract plain text from HTML content
  */
 export function extractTextFromHTML(html: string): string {
@@ -135,4 +232,24 @@ export function truncateText(text: string, maxLength: number): string {
   const lastSpace = truncated.lastIndexOf(' ');
   
   return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+}
+
+/**
+ * Generate FAQ schema from content
+ */
+export function generateFAQSchema(
+  faqs: Array<{ question: string; answer: string }>
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
 }

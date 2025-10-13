@@ -30,14 +30,25 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     setTheme(prev => ({ ...prev, ...newTheme }));
   };
 
-  // Fetch latest theme settings on mount
+  // Fetch latest theme and appearance settings on mount
   useEffect(() => {
     const fetchLatestTheme = async () => {
       try {
-        const response = await fetch('/api/admin/settings/theme');
-        if (response.ok) {
-          const latestTheme = await response.json();
-          setTheme(latestTheme);
+        const [themeRes, appearanceRes] = await Promise.all([
+          fetch('/api/admin/settings/theme'),
+          fetch('/api/admin/settings/appearance')
+        ]);
+        
+        if (themeRes.ok && appearanceRes.ok) {
+          const latestTheme = await themeRes.json();
+          const latestAppearance = await appearanceRes.json();
+          
+          // Merge appearance colors into theme
+          setTheme({
+            ...latestTheme,
+            primaryColor: latestAppearance.primaryColor,
+            secondaryColor: latestAppearance.secondaryColor,
+          });
         }
       } catch (error) {
         console.error('Failed to fetch latest theme:', error);
@@ -45,6 +56,15 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     };
 
     fetchLatestTheme();
+    
+    // Poll for changes every 2 seconds when on admin pages
+    const interval = setInterval(() => {
+      if (window.location.pathname.startsWith('/admin')) {
+        fetchLatestTheme();
+      }
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Apply theme to CSS custom properties

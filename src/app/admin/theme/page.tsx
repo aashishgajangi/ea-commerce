@@ -202,11 +202,19 @@ export default function ThemePage() {
       setError(null);
       setSuccess(null);
 
+      // Sync appearance colors to theme settings for consistency
+      const syncedTheme = {
+        ...theme,
+        primaryColor: appearance.primaryColor,
+        secondaryColor: appearance.secondaryColor,
+        fontFamily: appearance.fontFamily,
+      };
+
       // Save both theme and appearance settings
       const themeResponse = await fetch(`/api/admin/settings/theme`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(theme),
+        body: JSON.stringify(syncedTheme),
       });
 
       if (!themeResponse.ok) throw new Error("Failed to save theme settings");
@@ -219,7 +227,7 @@ export default function ThemePage() {
 
       if (!appearanceResponse.ok) throw new Error("Failed to save appearance settings");
 
-      setSuccess("Theme and appearance settings saved successfully!");
+      setSuccess("✅ All theme colors synced and saved successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save settings");
@@ -249,9 +257,16 @@ export default function ThemePage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Theme Settings</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">Customize your site&apos;s colors and styling</p>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">Customize your site&apos;s colors and styling - all changes apply to your modern homepage sections</p>
             </div>
           </div>
+
+          {/* Info Alert */}
+          <Alert>
+            <AlertDescription>
+              <strong>💡 Tip:</strong> Your homepage uses a modern sections layout. The Primary and Secondary colors create gradients in the Hero and Newsletter sections. The Accent color is used for buttons and highlights throughout your site.
+            </AlertDescription>
+          </Alert>
 
           {error && (
             <Alert variant="destructive">
@@ -269,7 +284,7 @@ export default function ThemePage() {
           <Card>
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
-              <CardDescription>Logo, favicon, brand colors, and font settings</CardDescription>
+              <CardDescription>Logo, favicon, brand colors, and font settings - these colors are used throughout your modern homepage sections</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Logo & Favicon */}
@@ -368,6 +383,9 @@ export default function ThemePage() {
               {/* Brand Colors */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">Brand Colors</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  These colors are used in your Hero Section and Newsletter Section gradients
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="primaryColor">Primary Color</Label>
@@ -385,7 +403,7 @@ export default function ThemePage() {
                         placeholder="#0070f3"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Main brand color</p>
+                    <p className="text-xs text-gray-500 mt-1">Used in gradients (start color), buttons, and links</p>
                   </div>
                   <div>
                     <Label htmlFor="secondaryColor">Secondary Color</Label>
@@ -403,7 +421,7 @@ export default function ThemePage() {
                         placeholder="#ff0080"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Accent brand color</p>
+                    <p className="text-xs text-gray-500 mt-1">Used in gradients (end color) for Hero and Newsletter sections</p>
                   </div>
                 </div>
               </div>
@@ -442,16 +460,23 @@ export default function ThemePage() {
                 <h3 className="text-lg font-semibold mb-4">Quick Presets</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <button
-                    onClick={() => setTheme({
-                      ...theme,
-                      accentColor: "#ff6b35",
-                      backgroundColor: "#ffffff",
-                      textColor: "#1a1a1a",
-                      headerBackgroundColor: "#ffffff",
-                      headerTextColor: "#1a1a1a",
-                      footerBackgroundColor: "#1a1a1a",
-                      footerTextColor: "#ffffff"
-                    })}
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#0070f3",
+                        secondaryColor: "#6c757d"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#ff6b35",
+                        backgroundColor: "#ffffff",
+                        textColor: "#1a1a1a",
+                        headerBackgroundColor: "#ffffff",
+                        headerTextColor: "#1a1a1a",
+                        footerBackgroundColor: "#1a1a1a",
+                        footerTextColor: "#ffffff"
+                      });
+                    }}
                     className="p-3 border rounded-lg text-left hover:border-blue-500 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -464,16 +489,23 @@ export default function ThemePage() {
                   </button>
                   
                   <button
-                    onClick={() => setTheme({
-                      ...theme,
-                      accentColor: "#f59e0b",
-                      backgroundColor: "#ffffff",
-                      textColor: "#1f2937",
-                      headerBackgroundColor: "#f9fafb",
-                      headerTextColor: "#1f2937",
-                      footerBackgroundColor: "#111827",
-                      footerTextColor: "#f9fafb"
-                    })}
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#10b981",
+                        secondaryColor: "#059669"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#f59e0b",
+                        backgroundColor: "#ffffff",
+                        textColor: "#1f2937",
+                        headerBackgroundColor: "#f9fafb",
+                        headerTextColor: "#1f2937",
+                        footerBackgroundColor: "#111827",
+                        footerTextColor: "#f9fafb"
+                      });
+                    }}
                     className="p-3 border rounded-lg text-left hover:border-green-500 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -486,16 +518,23 @@ export default function ThemePage() {
                   </button>
                   
                   <button
-                    onClick={() => setTheme({
-                      ...theme,
-                      accentColor: "#06b6d4",
-                      backgroundColor: "#ffffff",
-                      textColor: "#1e293b",
-                      headerBackgroundColor: "#f8fafc",
-                      headerTextColor: "#1e293b",
-                      footerBackgroundColor: "#1e1b4b",
-                      footerTextColor: "#f8fafc"
-                    })}
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#8b5cf6",
+                        secondaryColor: "#ec4899"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#06b6d4",
+                        backgroundColor: "#ffffff",
+                        textColor: "#1e293b",
+                        headerBackgroundColor: "#f8fafc",
+                        headerTextColor: "#1e293b",
+                        footerBackgroundColor: "#1e1b4b",
+                        footerTextColor: "#f8fafc"
+                      });
+                    }}
                     className="p-3 border rounded-lg text-left hover:border-purple-500 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -508,16 +547,23 @@ export default function ThemePage() {
                   </button>
                   
                   <button
-                    onClick={() => setTheme({
-                      ...theme,
-                      accentColor: "#d97706",
-                      backgroundColor: "#ffffff",
-                      textColor: "#1c1917",
-                      headerBackgroundColor: "#fef2f2",
-                      headerTextColor: "#1c1917",
-                      footerBackgroundColor: "#450a0a",
-                      footerTextColor: "#fef2f2"
-                    })}
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#ef4444",
+                        secondaryColor: "#dc2626"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#d97706",
+                        backgroundColor: "#ffffff",
+                        textColor: "#1c1917",
+                        headerBackgroundColor: "#fef2f2",
+                        headerTextColor: "#1c1917",
+                        footerBackgroundColor: "#450a0a",
+                        footerTextColor: "#fef2f2"
+                      });
+                    }}
                     className="p-3 border rounded-lg text-left hover:border-red-500 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -553,7 +599,7 @@ export default function ThemePage() {
                           placeholder="#ff6b35"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Highlights, special elements</p>
+                      <p className="text-xs text-gray-500 mt-1">Used for call-to-action buttons, badges, and hover effects</p>
                     </div>
                     
                     <div>
