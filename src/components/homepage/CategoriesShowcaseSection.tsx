@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { HomepageSettings } from '@/lib/settings';
 import { getCategories } from '@/lib/categories';
+import { ThemedButton } from '@/components/ui/themed-button';
 
 interface CategoriesShowcaseSectionProps {
   settings: HomepageSettings;
@@ -28,10 +29,16 @@ export default async function CategoriesShowcaseSection({ settings }: Categories
     >
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{ color: 'var(--theme-text, #1a1a1a)' }}
+          >
             {settings.categoriesTitle}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p 
+            className="text-lg max-w-2xl mx-auto opacity-75"
+            style={{ color: 'var(--theme-text, #1a1a1a)' }}
+          >
             Explore our wide range of product categories
           </p>
         </div>
@@ -39,7 +46,13 @@ export default async function CategoriesShowcaseSection({ settings }: Categories
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {categories.map((category) => (
             <Link key={category.id} href={`/products?category=${category.id}`}>
-              <Card className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden">
+              <Card 
+                className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden"
+                style={{
+                  backgroundColor: 'var(--theme-background, #ffffff)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                }}
+              >
                 <div className="aspect-square relative overflow-hidden bg-gray-100">
                   {category.image ? (
                     <Image
@@ -50,8 +63,17 @@ export default async function CategoriesShowcaseSection({ settings }: Categories
                       unoptimized={true}
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
-                      <span className="text-2xl font-bold text-gray-600">
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        background: `linear-gradient(135deg, var(--theme-primary, #0070f3) 0%, var(--theme-secondary, #6c757d) 100%)`,
+                        opacity: 0.2,
+                      }}
+                    >
+                      <span 
+                        className="text-2xl font-bold"
+                        style={{ color: 'var(--theme-text, #1a1a1a)', opacity: 1 }}
+                      >
                         {category.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -66,11 +88,19 @@ export default async function CategoriesShowcaseSection({ settings }: Categories
                 </div>
 
                 <CardContent className="p-4 text-center">
-                  <h3 className="font-semibold text-sm text-gray-900 group-hover:text-blue-600 transition-colors">
+                  <h3 
+                    className="font-semibold text-sm transition-colors"
+                    style={{ 
+                      color: 'var(--theme-text, #1a1a1a)',
+                    }}
+                  >
                     {category.name}
                   </h3>
                   {category.description && (
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                    <p 
+                      className="text-xs mt-1 line-clamp-2 opacity-75"
+                      style={{ color: 'var(--theme-text, #1a1a1a)' }}
+                    >
                       {category.description}
                     </p>
                   )}
@@ -81,12 +111,9 @@ export default async function CategoriesShowcaseSection({ settings }: Categories
         </div>
 
         <div className="text-center mt-12">
-          <Link
-            href="/products"
-            className="inline-block border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-colors"
-          >
+          <ThemedButton href="/products" variant="outline">
             Browse All Categories
-          </Link>
+          </ThemedButton>
         </div>
       </div>
     </section>

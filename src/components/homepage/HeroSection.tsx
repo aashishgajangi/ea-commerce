@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { HomepageSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
+import { ThemedButton } from '@/components/ui/themed-button';
 
 interface HeroSectionProps {
   settings: HomepageSettings;
@@ -21,7 +21,7 @@ export default async function HeroSection({ settings }: HeroSectionProps) {
     <section
       className="relative min-h-[60vh] flex items-center justify-center text-white overflow-hidden"
       style={{
-        background: `linear-gradient(to right, var(--theme-primary, #0070f3), var(--theme-secondary, #6c757d))`
+        background: `linear-gradient(135deg, var(--theme-primary, #0070f3) 0%, var(--theme-secondary, #6c757d) 100%)`
       }}
     >
       {/* Background Image */}
@@ -43,29 +43,30 @@ export default async function HeroSection({ settings }: HeroSectionProps) {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in text-white">
           {settings.heroTitle}
         </h1>
-        <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto opacity-90">
+        <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto opacity-90 text-white">
           {settings.heroSubtitle}
         </p>
         {settings.heroButtonText && settings.heroButtonUrl && (
-          <Link
+          <ThemedButton
             href={settings.heroButtonUrl}
-            className="inline-block px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:bg-[var(--theme-accent,#ff6b35)] hover:text-[var(--theme-background,#ffffff)]"
-            style={{
-              backgroundColor: 'var(--theme-background, #ffffff)',
-              color: 'var(--theme-text, #1a1a1a)',
-              borderRadius: 'var(--theme-radius, 0.375rem)',
-            }}
+            variant="accent"
+            className="text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             {settings.heroButtonText}
-          </Link>
+          </ThemedButton>
         )}
       </div>
 
       {/* Decorative elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t to-transparent"
+        style={{
+          background: `linear-gradient(to top, var(--theme-background, #ffffff), transparent)`
+        }}
+      ></div>
     </section>
   );
 }

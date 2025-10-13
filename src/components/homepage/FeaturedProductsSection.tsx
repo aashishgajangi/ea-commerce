@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { HomepageSettings } from '@/lib/settings';
 import { getProducts } from '@/lib/products';
+import { ThemedButton } from '@/components/ui/themed-button';
 
 interface FeaturedProductsSectionProps {
   settings: HomepageSettings;
@@ -42,10 +43,16 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
     >
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{ color: 'var(--theme-text, #1a1a1a)' }}
+          >
             {settings.featuredProductsTitle}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p 
+            className="text-lg max-w-2xl mx-auto opacity-75"
+            style={{ color: 'var(--theme-text, #1a1a1a)' }}
+          >
             Discover our handpicked selection of premium products
           </p>
         </div>
@@ -57,7 +64,13 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
 
             return (
               <Link key={product.id} href={`/products/${product.slug}`}>
-                <Card className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden">
+                <Card 
+                  className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden"
+                  style={{
+                    backgroundColor: 'var(--theme-background, #ffffff)',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                  }}
+                >
                   <div className="aspect-square relative overflow-hidden bg-gray-100">
                     {primaryImage ? (
                       <Image
@@ -74,13 +87,25 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
                     )}
 
                     {/* Featured badge */}
-                    <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
+                    <div 
+                      className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1"
+                      style={{
+                        backgroundColor: 'var(--theme-primary, #0070f3)',
+                        borderRadius: 'var(--theme-radius, 0.375rem)',
+                      }}
+                    >
                       Featured
                     </div>
 
                     {/* Discount badge */}
                     {discount && (
-                      <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      <div 
+                        className="absolute top-2 right-2 text-white text-xs font-bold px-2 py-1"
+                        style={{
+                          backgroundColor: 'var(--theme-accent, #ff6b35)',
+                          borderRadius: 'var(--theme-radius, 0.375rem)',
+                        }}
+                      >
                         -{discount}%
                       </div>
                     )}
@@ -94,23 +119,39 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
                   </div>
 
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <h3 
+                      className="font-semibold text-lg mb-2 line-clamp-2 transition-colors"
+                      style={{ color: 'var(--theme-text, #1a1a1a)' }}
+                    >
                       {product.name}
                     </h3>
 
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl font-bold text-gray-900">
+                      <span 
+                        className="text-xl font-bold"
+                        style={{ color: 'var(--theme-text, #1a1a1a)' }}
+                      >
                         {formatPrice(product.price)}
                       </span>
                       {product.compareAtPrice && product.compareAtPrice > product.price && (
-                        <span className="text-sm text-gray-500 line-through">
+                        <span 
+                          className="text-sm line-through opacity-60"
+                          style={{ color: 'var(--theme-text, #1a1a1a)' }}
+                        >
                           {formatPrice(product.compareAtPrice)}
                         </span>
                       )}
                     </div>
 
                     {product.category && (
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      <span 
+                        className="text-xs px-2 py-1"
+                        style={{
+                          color: 'var(--theme-text, #1a1a1a)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          borderRadius: 'var(--theme-radius, 0.375rem)',
+                        }}
+                      >
                         {product.category.name}
                       </span>
                     )}
@@ -122,12 +163,9 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
         </div>
 
         <div className="text-center mt-12">
-          <Link
-            href="/products"
-            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
+          <ThemedButton href="/products" variant="primary">
             View All Products
-          </Link>
+          </ThemedButton>
         </div>
       </div>
     </section>
