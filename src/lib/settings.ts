@@ -41,6 +41,35 @@ export interface HeaderSettings {
   headerStyle: 'normal' | 'bold' | 'minimal' | 'modern';
   hamburgerIcon: 'menu' | 'bars' | 'grid' | 'list' | 'more';
   accountIcon: 'user' | 'person' | 'profile' | 'account' | 'avatar';
+  
+  // Announcement Bar
+  showAnnouncementBar?: boolean;
+  announcementText?: string;
+  announcementBgColor?: string;
+  announcementTextColor?: string;
+  announcementLink?: string;
+  announcementCloseable?: boolean;
+  
+  // Header Layout
+  headerLayout?: 'default' | 'centered' | 'split' | 'minimal';
+  logoPosition?: 'left' | 'center' | 'right';
+  navigationPosition?: 'left' | 'center' | 'right';
+  
+  // Navigation Menu Styles
+  navMenuStyle?: 'default' | 'underline' | 'pills' | 'bordered';
+  navMenuSpacing?: 'compact' | 'normal' | 'relaxed';
+  navMenuFontSize?: 'sm' | 'md' | 'lg';
+  navMenuFontWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  showNavMenuIcons?: boolean;
+  
+  // Mobile Dropdown
+  mobileMenuStyle?: 'slide' | 'dropdown' | 'fullscreen';
+  mobileMenuPosition?: 'left' | 'right';
+  mobileMenuAnimation?: 'fade' | 'slide' | 'scale';
+  showMobileSearch?: boolean;
+  mobileMenuListStyle?: 'default' | 'bordered' | 'pills' | 'cards' | 'minimal' | 'underline' | 'gradient' | 'outlined' | 'divided' | 'compact' | 'spacious' | 'modern';
+  mobileMenuBgColor?: string;
+  mobileMenuTextColor?: string;
 }
 
 export interface FooterSettings {

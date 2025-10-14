@@ -261,6 +261,26 @@ export default function ThemePage() {
             </div>
           </div>
 
+          {/* Quick Links */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link href="/admin/theme/header">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Header Settings</CardTitle>
+                  <CardDescription>Configure header appearance and behavior</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+            <Link href="/admin/theme/footer">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Footer Settings</CardTitle>
+                  <CardDescription>Configure footer content and display options</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
+
           {/* Info Alert */}
           <Alert>
             <AlertDescription>

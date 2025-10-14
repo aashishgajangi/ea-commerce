@@ -35,11 +35,18 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     const fetchLatestTheme = async () => {
       try {
         const [themeRes, appearanceRes] = await Promise.all([
-          fetch('/api/admin/settings/theme'),
-          fetch('/api/admin/settings/appearance')
+          fetch('/api/admin/settings/theme', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }).catch(() => null),
+          fetch('/api/admin/settings/appearance', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }).catch(() => null)
         ]);
         
-        if (themeRes.ok && appearanceRes.ok) {
+        // Only update if both requests succeeded
+        if (themeRes?.ok && appearanceRes?.ok) {
           const latestTheme = await themeRes.json();
           const latestAppearance = await appearanceRes.json();
           
@@ -50,19 +57,20 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
             secondaryColor: latestAppearance.secondaryColor,
           });
         }
-      } catch (error) {
-        console.error('Failed to fetch latest theme:', error);
+      } catch {
+        // Silently fail - use initial theme
+        console.warn('Could not fetch latest theme, using initial theme');
       }
     };
 
     fetchLatestTheme();
     
-    // Poll for changes every 2 seconds when on admin pages
+    // Poll for changes every 5 seconds when on admin pages (reduced frequency)
     const interval = setInterval(() => {
-      if (window.location.pathname.startsWith('/admin')) {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
         fetchLatestTheme();
       }
-    }, 2000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, []);

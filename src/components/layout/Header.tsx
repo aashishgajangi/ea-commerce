@@ -7,6 +7,7 @@ import { config, ConfigKeys } from '@/lib/config';
 import { Search } from 'lucide-react';
 import MobileMenu from './MobileMenu';
 import AuthLinks from '@/components/auth/AuthLinks';
+import AnnouncementBar from './AnnouncementBar';
 
 export default async function Header() {
   // Get settings
@@ -42,23 +43,88 @@ export default async function Header() {
   };
 
   const stickyClass = settings.header.sticky
-    ? 'sticky top-0 z-50 backdrop-blur-sm'
+    ? 'sticky top-0 z-40 backdrop-blur-sm'
     : '';
 
   // Pass icon names as strings to client components
-  const hamburgerIconName = settings.header.hamburgerIcon;
-  const accountIconName = settings.header.accountIcon;
+  const hamburgerIconName = settings.header.hamburgerIcon || 'menu';
+  const accountIconName = settings.header.accountIcon || 'user';
+
+  // Navigation menu style classes
+  const navSpacingClasses = {
+    compact: 'gap-3',
+    normal: 'gap-6',
+    relaxed: 'gap-8'
+  };
+
+  const navFontSizeClasses = {
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-lg'
+  };
+
+  const navFontWeightClasses = {
+    normal: 'font-normal',
+    medium: 'font-medium',
+    semibold: 'font-semibold',
+    bold: 'font-bold'
+  };
+
+  const navStyleClasses = {
+    default: '',
+    underline: 'hover:underline underline-offset-4',
+    pills: 'px-3 py-1.5 rounded-full hover:bg-opacity-10 hover:bg-current',
+    bordered: 'px-3 py-1.5 border border-current border-opacity-20 rounded hover:border-opacity-40'
+  };
+
+  const navMenuStyle = settings.header.navMenuStyle || 'default';
+  const navMenuSpacing = settings.header.navMenuSpacing || 'normal';
+  const navMenuFontSize = settings.header.navMenuFontSize || 'md';
+  const navMenuFontWeight = settings.header.navMenuFontWeight || 'medium';
+
+  // Header layout configuration
+  const headerLayout = settings.header.headerLayout || 'default';
+  const navigationPosition = settings.header.navigationPosition || 'center';
+
+  // Layout classes based on header layout setting
+  const getLayoutClasses = () => {
+    switch (headerLayout) {
+      case 'centered':
+        return 'flex-col items-center gap-4';
+      case 'split':
+        return 'flex-row items-center justify-between';
+      case 'minimal':
+        return 'flex-row items-center gap-8';
+      default:
+        return 'flex-row items-center justify-between';
+    }
+  };
+
+  // Position classes for navigation
+  const navPositionClass = navigationPosition === 'center' ? 'mx-auto' : navigationPosition === 'right' ? 'ml-auto' : '';
 
   return (
-    <header
-      className={`${styleClasses[settings.header.headerStyle]} ${stickyClass} relative`}
-      style={{
-        backgroundColor: 'var(--theme-header-background)',
-        borderColor: 'var(--theme-header-text)',
-      }}
-    >
+    <>
+      {/* Announcement Bar */}
+      {settings.header.showAnnouncementBar && settings.header.announcementText && (
+        <AnnouncementBar
+          text={settings.header.announcementText}
+          bgColor={settings.header.announcementBgColor || '#0070f3'}
+          textColor={settings.header.announcementTextColor || '#ffffff'}
+          link={settings.header.announcementLink}
+          closeable={settings.header.announcementCloseable !== false}
+        />
+      )}
+
+      <header
+        className={`${styleClasses[settings.header.headerStyle]} ${stickyClass} relative`}
+        style={{
+          backgroundColor: 'var(--theme-header-background)',
+          borderColor: 'var(--theme-header-text)',
+        }}
+      >
       <div className={`container mx-auto px-4 ${heightClasses[settings.header.headerHeight]}`}>
-        <div className="flex items-center justify-between">
+        <div className={`flex ${getLayoutClasses()}`}>
           {/* Logo & Site Name */}
           <Link href="/" className="flex items-center gap-3">
             {settings.header.showLogoImage && logo && (
@@ -93,7 +159,7 @@ export default async function Header() {
 
           {/* Desktop Navigation Menu */}
           {menu && menu.items && menu.items.length > 0 && (
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className={`hidden md:flex items-center ${navSpacingClasses[navMenuSpacing]} ${navPositionClass}`}>
               {menu.items.map((item) => {
                 const href = item.type === 'page' && item.page
                   ? item.page.slug === '' ? '/' : `/${item.page.slug}`
@@ -104,7 +170,13 @@ export default async function Header() {
                     key={item.id}
                     href={href}
                     target={item.target}
-                    className={`font-medium hover:opacity-80 ${item.cssClass || ''}`}
+                    className={`
+                      ${navFontSizeClasses[navMenuFontSize]}
+                      ${navFontWeightClasses[navMenuFontWeight]}
+                      ${navStyleClasses[navMenuStyle]}
+                      hover:opacity-80 transition-all
+                      ${item.cssClass || ''}
+                    `}
                     style={{
                       color: 'var(--theme-header-text)',
                       textDecorationColor: 'var(--theme-primary)'
@@ -144,11 +216,20 @@ export default async function Header() {
 
             {/* Mobile Menu Button */}
             {menu && menu.items && menu.items.length > 0 && (
-              <MobileMenu menuItems={menu.items} hamburgerIconName={hamburgerIconName} />
+              <MobileMenu
+                menuItems={menu.items}
+                hamburgerIconName={hamburgerIconName}
+                mobileMenuStyle={settings.header.mobileMenuStyle || 'slide'}
+                mobileMenuPosition={settings.header.mobileMenuPosition || 'right'}
+                mobileMenuAnimation={settings.header.mobileMenuAnimation || 'slide'}
+                showMobileSearch={settings.header.showMobileSearch !== false}
+                mobileMenuListStyle={settings.header.mobileMenuListStyle || 'default'}
+              />
             )}
           </div>
         </div>
       </div>
     </header>
+    </>
   );
 }
