@@ -457,122 +457,256 @@ export default function ThemePage() {
             <CardContent className="space-y-6">
               {/* Quick Presets */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Quick Presets</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <h3 className="text-lg font-semibold mb-4">Quick Theme Presets</h3>
+                <p className="text-sm text-gray-600 mb-4">Click any preset to instantly apply a complete color scheme</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {/* Ocean Blue */}
                   <button
                     onClick={() => {
                       setAppearance({
                         ...appearance,
-                        primaryColor: "#0070f3",
-                        secondaryColor: "#6c757d"
-                      });
-                      setTheme({
-                        ...theme,
-                        accentColor: "#ff6b35",
-                        backgroundColor: "#ffffff",
-                        textColor: "#1a1a1a",
-                        headerBackgroundColor: "#ffffff",
-                        headerTextColor: "#1a1a1a",
-                        footerBackgroundColor: "#1a1a1a",
-                        footerTextColor: "#ffffff"
-                      });
-                    }}
-                    className="p-3 border rounded-lg text-left hover:border-blue-500 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 rounded bg-blue-500"></div>
-                      <div className="w-4 h-4 rounded bg-gray-500"></div>
-                      <div className="w-4 h-4 rounded bg-orange-500"></div>
-                    </div>
-                    <div className="text-sm font-medium">Default Blue</div>
-                    <div className="text-xs text-gray-500">Clean & Professional</div>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setAppearance({
-                        ...appearance,
-                        primaryColor: "#10b981",
-                        secondaryColor: "#059669"
+                        primaryColor: "#0ea5e9",
+                        secondaryColor: "#06b6d4"
                       });
                       setTheme({
                         ...theme,
                         accentColor: "#f59e0b",
                         backgroundColor: "#ffffff",
-                        textColor: "#1f2937",
-                        headerBackgroundColor: "#f9fafb",
-                        headerTextColor: "#1f2937",
-                        footerBackgroundColor: "#111827",
-                        footerTextColor: "#f9fafb"
+                        textColor: "#0f172a",
+                        headerBackgroundColor: "#f0f9ff",
+                        headerTextColor: "#0c4a6e",
+                        footerBackgroundColor: "#0c4a6e",
+                        footerTextColor: "#f0f9ff",
+                        borderRadius: "md"
                       });
                     }}
-                    className="p-3 border rounded-lg text-left hover:border-green-500 transition-colors"
+                    className="p-4 border-2 rounded-lg text-left hover:border-sky-500 hover:shadow-lg transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 rounded bg-green-500"></div>
-                      <div className="w-4 h-4 rounded bg-gray-500"></div>
-                      <div className="w-4 h-4 rounded bg-yellow-500"></div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-sky-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-cyan-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-amber-500 border-2 border-white shadow"></div>
                     </div>
-                    <div className="text-sm font-medium">Nature Green</div>
-                    <div className="text-xs text-gray-500">Fresh & Natural</div>
+                    <div className="text-sm font-bold text-gray-900">Ocean Blue</div>
+                    <div className="text-xs text-gray-600 mt-1">Professional & Trustworthy</div>
                   </button>
-                  
+
+                  {/* Forest Green */}
+                  <button
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#10b981",
+                        secondaryColor: "#14b8a6"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#f97316",
+                        backgroundColor: "#ffffff",
+                        textColor: "#064e3b",
+                        headerBackgroundColor: "#f0fdf4",
+                        headerTextColor: "#064e3b",
+                        footerBackgroundColor: "#064e3b",
+                        footerTextColor: "#f0fdf4",
+                        borderRadius: "lg"
+                      });
+                    }}
+                    className="p-4 border-2 rounded-lg text-left hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-teal-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-orange-500 border-2 border-white shadow"></div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">Forest Green</div>
+                    <div className="text-xs text-gray-600 mt-1">Fresh & Eco-Friendly</div>
+                  </button>
+
+                  {/* Royal Purple */}
                   <button
                     onClick={() => {
                       setAppearance({
                         ...appearance,
                         primaryColor: "#8b5cf6",
-                        secondaryColor: "#ec4899"
+                        secondaryColor: "#a855f7"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#ec4899",
+                        backgroundColor: "#ffffff",
+                        textColor: "#1e1b4b",
+                        headerBackgroundColor: "#faf5ff",
+                        headerTextColor: "#5b21b6",
+                        footerBackgroundColor: "#5b21b6",
+                        footerTextColor: "#faf5ff",
+                        borderRadius: "xl"
+                      });
+                    }}
+                    className="p-4 border-2 rounded-lg text-left hover:border-purple-500 hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-violet-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-pink-500 border-2 border-white shadow"></div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">Royal Purple</div>
+                    <div className="text-xs text-gray-600 mt-1">Luxurious & Creative</div>
+                  </button>
+
+                  {/* Sunset Orange */}
+                  <button
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#f97316",
+                        secondaryColor: "#fb923c"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#dc2626",
+                        backgroundColor: "#ffffff",
+                        textColor: "#7c2d12",
+                        headerBackgroundColor: "#fff7ed",
+                        headerTextColor: "#9a3412",
+                        footerBackgroundColor: "#9a3412",
+                        footerTextColor: "#fff7ed",
+                        borderRadius: "md"
+                      });
+                    }}
+                    className="p-4 border-2 rounded-lg text-left hover:border-orange-500 hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-orange-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-amber-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-red-600 border-2 border-white shadow"></div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">Sunset Orange</div>
+                    <div className="text-xs text-gray-600 mt-1">Warm & Energetic</div>
+                  </button>
+
+                  {/* Cherry Red */}
+                  <button
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#dc2626",
+                        secondaryColor: "#ef4444"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#f59e0b",
+                        backgroundColor: "#ffffff",
+                        textColor: "#7f1d1d",
+                        headerBackgroundColor: "#fef2f2",
+                        headerTextColor: "#991b1b",
+                        footerBackgroundColor: "#991b1b",
+                        footerTextColor: "#fef2f2",
+                        borderRadius: "lg"
+                      });
+                    }}
+                    className="p-4 border-2 rounded-lg text-left hover:border-red-500 hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-red-600 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-red-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-amber-500 border-2 border-white shadow"></div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">Cherry Red</div>
+                    <div className="text-xs text-gray-600 mt-1">Bold & Passionate</div>
+                  </button>
+
+                  {/* Midnight Blue */}
+                  <button
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#1e40af",
+                        secondaryColor: "#3b82f6"
                       });
                       setTheme({
                         ...theme,
                         accentColor: "#06b6d4",
                         backgroundColor: "#ffffff",
-                        textColor: "#1e293b",
-                        headerBackgroundColor: "#f8fafc",
-                        headerTextColor: "#1e293b",
-                        footerBackgroundColor: "#1e1b4b",
-                        footerTextColor: "#f8fafc"
+                        textColor: "#1e3a8a",
+                        headerBackgroundColor: "#eff6ff",
+                        headerTextColor: "#1e3a8a",
+                        footerBackgroundColor: "#1e3a8a",
+                        footerTextColor: "#eff6ff",
+                        borderRadius: "md"
                       });
                     }}
-                    className="p-3 border rounded-lg text-left hover:border-purple-500 transition-colors"
+                    className="p-4 border-2 rounded-lg text-left hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 rounded bg-purple-500"></div>
-                      <div className="w-4 h-4 rounded bg-pink-500"></div>
-                      <div className="w-4 h-4 rounded bg-cyan-500"></div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-700 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-cyan-500 border-2 border-white shadow"></div>
                     </div>
-                    <div className="text-sm font-medium">Vibrant Purple</div>
-                    <div className="text-xs text-gray-500">Creative & Modern</div>
+                    <div className="text-sm font-bold text-gray-900">Midnight Blue</div>
+                    <div className="text-xs text-gray-600 mt-1">Corporate & Reliable</div>
                   </button>
-                  
+
+                  {/* Rose Pink */}
                   <button
                     onClick={() => {
                       setAppearance({
                         ...appearance,
-                        primaryColor: "#ef4444",
-                        secondaryColor: "#dc2626"
+                        primaryColor: "#ec4899",
+                        secondaryColor: "#f472b6"
                       });
                       setTheme({
                         ...theme,
-                        accentColor: "#d97706",
+                        accentColor: "#8b5cf6",
                         backgroundColor: "#ffffff",
-                        textColor: "#1c1917",
-                        headerBackgroundColor: "#fef2f2",
-                        headerTextColor: "#1c1917",
-                        footerBackgroundColor: "#450a0a",
-                        footerTextColor: "#fef2f2"
+                        textColor: "#831843",
+                        headerBackgroundColor: "#fdf2f8",
+                        headerTextColor: "#9f1239",
+                        footerBackgroundColor: "#9f1239",
+                        footerTextColor: "#fdf2f8",
+                        borderRadius: "xl"
                       });
                     }}
-                    className="p-3 border rounded-lg text-left hover:border-red-500 transition-colors"
+                    className="p-4 border-2 rounded-lg text-left hover:border-pink-500 hover:shadow-lg transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 rounded bg-red-600"></div>
-                      <div className="w-4 h-4 rounded bg-orange-500"></div>
-                      <div className="w-4 h-4 rounded bg-amber-500"></div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-pink-500 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-rose-400 border-2 border-white shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-purple-500 border-2 border-white shadow"></div>
                     </div>
-                    <div className="text-sm font-medium">Warm Red</div>
-                    <div className="text-xs text-gray-500">Bold & Energetic</div>
+                    <div className="text-sm font-bold text-gray-900">Rose Pink</div>
+                    <div className="text-xs text-gray-600 mt-1">Elegant & Feminine</div>
+                  </button>
+
+                  {/* Dark Mode */}
+                  <button
+                    onClick={() => {
+                      setAppearance({
+                        ...appearance,
+                        primaryColor: "#3b82f6",
+                        secondaryColor: "#8b5cf6"
+                      });
+                      setTheme({
+                        ...theme,
+                        accentColor: "#10b981",
+                        backgroundColor: "#0f172a",
+                        textColor: "#f1f5f9",
+                        headerBackgroundColor: "#1e293b",
+                        headerTextColor: "#f1f5f9",
+                        footerBackgroundColor: "#020617",
+                        footerTextColor: "#f1f5f9",
+                        borderRadius: "lg",
+                        darkMode: true
+                      });
+                    }}
+                    className="p-4 border-2 rounded-lg text-left hover:border-slate-700 hover:shadow-lg transition-all cursor-pointer bg-slate-900"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-slate-700 shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-purple-500 border-2 border-slate-700 shadow"></div>
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-slate-700 shadow"></div>
+                    </div>
+                    <div className="text-sm font-bold text-white">Dark Mode</div>
+                    <div className="text-xs text-slate-400 mt-1">Sleek & Modern</div>
                   </button>
                 </div>
               </div>
