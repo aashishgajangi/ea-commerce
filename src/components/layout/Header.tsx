@@ -193,13 +193,13 @@ export default async function Header() {
           <div className="flex items-center gap-4">
             {/* Search Bar */}
             {settings.header.showSearch && (
-              <div className="hidden lg:block">
+              <div className="hidden md:block">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'var(--theme-text)' }} />
                   <input
                     type="search"
                     placeholder="Search..."
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 w-64"
+                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:shadow-lg transition-all w-80"
                     style={{
                       borderColor: 'var(--theme-text)',
                       backgroundColor: 'var(--theme-background)',
