@@ -286,32 +286,32 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Phase 5: Product Management System</CardTitle>
+              <CardTitle>Next Phase: Orders & Payments</CardTitle>
               <CardDescription>
-                Building complete e-commerce product management
+                Phase 8: Multi-step checkout, payment gateways, order management
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Category Management - Hierarchical categories
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  Multi-step checkout process
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Product Management - Full CRUD with variants
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  Payment gateways (Stripe/Razorpay/PayPal)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Inventory Tracking - Stock management and logs
-                </li>
-                <li className="flex items-center gap-2 opacity-50">
                   <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  CSV Import/Export - Bulk operations
+                  Order management system
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
+                <li className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  Frontend Product Pages - Customer-facing views
+                  Email notifications
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  Invoice generation
                 </li>
               </ul>
             </CardContent>

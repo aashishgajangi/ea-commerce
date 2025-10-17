@@ -299,7 +299,7 @@ Use when: Complete fresh start, delete all data including settings
 - [x] Interactive product selection (variants, quantity, weight)
 - [x] Wishlist and share functionality
 - [x] All API routes fixed for Next.js 15
-- [ ] CSV import/export (optional future enhancement)
+- [x] CSV import/export - Full bulk operations
 
 **Current Status:** Complete ✅ (2025-10-07)
 
