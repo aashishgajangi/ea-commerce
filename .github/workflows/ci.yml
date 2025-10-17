@@ -92,18 +92,41 @@ jobs:
           path: .next/
           retention-days: 7
 
-  build-status:
+  deploy:
     runs-on: ubuntu-latest
     needs: quality-checks
-    if: always()
-    
+    if: needs.quality-checks.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
     steps:
-      - name: Check build status
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            cd /var/www/ea-commerce
+            echo "🚀 Starting automated deployment..."
+            git pull origin ${{ github.ref_name }}
+            ./scripts/deploy.sh
+            echo "✅ Deployment completed successfully!"
+
+  build-status:
+    runs-on: ubuntu-latest
+    needs: [quality-checks, deploy]
+    if: always()
+
+    steps:
+      - name: Check overall status
         run: |
-          if [ "${{ needs.quality-checks.result }}" == "success" ]; then
-            echo "✅ All quality checks passed!"
+          if [ "${{ needs.quality-checks.result }}" == "success" ] && [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ All checks passed and deployment successful!"
+            exit 0
+          elif [ "${{ needs.quality-checks.result }}" == "success" ] && [ "${{ needs.deploy.result }}" == "skipped" ]; then
+            echo "✅ Quality checks passed (deployment skipped for this branch)"
             exit 0
           else
-            echo "❌ Quality checks failed"
+            echo "❌ Pipeline failed - check quality checks or deployment"
             exit 1
           fi
