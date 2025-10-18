@@ -84,6 +84,7 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  const [currency, setCurrency] = useState<string>('USD');
 
   // Reviews state
   const [reviews, setReviews] = useState<ReviewsData | null>(null);
@@ -102,7 +103,7 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
     notFound();
   }
 
-  // Fetch reviews on component mount
+  // Fetch reviews and currency on component mount
   useEffect(() => {
     const fetchReviews = async () => {
       try {
@@ -118,16 +119,29 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
       }
     };
 
+    const fetchCurrency = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/general');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrency(data.currency || 'USD');
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency:', error);
+      }
+    };
+
     fetchReviews();
+    fetchCurrency();
   }, [product.slug]);
 
   const primaryImage = product.images.find((img: ProductImage) => img.isPrimary) || product.images[0];
   const otherImages = product.images.filter((img: ProductImage) => !img.isPrimary);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(price);
   };
 

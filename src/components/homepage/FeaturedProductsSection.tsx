@@ -21,10 +21,14 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
 
   if (products.length === 0) return null;
 
+  // Fetch currency from config
+  const { config } = await import('@/lib/config');
+  const currency = await config.get('currency') || 'USD';
+
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(price);
   };
 

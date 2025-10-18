@@ -33,9 +33,11 @@ export default function ModernProductsContent() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [currency, setCurrency] = useState('USD');
 
   useEffect(() => {
     fetchProducts();
+    fetchCurrency();
   }, []);
 
   const fetchProducts = async () => {
@@ -52,10 +54,22 @@ export default function ModernProductsContent() {
     }
   };
 
+  const fetchCurrency = async () => {
+    try {
+      const response = await fetch('/api/admin/settings/general');
+      if (response.ok) {
+        const data = await response.json();
+        setCurrency(data.currency || 'USD');
+      }
+    } catch (error) {
+      console.error('Failed to fetch currency:', error);
+    }
+  };
+
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(price);
   };
 
