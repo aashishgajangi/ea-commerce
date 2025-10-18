@@ -25,25 +25,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get favicon from settings
-  let faviconPath = "/favicon.ico";
-  try {
-    const { getAllSettings } = await import("@/lib/settings");
-    const { db } = await import("@/lib/db");
-    const settings = await getAllSettings();
-
-    if (settings.appearance.faviconId) {
-      const media = await db.media.findUnique({
-        where: { id: settings.appearance.faviconId },
-      });
-      if (media) {
-        faviconPath = media.path;
-      }
-    }
-  } catch (error) {
-    console.error("Failed to load favicon:", error);
-  }
-
   // Get theme and appearance settings for global theme provider
   const themeSettings = await getThemeSettings();
   const { getAppearanceSettings } = await import("@/lib/settings");
@@ -56,12 +37,9 @@ export default async function RootLayout({
     secondaryColor: appearanceSettings.secondaryColor,
   };
 
+  // Favicon is handled by /app/icon.tsx for dynamic support
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" type="image/x-icon" href={faviconPath} />
-        <link rel="shortcut icon" type="image/x-icon" href={faviconPath} />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
