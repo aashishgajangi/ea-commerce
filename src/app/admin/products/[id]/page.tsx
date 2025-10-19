@@ -31,6 +31,9 @@ interface Product {
   compareAtPrice: number | null;
   costPerItem: number | null;
   weightBasedPricing: boolean;
+  weightSlotBase: number | null;
+  weightSlotMin: number | null;
+  weightSlotMax: number | null;
   trackInventory: boolean;
   stockQuantity: number;
   lowStockThreshold: number | null;
@@ -202,6 +205,9 @@ export default function ProductEditPage() {
         categoryId: product.categoryId || null,
         compareAtPrice: product.compareAtPrice !== null && product.compareAtPrice !== undefined ? Number(product.compareAtPrice) : null,
         costPerItem: product.costPerItem !== null && product.costPerItem !== undefined ? Number(product.costPerItem) : null,
+        weightSlotBase: product.weightSlotBase !== null && product.weightSlotBase !== undefined ? Number(product.weightSlotBase) : null,
+        weightSlotMin: product.weightSlotMin !== null && product.weightSlotMin !== undefined ? Number(product.weightSlotMin) : null,
+        weightSlotMax: product.weightSlotMax !== null && product.weightSlotMax !== undefined ? Number(product.weightSlotMax) : null,
         lowStockThreshold: product.lowStockThreshold !== null && product.lowStockThreshold !== undefined ? Number(product.lowStockThreshold) : null,
         weight: product.weight !== null && product.weight !== undefined ? Number(product.weight) : null,
         length: product.length !== null && product.length !== undefined ? Number(product.length) : null,
@@ -632,6 +638,69 @@ export default function ProductEditPage() {
                   />
                 </div>
               </div>
+
+              {product.weightBasedPricing && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Weight Slot Configuration</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotBase" className="text-sm">Slot Increment (kg)</Label>
+                      <Input
+                        id="weightSlotBase"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={product.weightSlotBase || ''}
+                        onChange={(e) =>
+                          setProduct({
+                            ...product,
+                            weightSlotBase: e.target.value ? parseFloat(e.target.value) : null,
+                          })
+                        }
+                        placeholder="0.5"
+                      />
+                      <p className="text-xs text-gray-500">e.g., 0.5 for 500g slots</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotMin" className="text-sm">Minimum Weight (kg)</Label>
+                      <Input
+                        id="weightSlotMin"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={product.weightSlotMin || ''}
+                        onChange={(e) =>
+                          setProduct({
+                            ...product,
+                            weightSlotMin: e.target.value ? parseFloat(e.target.value) : null,
+                          })
+                        }
+                        placeholder="0.5"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotMax" className="text-sm">Maximum Weight (kg)</Label>
+                      <Input
+                        id="weightSlotMax"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={product.weightSlotMax || ''}
+                        onChange={(e) =>
+                          setProduct({
+                            ...product,
+                            weightSlotMax: e.target.value ? parseFloat(e.target.value) : null,
+                          })
+                        }
+                        placeholder="5.0"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Configure weight slots for frontend selection. Leave empty for continuous weight selection.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

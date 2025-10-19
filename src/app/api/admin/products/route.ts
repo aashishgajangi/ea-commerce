@@ -22,6 +22,9 @@ const createProductSchema = z.object({
   compareAtPrice: optionalNumber(z.number().min(0)),
   costPerItem: optionalNumber(z.number().min(0)),
   weightBasedPricing: z.boolean().default(false),
+  weightSlotBase: optionalNumber(z.number().min(0.1)),
+  weightSlotMin: optionalNumber(z.number().min(0.1)),
+  weightSlotMax: optionalNumber(z.number().min(0.1)),
   trackInventory: z.boolean().default(true),
   stockQuantity: z.preprocess((val) => {
     if (typeof val === 'string' && val.trim() === '') return 0;
@@ -127,6 +130,9 @@ export async function POST(request: NextRequest) {
       compareAtPrice: data.compareAtPrice,
       costPerItem: data.costPerItem,
       weightBasedPricing: data.weightBasedPricing,
+      weightSlotBase: data.weightSlotBase,
+      weightSlotMin: data.weightSlotMin,
+      weightSlotMax: data.weightSlotMax,
       trackInventory: data.trackInventory,
       stockQuantity: data.stockQuantity,
       lowStockThreshold: data.lowStockThreshold,

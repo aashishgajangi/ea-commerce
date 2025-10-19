@@ -34,6 +34,9 @@ export default function NewProductPage() {
     compareAtPrice: '',
     costPerItem: '',
     weightBasedPricing: false,
+    weightSlotBase: '',
+    weightSlotMin: '',
+    weightSlotMax: '',
     trackInventory: true,
     stockQuantity: '0',
     lowStockThreshold: '',
@@ -103,6 +106,9 @@ export default function NewProductPage() {
           compareAtPrice: formData.compareAtPrice.trim() ? parseFloat(formData.compareAtPrice) : undefined,
           costPerItem: formData.costPerItem.trim() ? parseFloat(formData.costPerItem) : undefined,
           weightBasedPricing: formData.weightBasedPricing,
+          weightSlotBase: formData.weightSlotBase.trim() ? parseFloat(formData.weightSlotBase) : undefined,
+          weightSlotMin: formData.weightSlotMin.trim() ? parseFloat(formData.weightSlotMin) : undefined,
+          weightSlotMax: formData.weightSlotMax.trim() ? parseFloat(formData.weightSlotMax) : undefined,
           trackInventory: formData.trackInventory,
           stockQuantity: formData.stockQuantity.trim() ? parseInt(formData.stockQuantity) : '',
           lowStockThreshold: formData.lowStockThreshold.trim() ? parseInt(formData.lowStockThreshold) : undefined,
@@ -218,6 +224,54 @@ export default function NewProductPage() {
                   <Label htmlFor="weightBasedPricing" className="text-sm">Weight-based pricing (price per kg)</Label>
                 </div>
               </div>
+
+              {formData.weightBasedPricing && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Weight Slot Configuration</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotBase" className="text-sm">Slot Increment (kg)</Label>
+                      <Input
+                        id="weightSlotBase"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={formData.weightSlotBase}
+                        onChange={(e) => setFormData({ ...formData, weightSlotBase: e.target.value })}
+                        placeholder="0.5"
+                      />
+                      <p className="text-xs text-gray-500">e.g., 0.5 for 500g slots</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotMin" className="text-sm">Minimum Weight (kg)</Label>
+                      <Input
+                        id="weightSlotMin"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={formData.weightSlotMin}
+                        onChange={(e) => setFormData({ ...formData, weightSlotMin: e.target.value })}
+                        placeholder="0.5"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weightSlotMax" className="text-sm">Maximum Weight (kg)</Label>
+                      <Input
+                        id="weightSlotMax"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={formData.weightSlotMax}
+                        onChange={(e) => setFormData({ ...formData, weightSlotMax: e.target.value })}
+                        placeholder="5.0"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Configure weight slots for frontend selection. Leave empty for continuous weight selection.
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="stockQuantity">Initial Stock</Label>

@@ -41,6 +41,9 @@ interface Product {
   price: number;
   compareAtPrice: number | null;
   weightBasedPricing: boolean;
+  weightSlotBase: number | null;
+  weightSlotMin: number | null;
+  weightSlotMax: number | null;
   weight: number | null;
   length: number | null;
   width: number | null;
@@ -80,7 +83,7 @@ interface ReviewsData {
 }
 
 function ProductContent({ product: initialProduct }: { product: Product }) {
-  const [selectedWeight, setSelectedWeight] = useState<number>(initialProduct.weight || 1);
+  const [selectedWeight, setSelectedWeight] = useState<number>(initialProduct.weightSlotMin || initialProduct.weight || 1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
@@ -177,11 +180,40 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
     return product.compareAtPrice;
   };
 
+  // Generate weight options based on slots configuration
+  const getWeightOptions = () => {
+    if (!product.weightBasedPricing || !product.weightSlotBase || !product.weightSlotMin || !product.weightSlotMax) {
+      return null; // No slots configured, use continuous input
+    }
+
+    const options = [];
+    for (let w = product.weightSlotMin; w <= product.weightSlotMax; w += product.weightSlotBase) {
+      options.push(w);
+    }
+    return options;
+  };
+
+  // Format weight display (kg or grams)
+  const formatWeight = (weight: number) => {
+    if (weight >= 1) {
+      return `${weight}kg`;
+    } else if (weight >= 0.1) {
+      return `${(weight * 1000).toFixed(0)}g`;
+    } else {
+      return `${(weight * 1000).toFixed(1)}g`;
+    }
+  };
+
   // Handle weight changes
   const handleWeightChange = (weight: number) => {
     if (weight >= 0.1) {
       setSelectedWeight(weight);
     }
+  };
+
+  // Handle weight slot selection
+  const handleWeightSlotSelect = (weight: number) => {
+    setSelectedWeight(weight);
   };
 
   // Handle quantity changes
@@ -401,36 +433,67 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
           {/* Weight Selector for Weight-based Pricing */}
           {product.weightBasedPricing && (
             <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleWeightChange(Math.max(0.1, selectedWeight - 0.1))}
-                  disabled={selectedWeight <= 0.1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  id="weight"
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={selectedWeight}
-                  onChange={(e) => handleWeightChange(parseFloat(e.target.value) || 0.1)}
-                  className="w-20 text-center"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleWeightChange(selectedWeight + 0.1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-gray-600">kg</span>
-              </div>
+              <Label>Weight</Label>
+              {(() => {
+                const weightOptions = getWeightOptions();
+                if (weightOptions && weightOptions.length > 0) {
+                  // Show weight slots as buttons
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {weightOptions.map((weight) => (
+                          <Button
+                            key={weight}
+                            type="button"
+                            variant={selectedWeight === weight ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleWeightSlotSelect(weight)}
+                            className="min-w-[60px]"
+                          >
+                            {formatWeight(weight)}
+                          </Button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Select weight • Price: {formatPrice(calculatePrice(getEffectivePrice(), selectedWeight))}
+                      </p>
+                    </div>
+                  );
+                } else {
+                  // Fallback to continuous input
+                  return (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleWeightChange(Math.max(0.1, selectedWeight - 0.1))}
+                        disabled={selectedWeight <= 0.1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="weight"
+                        type="number"
+                        min="0.1"
+                        step="0.1"
+                        value={selectedWeight}
+                        onChange={(e) => handleWeightChange(parseFloat(e.target.value) || 0.1)}
+                        className="w-20 text-center"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleWeightChange(selectedWeight + 0.1)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm text-gray-600">kg</span>
+                    </div>
+                  );
+                }
+              })()}
             </div>
           )}
 

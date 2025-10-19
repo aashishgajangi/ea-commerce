@@ -219,6 +219,9 @@ export async function createProduct(data: {
   compareAtPrice?: number;
   costPerItem?: number;
   weightBasedPricing?: boolean;
+  weightSlotBase?: number;
+  weightSlotMin?: number;
+  weightSlotMax?: number;
   trackInventory?: boolean;
   stockQuantity?: number;
   lowStockThreshold?: number;
@@ -264,6 +267,9 @@ export async function updateProduct(
     compareAtPrice?: number;
     costPerItem?: number;
     weightBasedPricing?: boolean;
+    weightSlotBase?: number;
+    weightSlotMin?: number;
+    weightSlotMax?: number;
     trackInventory?: boolean;
     stockQuantity?: number;
     lowStockThreshold?: number;

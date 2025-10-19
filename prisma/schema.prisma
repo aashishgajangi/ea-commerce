@@ -241,49 +241,54 @@ model Product {
   sku             String?     @unique
   description     String?     @db.Text
   shortDescription String?    @db.Text
-  
+
   // Categorization
   categoryId      String?
-  
+
   // Pricing
   price           Float       // Base price (or price per kg if weightBasedPricing is true)
   compareAtPrice  Float?      // Original price (for showing discounts)
   costPerItem     Float?      // Cost to track profit
   weightBasedPricing Boolean  @default(false) // If true, price is per kg
-  
+
+  // Weight slots configuration (for weight-based products)
+  weightSlotBase  Float?      // Base weight increment in kg (e.g., 0.5 for 500g slots)
+  weightSlotMin   Float?      // Minimum weight in kg
+  weightSlotMax   Float?      // Maximum weight in kg
+
   // Inventory (aggregate from variants or direct)
   trackInventory  Boolean     @default(true)
   stockQuantity   Int         @default(0)
   lowStockThreshold Int?
-  
+
   // Product settings
   isFeatured      Boolean     @default(false)
   isActive        Boolean     @default(true)
   status          String      @default("draft") // draft, published, archived
-  
+
   // Shipping
   weight          Float?      // in kg
   length          Float?      // in cm
   width           Float?      // in cm
   height          Float?      // in cm
-  
+
   // SEO
   metaTitle       String?
   metaDescription String?     @db.Text
   metaKeywords    String?
-  
+
   // Dates
   publishedAt     DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-  
+
   // Relations
   category        Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   variants        ProductVariant[]
   images          ProductImage[]
   inventoryLogs   InventoryLog[]
   reviews         Review[]
-  
+
   @@index([slug])
   @@index([sku])
   @@index([categoryId])

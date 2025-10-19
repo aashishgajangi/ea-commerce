@@ -12,6 +12,10 @@ type UpdateProductData = {
   price?: number;
   compareAtPrice?: number;
   costPerItem?: number;
+  weightBasedPricing?: boolean;
+  weightSlotBase?: number;
+  weightSlotMin?: number;
+  weightSlotMax?: number;
   trackInventory?: boolean;
   stockQuantity?: number;
   lowStockThreshold?: number;
@@ -55,6 +59,9 @@ const updateProductSchema = z.object({
   categoryId: z.string().nullable().optional(),
   compareAtPrice: optionalNumber(z.number().min(0)),
   costPerItem: optionalNumber(z.number().min(0)),
+  weightSlotBase: optionalNumber(z.number().min(0.1)),
+  weightSlotMin: optionalNumber(z.number().min(0.1)),
+  weightSlotMax: optionalNumber(z.number().min(0.1)),
   lowStockThreshold: optionalNumber(z.number().int().min(0)),
   weight: optionalNumber(z.number().min(0)),
   length: optionalNumber(z.number().min(0)),
