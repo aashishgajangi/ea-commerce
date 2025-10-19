@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Package, ShoppingCart, Heart, Share2, Truck, Shield, ArrowLeft, Minus, Plus, Star, MessageSquare } from 'lucide-react';
+import { useCart } from '@/components/cart/CartContext';
 
 interface ProductImage {
   id: string;
@@ -83,11 +84,13 @@ interface ReviewsData {
 }
 
 function ProductContent({ product: initialProduct }: { product: Product }) {
+  const { addToCart: addToCartContext } = useCart();
   const [selectedWeight, setSelectedWeight] = useState<number>(initialProduct.weightSlotMin || initialProduct.weight || 1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string>('USD');
+  const [addingToCart, setAddingToCart] = useState(false);
 
   // Reviews state
   const [reviews, setReviews] = useState<ReviewsData | null>(null);
@@ -249,6 +252,27 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
       // Fallback for browsers without Web Share API
       navigator.clipboard.writeText(url);
       alert('Link copied to clipboard!');
+    }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    setAddingToCart(true);
+    try {
+      const success = await addToCartContext(
+        product.id,
+        selectedVariant?.id,
+        quantity,
+        product.weightBasedPricing ? selectedWeight : undefined
+      );
+
+      if (success) {
+        alert(`${product.name} added to cart!`);
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -567,10 +591,11 @@ function ProductContent({ product: initialProduct }: { product: Product }) {
             <Button
               size="lg"
               className="flex-1"
-              disabled={isOutOfStock}
+              disabled={isOutOfStock || addingToCart}
+              onClick={handleAddToCart}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
-              {isOutOfStock ? 'Out of Stock' : `Add to Cart - ${formatPrice(calculatePrice(getEffectivePrice(), product.weightBasedPricing ? selectedWeight : null) * quantity)}`}
+              {addingToCart ? 'Adding...' : isOutOfStock ? 'Out of Stock' : `Add to Cart - ${formatPrice(calculatePrice(getEffectivePrice(), product.weightBasedPricing ? selectedWeight : null) * quantity)}`}
             </Button>
             <Button
               size="lg"

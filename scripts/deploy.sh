@@ -1,16 +1,22 @@
 #!/bin/bash
 
 # Deployment script for EA Commerce
-# Automates the process of installing dependencies, building, and restarting PM2
+# Automates the process of installing dependencies, migrations, building, and restarting PM2
 
 set -e  # Exit on any error
 
 echo "🚀 Starting deployment process..."
+echo "📅 Deployment started at: $(date)"
 
 # Check if we're in the project directory
 if [ ! -f "package.json" ]; then
     echo "❌ Error: package.json not found. Are you in the project root?"
     exit 1
+fi
+
+# Check if .env exists
+if [ ! -f ".env" ]; then
+    echo "⚠️  Warning: .env file not found. Make sure environment variables are set!"
 fi
 
 # Install dependencies
@@ -20,6 +26,15 @@ npm ci
 # Generate Prisma client (if needed)
 echo "🗄️ Generating Prisma client..."
 npx prisma generate
+
+# Run database migrations (SAFE - no data loss)
+echo "📊 Running database migrations..."
+if npx prisma migrate deploy; then
+    echo "✅ Migrations applied successfully!"
+else
+    echo "❌ Migration failed! Rolling back..."
+    exit 1
+fi
 
 # Build the application
 echo "🔨 Building application..."
@@ -34,4 +49,12 @@ pm2 restart ea-commerce || {
 }
 
 echo "✅ Deployment completed successfully!"
+echo "📅 Deployment finished at: $(date)"
 echo "🌐 Your application should be running at your configured port."
+echo ""
+echo "📋 Summary:"
+echo "  - Dependencies: ✅ Installed"
+echo "  - Prisma Client: ✅ Generated"
+echo "  - Migrations: ✅ Applied"
+echo "  - Build: ✅ Completed"
+echo "  - PM2: ✅ Restarted"

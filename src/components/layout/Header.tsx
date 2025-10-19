@@ -8,6 +8,7 @@ import MobileMenu from './MobileMenu';
 import AuthLinks from '@/components/auth/AuthLinks';
 import AnnouncementBar from './AnnouncementBar';
 import SearchBar from '@/components/search/SearchBar';
+import CartIcon from '@/components/cart/CartIcon';
 
 export default async function Header() {
   // Get settings
@@ -189,7 +190,7 @@ export default async function Header() {
             </nav>
           )}
 
-          {/* Right Side: Search, Auth, Mobile Menu */}
+          {/* Right Side: Search, Cart, Auth, Mobile Menu */}
           <div className="flex items-center gap-4">
             {/* Search Bar */}
             {settings.header.showSearch && (
@@ -197,6 +198,9 @@ export default async function Header() {
                 <SearchBar />
               </div>
             )}
+
+            {/* Cart Icon */}
+            <CartIcon />
 
             {/* Auth Links */}
             <AuthLinks accountIconName={accountIconName} />

@@ -1,13 +1,15 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { generateSiteMetadata } from "@/lib/metadata";
-import AuthSessionProvider from "@/components/providers/SessionProvider";
-import ThemeProvider from "@/components/providers/ThemeProvider";
+import AuthSessionProvider from '@/components/providers/SessionProvider';
+import ThemeProvider from '@/components/providers/ThemeProvider';
+import { CartProvider } from '@/components/cart/CartContext';
 import { getThemeSettings } from "@/lib/settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -45,7 +47,9 @@ export default async function RootLayout({
       >
         <ThemeProvider initialTheme={mergedTheme}>
           <AuthSessionProvider>
-            {children}
+            <CartProvider>
+              {children}
+            </CartProvider>
           </AuthSessionProvider>
         </ThemeProvider>
       </body>
