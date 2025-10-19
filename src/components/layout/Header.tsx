@@ -4,10 +4,10 @@ import { getMenuByLocation } from '@/lib/menus';
 import { getAllSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
 import { config, ConfigKeys } from '@/lib/config';
-import { Search } from 'lucide-react';
 import MobileMenu from './MobileMenu';
 import AuthLinks from '@/components/auth/AuthLinks';
 import AnnouncementBar from './AnnouncementBar';
+import SearchBar from '@/components/search/SearchBar';
 
 export default async function Header() {
   // Get settings
@@ -193,21 +193,8 @@ export default async function Header() {
           <div className="flex items-center gap-4">
             {/* Search Bar */}
             {settings.header.showSearch && (
-              <div className="hidden md:block">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'var(--theme-text)' }} />
-                  <input
-                    type="search"
-                    placeholder="Search..."
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:shadow-lg transition-all w-80"
-                    style={{
-                      borderColor: 'var(--theme-text)',
-                      backgroundColor: 'var(--theme-background)',
-                      color: 'var(--theme-text)',
-                      '--tw-ring-color': 'var(--theme-primary)'
-                    } as React.CSSProperties}
-                  />
-                </div>
+              <div className="hidden md:block w-80">
+                <SearchBar />
               </div>
             )}
 
