@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Menu, X, AlignJustify, Grid3X3, List, MoreHorizontal, Search } from 'lucide-react';
+import { Menu, X, AlignJustify, Grid3X3, List, MoreHorizontal } from 'lucide-react';
 import type { MenuItemWithChildren } from '@/lib/menus';
+import MobileSearchBar from '@/components/search/MobileSearchBar';
 
 interface MobileMenuProps {
   menuItems: MenuItemWithChildren[];
@@ -185,41 +186,17 @@ export default function MobileMenu({
             </div>
           )}
 
-          {/* Search bar */}
+          {/* Search bar with autocomplete */}
           {showMobileSearch && (
             <div
               className="p-4 border-b flex-shrink-0"
               style={{ borderColor: `${textColor}15` }}
             >
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
-                if (query.trim()) {
-                  window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
-                  setIsOpen(false);
-                }
-              }}>
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 opacity-50"
-                    style={{ color: textColor }}
-                  />
-                  <input
-                    type="search"
-                    name="search"
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:shadow-lg transition-all"
-                    style={{
-                      borderColor: `${textColor}30`,
-                      backgroundColor: mobileMenuStyle === 'fullscreen'
-                        ? `${textColor}10`
-                        : 'transparent',
-                      color: textColor,
-                      '--tw-ring-color': 'var(--theme-primary)'
-                    } as React.CSSProperties}
-                  />
-                </div>
-              </form>
+              <MobileSearchBar 
+                onClose={() => setIsOpen(false)}
+                textColor={textColor}
+                mobileMenuStyle={mobileMenuStyle}
+              />
             </div>
           )}
 
