@@ -63,7 +63,7 @@ export default function NewUserPage() {
         throw new Error(errorData.error || 'Failed to create user');
       }
 
-      const user = await response.json();
+      await response.json();
       alert('User created successfully');
       router.push('/admin/users');
     } catch (error) {

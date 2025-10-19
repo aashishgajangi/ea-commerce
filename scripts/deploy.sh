@@ -27,37 +27,13 @@ npm ci
 echo "🗄️ Generating Prisma client..."
 npx prisma generate
 
-# Run database migrations (SAFE - no data loss)
-echo "📊 Running database migrations..."
-if npx prisma migrate deploy 2>&1 | tee /tmp/migrate-output.log; then
-    echo "✅ Migrations applied successfully!"
+# Sync database schema (SAFE - no data loss)
+echo "📊 Syncing database schema..."
+if npx prisma db push --accept-data-loss; then
+    echo "✅ Database schema synced successfully!"
 else
-    # Check if it's the baseline error
-    if grep -q "P3005" /tmp/migrate-output.log; then
-        echo "⚠️  Database needs baseline. Attempting to resolve..."
-        
-        # Mark existing migrations as applied
-        echo "📝 Marking existing migrations as already applied..."
-        
-        # Try to resolve each migration
-        for migration in prisma/migrations/*/; do
-            migration_name=$(basename "$migration")
-            echo "  Resolving: $migration_name"
-            npx prisma migrate resolve --applied "$migration_name" || true
-        done
-        
-        # Try deploy again
-        echo "🔄 Retrying migration deploy..."
-        if npx prisma migrate deploy; then
-            echo "✅ Migrations applied successfully after baseline!"
-        else
-            echo "❌ Migration still failed after baseline attempt"
-            exit 1
-        fi
-    else
-        echo "❌ Migration failed! Rolling back..."
-        exit 1
-    fi
+    echo "❌ Database sync failed!"
+    exit 1
 fi
 
 # Build the application

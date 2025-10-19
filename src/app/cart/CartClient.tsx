@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -45,8 +43,6 @@ interface CartSummary {
 }
 
 export default function CartClient() {
-  const { data: session } = useSession();
-  const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [summary, setSummary] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +69,7 @@ export default function CartClient() {
   };
 
   // Fetch cart
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       const sessionId = getSessionId();
       const url = sessionId ? `/api/cart?sessionId=${sessionId}` : '/api/cart';
@@ -89,7 +85,7 @@ export default function CartClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCart();
@@ -108,7 +104,7 @@ export default function CartClient() {
     };
     
     fetchCurrency();
-  }, []);
+  }, [fetchCart]);
 
   // Update item quantity
   const updateQuantity = async (itemId: string, newQuantity: number) => {
@@ -274,16 +270,16 @@ export default function CartClient() {
                       )}
 
                       {/* Quantity Controls */}
-                      <div className="flex items-center gap-4 mt-3">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3">
                         <div className="flex items-center border rounded-lg">
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             disabled={updating === item.id || item.quantity <= 1}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
-                            <Minus className="h-3 w-3" />
+                            <Minus className="h-4 w-4 sm:h-3 sm:w-3" />
                           </Button>
                           <Input
                             type="number"
@@ -295,7 +291,7 @@ export default function CartClient() {
                               }
                             }}
                             disabled={updating === item.id}
-                            className="h-8 w-16 text-center border-0 focus-visible:ring-0"
+                            className="h-10 sm:h-8 w-16 text-center border-0 focus-visible:ring-0"
                             min="1"
                           />
                           <Button
@@ -303,9 +299,9 @@ export default function CartClient() {
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             disabled={updating === item.id}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-4 w-4 sm:h-3 sm:w-3" />
                           </Button>
                         </div>
 
@@ -314,10 +310,10 @@ export default function CartClient() {
                           variant="ghost"
                           onClick={() => removeItem(item.id)}
                           disabled={updating === item.id}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 sm:h-auto min-w-[100px]"
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
+                          <span>Remove</span>
                         </Button>
                       </div>
                     </div>

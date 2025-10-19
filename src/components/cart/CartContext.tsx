@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface CartContextType {
@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   // Fetch cart count
-  const refreshCart = async () => {
+  const refreshCart = useCallback(async () => {
     try {
       const sessionId = getSessionId();
       const url = sessionId ? `/api/cart?sessionId=${sessionId}` : '/api/cart';
@@ -40,7 +40,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error fetching cart:', error);
     }
-  };
+  }, []);
 
   // Add to cart function
   const addToCart = async (
@@ -82,7 +82,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Load cart on mount and when session changes
   useEffect(() => {
     refreshCart();
-  }, [session]);
+  }, [session, refreshCart]);
 
   return (
     <CartContext.Provider value={{ cartCount, refreshCart, addToCart }}>
