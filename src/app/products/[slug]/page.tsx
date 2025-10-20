@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/lib/products';
+import { getGeneralSettings } from '@/lib/settings';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Metadata } from 'next';
 import ProductClient from './ProductClient';
@@ -44,7 +45,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  
+  // Fetch product and currency settings in parallel
+  const [product, generalSettings] = await Promise.all([
+    getProductBySlug(slug),
+    getGeneralSettings(),
+  ]);
 
   if (!product || product.status !== 'published' || !product.isActive) {
     notFound();
@@ -62,7 +68,10 @@ export default async function ProductPage({ params }: PageProps) {
           </div>
         }
       >
-        <ProductClient product={product} />
+        <ProductClient 
+          product={product} 
+          initialCurrency={generalSettings.currency || 'INR'} 
+        />
       </Suspense>
     </PublicLayout>
   );

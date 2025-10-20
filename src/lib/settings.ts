@@ -1,7 +1,12 @@
 import { db as prisma } from "./db";
+import { cache } from "./redis";
 
 // Setting types
 export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage";
+
+// Cache configuration
+const SETTINGS_CACHE_PREFIX = 'settings:';
+const SETTINGS_CACHE_TTL = 3600; // 1 hour cache
 
 // Setting interfaces
 export interface GeneralSettings {
@@ -213,10 +218,18 @@ export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
 };
 
 /**
- * Get setting by key
+ * Get setting by key with Redis caching
  */
 export async function getSetting<T>(key: string, defaultValue: T): Promise<T> {
   try {
+    // Try cache first
+    const cacheKey = `${SETTINGS_CACHE_PREFIX}${key}`;
+    const cached = await cache.get<T>(cacheKey);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // Fallback to database
     const setting = await prisma.siteSettings.findUnique({
       where: { key },
     });
@@ -225,7 +238,12 @@ export async function getSetting<T>(key: string, defaultValue: T): Promise<T> {
       return defaultValue;
     }
 
-    return JSON.parse(setting.value) as T;
+    const value = JSON.parse(setting.value) as T;
+    
+    // Cache for future requests
+    await cache.set(cacheKey, value, SETTINGS_CACHE_TTL);
+
+    return value;
   } catch (error) {
     console.error(`Failed to get setting: ${key}`, error);
     return defaultValue;
@@ -233,7 +251,7 @@ export async function getSetting<T>(key: string, defaultValue: T): Promise<T> {
 }
 
 /**
- * Set setting by key
+ * Set setting by key and invalidate cache
  */
 export async function setSetting<T>(
   key: string,
@@ -253,6 +271,13 @@ export async function setSetting<T>(
         type,
       },
     });
+
+    // Invalidate cache
+    const cacheKey = `${SETTINGS_CACHE_PREFIX}${key}`;
+    await cache.del(cacheKey);
+    
+    // Also clear the "all settings" cache
+    await cache.del(`${SETTINGS_CACHE_PREFIX}all`);
   } catch (error) {
     console.error(`Failed to set setting: ${key}`, error);
     throw error;
@@ -396,34 +421,83 @@ export async function setHomepageSettings(settings: HomepageSettings): Promise<v
 }
 
 /**
- * Get all settings
+ * Get all settings with caching
  */
 export async function getAllSettings() {
-  const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
-    getGeneralSettings(),
-    getAppearanceSettings(),
-    getSocialSettings(),
-    getHeaderSettings(),
-    getFooterSettings(),
-    getSEOSettings(),
-    getThemeSettings(),
-    getHomepageSettings(),
-  ]);
+  try {
+    // Try cache first
+    const cacheKey = `${SETTINGS_CACHE_PREFIX}all`;
+    const cached = await cache.get<{
+      general: GeneralSettings;
+      appearance: AppearanceSettings;
+      social: SocialSettings;
+      header: HeaderSettings;
+      footer: FooterSettings;
+      seo: SEOSettings;
+      theme: ThemeSettings;
+      homepage: HomepageSettings;
+    }>(cacheKey);
+    
+    if (cached !== null) {
+      return cached;
+    }
 
-  return {
-    general,
-    appearance,
-    social,
-    header,
-    footer,
-    seo,
-    theme,
-    homepage,
-  };
+    // Fetch from database
+    const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
+      getGeneralSettings(),
+      getAppearanceSettings(),
+      getSocialSettings(),
+      getHeaderSettings(),
+      getFooterSettings(),
+      getSEOSettings(),
+      getThemeSettings(),
+      getHomepageSettings(),
+    ]);
+
+    const settings = {
+      general,
+      appearance,
+      social,
+      header,
+      footer,
+      seo,
+      theme,
+      homepage,
+    };
+
+    // Cache for future requests
+    await cache.set(cacheKey, settings, SETTINGS_CACHE_TTL);
+
+    return settings;
+  } catch (error) {
+    console.error('Failed to get all settings:', error);
+    // Fallback to fetching without cache on error
+    const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
+      getGeneralSettings(),
+      getAppearanceSettings(),
+      getSocialSettings(),
+      getHeaderSettings(),
+      getFooterSettings(),
+      getSEOSettings(),
+      getThemeSettings(),
+      getHomepageSettings(),
+    ]);
+
+    return {
+      general,
+      appearance,
+      social,
+      header,
+      footer,
+      seo,
+      theme,
+      homepage,
+    };
+  }
 }
 
 /**
- * Reset settings to defaults
+ * Reset settings to defaults and clear cache
  */
 export async function resetSettings(type?: SettingType): Promise<void> {
   if (type) {
@@ -434,5 +508,19 @@ export async function resetSettings(type?: SettingType): Promise<void> {
   } else {
     // Reset all settings
     await prisma.siteSettings.deleteMany();
+  }
+  
+  // Clear all settings cache
+  await clearSettingsCache();
+}
+
+/**
+ * Clear all settings cache
+ */
+export async function clearSettingsCache(): Promise<void> {
+  try {
+    await cache.delPattern(`${SETTINGS_CACHE_PREFIX}*`);
+  } catch (error) {
+    console.error('Failed to clear settings cache:', error);
   }
 }

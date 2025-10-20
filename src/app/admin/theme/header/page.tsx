@@ -90,14 +90,13 @@ export default function HeaderSettingsPage() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin/settings");
-      if (!response.ok) throw new Error("Failed to fetch settings");
+      // Fetch only header settings instead of all settings
+      const response = await fetch("/api/admin/settings/header");
+      if (!response.ok) throw new Error("Failed to fetch header settings");
       const data = await response.json();
-      if (data.header) {
-        setHeader(prev => ({ ...prev, ...data.header }));
-      }
+      setHeader(prev => ({ ...prev, ...data }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch settings");
+      setError(err instanceof Error ? err.message : "Failed to fetch header settings");
     } finally {
       setLoading(false);
     }

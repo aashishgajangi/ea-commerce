@@ -30,8 +30,17 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     setTheme(prev => ({ ...prev, ...newTheme }));
   };
 
-  // Fetch latest theme and appearance settings on mount
+  // Only poll for theme updates on admin/theme pages
   useEffect(() => {
+    // Check if we're on admin theme pages
+    const isThemePage = typeof window !== 'undefined' && 
+      (window.location.pathname === '/admin/theme' || 
+       window.location.pathname.startsWith('/admin/theme/'));
+    
+    if (!isThemePage) {
+      return; // Don't poll on non-theme pages
+    }
+
     const fetchLatestTheme = async () => {
       try {
         const [themeRes, appearanceRes] = await Promise.all([
@@ -62,15 +71,9 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
         console.warn('Could not fetch latest theme, using initial theme');
       }
     };
-
-    fetchLatestTheme();
     
-    // Poll for changes every 5 seconds when on admin pages (reduced frequency)
-    const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
-        fetchLatestTheme();
-      }
-    }, 5000);
+    // Poll for changes every 10 seconds (reduced from 5)
+    const interval = setInterval(fetchLatestTheme, 10000);
     
     return () => clearInterval(interval);
   }, []);

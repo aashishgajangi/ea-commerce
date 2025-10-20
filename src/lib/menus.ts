@@ -1,5 +1,10 @@
 import { db } from './db';
+import { cache } from './redis';
 import type { Menu, MenuItem, Prisma } from '@prisma/client';
+
+// Cache configuration
+const MENU_CACHE_PREFIX = 'menu:';
+const MENU_CACHE_TTL = 3600; // 1 hour cache
 
 export interface MenuWithItems extends Menu {
   items: MenuItemWithChildren[];
@@ -127,91 +132,118 @@ export async function getMenu(id: string): Promise<MenuWithItems | null> {
 }
 
 /**
- * Get menu by location
+ * Get menu by location with caching
  */
 export async function getMenuByLocation(location: string): Promise<MenuWithItems | null> {
-  const menu = await db.menu.findFirst({
-    where: { location },
-    include: {
-      items: {
-        include: {
-          page: {
-            select: {
-              id: true,
-              title: true,
-              slug: true,
+  try {
+    // Try cache first
+    const cacheKey = `${MENU_CACHE_PREFIX}location:${location}`;
+    const cached = await cache.get<MenuWithItems>(cacheKey);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // Fetch from database
+    const menu = await db.menu.findFirst({
+      where: { location },
+      include: {
+        items: {
+          include: {
+            page: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+              },
             },
           },
+          orderBy: { order: 'asc' },
         },
-        orderBy: { order: 'asc' },
       },
-    },
-  });
+    });
 
-  if (!menu) return null;
+    if (!menu) return null;
 
-  // Build hierarchical structure (same as getMenu)
-  const itemsMap = new Map<string, MenuItemWithChildren>();
-  const rootItems: MenuItemWithChildren[] = [];
+    // Build hierarchical structure (same as getMenu)
+    const itemsMap = new Map<string, MenuItemWithChildren>();
+    const rootItems: MenuItemWithChildren[] = [];
 
-  menu.items.forEach((item) => {
-    itemsMap.set(item.id, { ...item, children: [] });
-  });
+    menu.items.forEach((item) => {
+      itemsMap.set(item.id, { ...item, children: [] });
+    });
 
-  menu.items.forEach((item) => {
-    const menuItem = itemsMap.get(item.id)!;
-    if (item.parentId) {
-      const parent = itemsMap.get(item.parentId);
-      if (parent) {
-        parent.children.push(menuItem);
+    menu.items.forEach((item) => {
+      const menuItem = itemsMap.get(item.id)!;
+      if (item.parentId) {
+        const parent = itemsMap.get(item.parentId);
+        if (parent) {
+          parent.children.push(menuItem);
+        } else {
+          rootItems.push(menuItem);
+        }
       } else {
         rootItems.push(menuItem);
       }
-    } else {
-      rootItems.push(menuItem);
-    }
-  });
+    });
 
-  return {
-    ...menu,
-    items: rootItems,
-  };
+    const result: MenuWithItems = {
+      ...menu,
+      items: rootItems,
+    };
+
+    // Cache for future requests
+    await cache.set(cacheKey, result, MENU_CACHE_TTL);
+
+    return result;
+  } catch (error) {
+    console.error(`Failed to get menu by location ${location}:`, error);
+    return null;
+  }
 }
 
 /**
- * Create a new menu
+ * Create a new menu and clear cache
  */
 export async function createMenu(data: CreateMenuInput): Promise<Menu> {
-  return db.menu.create({
+  const result = await db.menu.create({
     data: {
       name: data.name,
       slug: data.slug,
       location: data.location,
     },
   });
+  
+  await clearMenuCache();
+  return result;
 }
 
 /**
- * Update a menu
+ * Update a menu and clear cache
  */
 export async function updateMenu(id: string, data: UpdateMenuInput): Promise<Menu> {
-  return db.menu.update({
+  const result = await db.menu.update({
     where: { id },
     data,
   });
+  
+  // Clear menu cache
+  await clearMenuCache();
+  
+  return result;
 }
 
 /**
- * Delete a menu
+ * Delete a menu and clear cache
  */
 export async function deleteMenu(id: string): Promise<void> {
   await db.menu.delete({
     where: { id },
   });
+  await clearMenuCache();
 }
 
 /**
- * Create a menu item
+ * Create a menu item and clear cache
  */
 export async function createMenuItem(data: CreateMenuItemInput): Promise<MenuItem> {
   // Get the highest order number for this menu/parent
@@ -239,13 +271,16 @@ export async function createMenuItem(data: CreateMenuItemInput): Promise<MenuIte
   if (data.pageId) itemData.page = { connect: { id: data.pageId } };
   if (data.parentId) itemData.parent = { connect: { id: data.parentId } };
 
-  return db.menuItem.create({
+  const result = await db.menuItem.create({
     data: itemData,
   });
+  
+  await clearMenuCache();
+  return result;
 }
 
 /**
- * Update a menu item
+ * Update a menu item and clear cache
  */
 export async function updateMenuItem(id: string, data: UpdateMenuItemInput): Promise<MenuItem> {
   const updateData: Prisma.MenuItemUpdateInput = {};
@@ -273,23 +308,27 @@ export async function updateMenuItem(id: string, data: UpdateMenuItemInput): Pro
     }
   }
 
-  return db.menuItem.update({
+  const result = await db.menuItem.update({
     where: { id },
     data: updateData,
   });
+  
+  await clearMenuCache();
+  return result;
 }
 
 /**
- * Delete a menu item
+ * Delete a menu item and clear cache
  */
 export async function deleteMenuItem(id: string): Promise<void> {
   await db.menuItem.delete({
     where: { id },
   });
+  await clearMenuCache();
 }
 
 /**
- * Reorder menu items
+ * Reorder menu items and clear cache
  */
 export async function reorderMenuItems(items: { id: string; order: number }[]): Promise<void> {
   await db.$transaction(
@@ -300,6 +339,7 @@ export async function reorderMenuItems(items: { id: string; order: number }[]): 
       })
     )
   );
+  await clearMenuCache();
 }
 
 /**
@@ -310,4 +350,15 @@ export function getMenuItemUrl(item: MenuItemWithChildren): string {
     return item.page.slug === '' ? '/' : `/${item.page.slug}`;
   }
   return item.url || '#';
+}
+
+/**
+ * Clear all menu cache
+ */
+export async function clearMenuCache(): Promise<void> {
+  try {
+    await cache.delPattern(`${MENU_CACHE_PREFIX}*`);
+  } catch (error) {
+    console.error('Failed to clear menu cache:', error);
+  }
 }

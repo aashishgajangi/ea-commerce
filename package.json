@@ -18,7 +18,11 @@
     "test:cart": "tsx scripts/test-cart.ts",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "db:optimize": "tsx scripts/add-performance-indexes.ts",
+    "perf:check": "tsx scripts/check-performance.ts",
+    "currency:check": "tsx scripts/check-currency-setting.ts",
+    "currency:inr": "tsx scripts/set-currency-inr.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
