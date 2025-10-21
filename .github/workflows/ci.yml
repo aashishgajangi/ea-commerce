@@ -91,6 +91,7 @@ jobs:
           name: build-artifacts
           path: .next/
           retention-days: 7
+          if-no-files-found: warn
 
   deploy:
     runs-on: ubuntu-latest

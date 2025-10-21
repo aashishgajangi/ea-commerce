@@ -127,7 +127,7 @@ async function main() {
     }
     
     await cache.del('test:ping');
-  } catch (error) {
+  } catch {
     console.log(`⚠️  Redis not available - caching disabled`);
   }
   console.log('');
