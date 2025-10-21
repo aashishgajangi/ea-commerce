@@ -139,10 +139,10 @@ export default function HeaderSettingsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
               <Link href="/admin/theme">
                 <Button variant="outline" size="sm">
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -150,11 +150,11 @@ export default function HeaderSettingsPage() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Header Settings</h1>
-                <p className="text-slate-600 dark:text-slate-400 mt-1">Customize your site header</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Header Settings</h1>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1">Customize your site header</p>
               </div>
             </div>
-            <Button onClick={handleSave} disabled={saving} size="lg">
+            <Button onClick={handleSave} disabled={saving} size="lg" className="w-full sm:w-auto">
               <Save className="w-4 h-4 mr-2" />
               {saving ? "Saving..." : "Save All"}
             </Button>
@@ -173,31 +173,32 @@ export default function HeaderSettingsPage() {
           )}
 
           <div className="bg-white dark:bg-slate-800 rounded-lg border">
-            <div className="border-b">
-              <nav className="flex space-x-1 p-2">
+            <div className="border-b overflow-x-auto">
+              <nav className="flex space-x-1 p-2 min-w-max md:min-w-0">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-md font-medium text-sm transition-colors ${
+                      className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-md font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                       }`}
                     >
-                      <Icon className="w-4 h-4" />
-                      {tab.label}
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                     </button>
                   );
                 })}
               </nav>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
               {activeTab === "announcement" && (
-                <Card className="p-6 space-y-6">
+                <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold mb-2">Announcement Bar</h2>
                     <p className="text-sm text-gray-600">Display a promotional banner above your header</p>
@@ -234,7 +235,7 @@ export default function HeaderSettingsPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label>Background Color</Label>
                           <div className="flex gap-2">
@@ -242,11 +243,12 @@ export default function HeaderSettingsPage() {
                               type="color"
                               value={header.announcementBgColor}
                               onChange={(e) => setHeader({ ...header, announcementBgColor: e.target.value })}
-                              className="w-20 h-10"
+                              className="w-20 h-10 flex-shrink-0"
                             />
                             <Input
                               value={header.announcementBgColor}
                               onChange={(e) => setHeader({ ...header, announcementBgColor: e.target.value })}
+                              className="flex-1"
                             />
                           </div>
                         </div>
@@ -258,11 +260,12 @@ export default function HeaderSettingsPage() {
                               type="color"
                               value={header.announcementTextColor}
                               onChange={(e) => setHeader({ ...header, announcementTextColor: e.target.value })}
-                              className="w-20 h-10"
+                              className="w-20 h-10 flex-shrink-0"
                             />
                             <Input
                               value={header.announcementTextColor}
                               onChange={(e) => setHeader({ ...header, announcementTextColor: e.target.value })}
+                              className="flex-1"
                             />
                           </div>
                         </div>
@@ -284,7 +287,7 @@ export default function HeaderSettingsPage() {
               )}
 
               {activeTab === "layout" && (
-                <Card className="p-6 space-y-6">
+                <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold mb-2">Layout & Style</h2>
                     <p className="text-sm text-gray-600">Configure header appearance and positioning</p>
@@ -409,7 +412,7 @@ export default function HeaderSettingsPage() {
               )}
 
               {activeTab === "navigation" && (
-                <Card className="p-6 space-y-6">
+                <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold mb-2">Navigation Menu</h2>
                     <p className="text-sm text-gray-600">Customize navigation appearance</p>
@@ -429,7 +432,7 @@ export default function HeaderSettingsPage() {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <Label>Spacing</Label>
                       <select
