@@ -5,6 +5,8 @@ import AuthSessionProvider from '@/components/providers/SessionProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
 import { CartProvider } from '@/components/cart/CartContext';
 import WhatsAppWidget from '@/components/WhatsAppWidget';
+import InstallButton from '@/components/pwa/InstallButton';
+import PWARegister from '@/components/pwa/PWARegister';
 import { getThemeSettings } from "@/lib/settings";
 
 const geistSans = Geist({
@@ -43,6 +45,13 @@ export default async function RootLayout({
   // Favicon is handled by /app/icon.tsx for dynamic support
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#10b981" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -51,6 +60,8 @@ export default async function RootLayout({
             <CartProvider>
               {children}
               <WhatsAppWidget />
+              <InstallButton />
+              <PWARegister />
             </CartProvider>
           </AuthSessionProvider>
         </ThemeProvider>

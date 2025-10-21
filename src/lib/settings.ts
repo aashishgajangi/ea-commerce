@@ -2,7 +2,7 @@ import { db as prisma } from "./db";
 import { cache } from "./redis";
 
 // Setting types
-export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage" | "whatsapp";
+export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage" | "whatsapp" | "pwa";
 
 // Cache configuration
 const SETTINGS_CACHE_PREFIX = 'settings:';
@@ -137,6 +137,23 @@ export interface WhatsAppSettings {
   showAnimation: boolean;
 }
 
+export interface PWASettings {
+  enabled: boolean;
+  appName: string;
+  shortName: string;
+  description: string;
+  themeColor: string;
+  backgroundColor: string;
+  displayMode: 'standalone' | 'fullscreen' | 'minimal-ui' | 'browser';
+  orientation: 'any' | 'portrait' | 'landscape';
+  iconId: string | null; // 512x512 icon from media library
+  icon192Id: string | null; // 192x192 icon (optional)
+  enableOfflineMode: boolean;
+  enablePushNotifications: boolean;
+  installPromptEnabled: boolean;
+  installPromptDelay: number; // seconds before showing prompt
+}
+
 // Default settings
 export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   siteName: "My Store",
@@ -235,6 +252,23 @@ export const DEFAULT_WHATSAPP_SETTINGS: WhatsAppSettings = {
   backgroundColor: "#25D366",
   iconColor: "#ffffff",
   showAnimation: true,
+};
+
+export const DEFAULT_PWA_SETTINGS: PWASettings = {
+  enabled: false,
+  appName: "My Store",
+  shortName: "Store",
+  description: "Shop our amazing products on the go",
+  themeColor: "#10b981",
+  backgroundColor: "#ffffff",
+  displayMode: "standalone",
+  orientation: "any",
+  iconId: null,
+  icon192Id: null,
+  enableOfflineMode: true,
+  enablePushNotifications: false,
+  installPromptEnabled: true,
+  installPromptDelay: 5,
 };
 
 /**
@@ -455,6 +489,20 @@ export async function setWhatsAppSettings(settings: WhatsAppSettings): Promise<v
 }
 
 /**
+ * Get PWA settings
+ */
+export async function getPWASettings(): Promise<PWASettings> {
+  return await getSetting("pwa", DEFAULT_PWA_SETTINGS);
+}
+
+/**
+ * Set PWA settings
+ */
+export async function setPWASettings(settings: PWASettings): Promise<void> {
+  await setSetting("pwa", settings, "pwa");
+}
+
+/**
  * Get all settings with caching
  */
 export async function getAllSettings() {
@@ -471,6 +519,7 @@ export async function getAllSettings() {
       theme: ThemeSettings;
       homepage: HomepageSettings;
       whatsapp: WhatsAppSettings;
+      pwa: PWASettings;
     }>(cacheKey);
     
     if (cached !== null) {
@@ -478,7 +527,7 @@ export async function getAllSettings() {
     }
 
     // Fetch from database
-    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp] = await Promise.all([
+    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp, pwa] = await Promise.all([
       getGeneralSettings(),
       getAppearanceSettings(),
       getSocialSettings(),
@@ -488,6 +537,7 @@ export async function getAllSettings() {
       getThemeSettings(),
       getHomepageSettings(),
       getWhatsAppSettings(),
+      getPWASettings(),
     ]);
 
     const settings = {
@@ -500,6 +550,7 @@ export async function getAllSettings() {
       theme,
       homepage,
       whatsapp,
+      pwa,
     };
 
     // Cache for future requests
@@ -509,7 +560,7 @@ export async function getAllSettings() {
   } catch (error) {
     console.error('Failed to get all settings:', error);
     // Fallback to fetching without cache on error
-    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp] = await Promise.all([
+    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp, pwa] = await Promise.all([
       getGeneralSettings(),
       getAppearanceSettings(),
       getSocialSettings(),
@@ -519,6 +570,7 @@ export async function getAllSettings() {
       getThemeSettings(),
       getHomepageSettings(),
       getWhatsAppSettings(),
+      getPWASettings(),
     ]);
 
     return {
@@ -531,6 +583,7 @@ export async function getAllSettings() {
       theme,
       homepage,
       whatsapp,
+      pwa,
     };
   }
 }
