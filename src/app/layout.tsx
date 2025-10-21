@@ -4,6 +4,7 @@ import { generateSiteMetadata } from "@/lib/metadata";
 import AuthSessionProvider from '@/components/providers/SessionProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
 import { CartProvider } from '@/components/cart/CartContext';
+import WhatsAppWidget from '@/components/WhatsAppWidget';
 import { getThemeSettings } from "@/lib/settings";
 
 const geistSans = Geist({
@@ -49,6 +50,7 @@ export default async function RootLayout({
           <AuthSessionProvider>
             <CartProvider>
               {children}
+              <WhatsAppWidget />
             </CartProvider>
           </AuthSessionProvider>
         </ThemeProvider>

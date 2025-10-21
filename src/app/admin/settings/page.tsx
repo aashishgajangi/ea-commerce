@@ -143,9 +143,14 @@ export default function SettingsPage() {
             <div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Settings</h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">Manage general site settings and social media links</p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                💡 Looking for Header/Footer settings? They&apos;re now in <Link href="/admin/theme" className="text-blue-500 hover:underline">Theme Settings</Link>
-              </p>
+              <div className="flex gap-4 mt-2 text-xs">
+                <p className="text-slate-500 dark:text-slate-500">
+                  💡 <Link href="/admin/theme" className="text-blue-500 hover:underline">Theme Settings</Link>
+                </p>
+                <p className="text-slate-500 dark:text-slate-500">
+                  💬 <Link href="/admin/settings/whatsapp" className="text-green-500 hover:underline">WhatsApp Widget</Link>
+                </p>
+              </div>
             </div>
           </div>
 

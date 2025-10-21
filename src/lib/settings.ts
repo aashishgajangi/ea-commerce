@@ -2,7 +2,7 @@ import { db as prisma } from "./db";
 import { cache } from "./redis";
 
 // Setting types
-export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage";
+export type SettingType = "general" | "appearance" | "social" | "header" | "footer" | "seo" | "theme" | "homepage" | "whatsapp";
 
 // Cache configuration
 const SETTINGS_CACHE_PREFIX = 'settings:';
@@ -127,6 +127,16 @@ export interface HomepageSettings {
   newsletterSubtitle: string;
 }
 
+export interface WhatsAppSettings {
+  enabled: boolean;
+  phoneNumber: string;
+  message: string;
+  position: 'bottom-left' | 'bottom-right';
+  backgroundColor: string;
+  iconColor: string;
+  showAnimation: boolean;
+}
+
 // Default settings
 export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   siteName: "My Store",
@@ -215,6 +225,16 @@ export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
   showNewsletter: true,
   newsletterTitle: "Stay Updated",
   newsletterSubtitle: "Subscribe to get special offers and updates",
+};
+
+export const DEFAULT_WHATSAPP_SETTINGS: WhatsAppSettings = {
+  enabled: false,
+  phoneNumber: "",
+  message: "Hello! I'm interested in your products.",
+  position: "bottom-right",
+  backgroundColor: "#25D366",
+  iconColor: "#ffffff",
+  showAnimation: true,
 };
 
 /**
@@ -421,6 +441,20 @@ export async function setHomepageSettings(settings: HomepageSettings): Promise<v
 }
 
 /**
+ * Get WhatsApp settings
+ */
+export async function getWhatsAppSettings(): Promise<WhatsAppSettings> {
+  return await getSetting("whatsapp", DEFAULT_WHATSAPP_SETTINGS);
+}
+
+/**
+ * Set WhatsApp settings
+ */
+export async function setWhatsAppSettings(settings: WhatsAppSettings): Promise<void> {
+  await setSetting("whatsapp", settings, "whatsapp");
+}
+
+/**
  * Get all settings with caching
  */
 export async function getAllSettings() {
@@ -436,6 +470,7 @@ export async function getAllSettings() {
       seo: SEOSettings;
       theme: ThemeSettings;
       homepage: HomepageSettings;
+      whatsapp: WhatsAppSettings;
     }>(cacheKey);
     
     if (cached !== null) {
@@ -443,7 +478,7 @@ export async function getAllSettings() {
     }
 
     // Fetch from database
-    const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
+    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp] = await Promise.all([
       getGeneralSettings(),
       getAppearanceSettings(),
       getSocialSettings(),
@@ -452,6 +487,7 @@ export async function getAllSettings() {
       getSEOSettings(),
       getThemeSettings(),
       getHomepageSettings(),
+      getWhatsAppSettings(),
     ]);
 
     const settings = {
@@ -463,6 +499,7 @@ export async function getAllSettings() {
       seo,
       theme,
       homepage,
+      whatsapp,
     };
 
     // Cache for future requests
@@ -472,7 +509,7 @@ export async function getAllSettings() {
   } catch (error) {
     console.error('Failed to get all settings:', error);
     // Fallback to fetching without cache on error
-    const [general, appearance, social, header, footer, seo, theme, homepage] = await Promise.all([
+    const [general, appearance, social, header, footer, seo, theme, homepage, whatsapp] = await Promise.all([
       getGeneralSettings(),
       getAppearanceSettings(),
       getSocialSettings(),
@@ -481,6 +518,7 @@ export async function getAllSettings() {
       getSEOSettings(),
       getThemeSettings(),
       getHomepageSettings(),
+      getWhatsAppSettings(),
     ]);
 
     return {
@@ -492,6 +530,7 @@ export async function getAllSettings() {
       seo,
       theme,
       homepage,
+      whatsapp,
     };
   }
 }
