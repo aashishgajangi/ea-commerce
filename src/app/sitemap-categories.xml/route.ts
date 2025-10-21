@@ -9,7 +9,7 @@ export async function GET() {
   try {
     // Get site URL from settings
     const generalSettings = await getSetting<Record<string, string>>('general', {});
-    const siteUrl = generalSettings?.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = generalSettings?.siteUrl || process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     
     // Fetch all active categories
     const categories = await db.category.findMany({

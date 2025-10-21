@@ -9,7 +9,7 @@ export async function GET() {
   try {
     // Get site URL from settings
     const generalSettings = await getSetting<Record<string, string>>('general', {});
-    const siteUrl = generalSettings?.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = generalSettings?.siteUrl || process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     
     // Fetch all active products
     const products = await db.product.findMany({
@@ -97,7 +97,7 @@ export async function GET() {
     console.error('Failed to generate products sitemap:', error);
     
     // Return minimal sitemap on error
-    const fallbackUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const fallbackUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const fallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>

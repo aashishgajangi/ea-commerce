@@ -8,7 +8,7 @@ export async function GET() {
   try {
     // Get site URL from settings
     const generalSettings = await getSetting<Record<string, string>>('general', {});
-    const siteUrl = generalSettings?.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = generalSettings?.siteUrl || process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     
     const robots = `# Robots.txt for ${siteUrl}
 User-agent: *
@@ -57,7 +57,7 @@ Sitemap: ${siteUrl}/sitemap-categories.xml
     console.error('Failed to generate robots.txt:', error);
     
     // Return basic robots.txt on error
-    const fallbackUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const fallbackUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const fallback = `User-agent: *
 Allow: /
 Disallow: /admin/
