@@ -6,9 +6,32 @@ import { z } from 'zod';
 const createPageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   slug: z.string().optional(),
-  content: z.string().min(1, 'Content is required'),
+  content: z.string(), // Not required for homepage
   excerpt: z.string().optional(),
   status: z.enum(['draft', 'published']).optional(),
+  // Template system
+  pageType: z.string().optional(),
+  template: z.string().optional(),
+  isEssential: z.boolean().optional(),
+  // Homepage data
+  homepageData: z.object({
+    showHero: z.boolean(),
+    heroTitle: z.string(),
+    heroSubtitle: z.string(),
+    heroImageId: z.string().nullable(),
+    heroButtonText: z.string(),
+    heroButtonUrl: z.string(),
+    showFeaturedProducts: z.boolean(),
+    featuredProductsTitle: z.string(),
+    featuredProductsCount: z.number(),
+    showCategories: z.boolean(),
+    categoriesTitle: z.string(),
+    categoriesCount: z.number(),
+    showNewsletter: z.boolean(),
+    newsletterTitle: z.string(),
+    newsletterSubtitle: z.string(),
+  }).optional(),
+  // SEO fields
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),

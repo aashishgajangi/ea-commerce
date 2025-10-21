@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LexicalEditor from '@/components/editor/LexicalEditor';
+import VisualHomepageEditor, { type HomepageData } from '@/components/pages/VisualHomepageEditor';
+import ThreeColumnEditor from '@/components/pages/ThreeColumnEditor';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,6 +19,8 @@ interface Page {
   content: string;
   excerpt: string | null;
   status: 'draft' | 'published';
+  pageType: string | null;
+  homepageData: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
   metaKeywords: string | null;
@@ -41,7 +45,6 @@ export default function PageEditor({ params }: PageEditorProps) {
   const [pageId, setPageId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -49,6 +52,8 @@ export default function PageEditor({ params }: PageEditorProps) {
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [pageType, setPageType] = useState<string>('');
+  const [homepageData, setHomepageData] = useState<HomepageData | null>(null);
 
   // SEO fields
   const [metaTitle, setMetaTitle] = useState('');
@@ -75,6 +80,17 @@ export default function PageEditor({ params }: PageEditorProps) {
         setContent(page.content);
         setExcerpt(page.excerpt || '');
         setStatus(page.status);
+        setPageType(page.pageType || '');
+        
+        // Parse homepage data if exists
+        if (page.homepageData) {
+          try {
+            setHomepageData(JSON.parse(page.homepageData));
+          } catch (e) {
+            console.error('Failed to parse homepage data:', e);
+          }
+        }
+        
         setMetaTitle(page.metaTitle || '');
         setMetaDescription(page.metaDescription || '');
         setMetaKeywords(page.metaKeywords || '');
@@ -106,8 +122,8 @@ export default function PageEditor({ params }: PageEditorProps) {
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    // Auto-generate slug if it hasn't been manually edited
-    if (!slug || slug === generateSlug(title)) {
+    // Auto-generate slug if it hasn't been manually edited (but not for homepage)
+    if (pageType !== 'homepage' && (!slug || slug === generateSlug(title))) {
       setSlug(generateSlug(newTitle));
     }
   };
@@ -118,7 +134,8 @@ export default function PageEditor({ params }: PageEditorProps) {
       return;
     }
 
-    if (!content.trim()) {
+    // For homepage, content can be minimal as sections are in homepageData
+    if (!content.trim() && pageType !== 'homepage') {
       alert('Please enter some content');
       return;
     }
@@ -136,6 +153,7 @@ export default function PageEditor({ params }: PageEditorProps) {
           content,
           excerpt,
           status,
+          homepageData: homepageData || undefined,
           metaTitle: metaTitle || undefined,
           metaDescription: metaDescription || undefined,
           metaKeywords: metaKeywords || undefined,
@@ -164,7 +182,7 @@ export default function PageEditor({ params }: PageEditorProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto max-w-6xl py-8 px-4">
+      <div className="container mx-auto max-w-[90%] py-8 px-4">
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           <p className="mt-2 text-gray-600">Loading page...</p>
@@ -174,7 +192,7 @@ export default function PageEditor({ params }: PageEditorProps) {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 px-4">
+    <div className="container mx-auto max-w-[90%] py-8 px-4">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -205,35 +223,22 @@ export default function PageEditor({ params }: PageEditorProps) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-4">
-          <button
-            className={`pb-2 px-1 ${
-              activeTab === 'content'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('content')}
-          >
-            Content
-          </button>
-          <button
-            className={`pb-2 px-1 ${
-              activeTab === 'seo'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('seo')}
-          >
-            SEO Settings
-          </button>
-        </div>
-      </div>
-
-      {/* Content Tab */}
-      {activeTab === 'content' && (
-        <div className="space-y-6">
+      {/* Three Column Editor: Content | SEO | Preview */}
+      <ThreeColumnEditor
+        title={title}
+        metaTitle={metaTitle}
+        metaDescription={metaDescription}
+        content={content}
+        slug={slug}
+        metaKeywords={metaKeywords}
+        ogTitle={ogTitle}
+        ogDescription={ogDescription}
+        twitterTitle={twitterTitle}
+        twitterDescription={twitterDescription}
+        isHomepage={pageType === 'homepage'}
+        heroTitle={homepageData?.heroTitle || ''}
+        contentSection={
+          <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
@@ -249,6 +254,9 @@ export default function PageEditor({ params }: PageEditorProps) {
                   placeholder="Enter page title"
                   className="mt-1"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Shows in browser tab and as page name
+                </p>
               </div>
 
               <div>
@@ -308,12 +316,18 @@ export default function PageEditor({ params }: PageEditorProps) {
               />
             </CardContent>
           </Card>
-        </div>
-      )}
 
-      {/* SEO Tab */}
-      {activeTab === 'seo' && (
-        <div className="space-y-6">
+          {/* Homepage Sections Editor - Only for Homepage */}
+          {pageType === 'homepage' && homepageData && (
+            <VisualHomepageEditor
+              data={homepageData}
+              onChange={setHomepageData}
+            />
+          )}
+        </div>
+        }
+        seoSection={
+          <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Meta Tags</CardTitle>
@@ -321,7 +335,7 @@ export default function PageEditor({ params }: PageEditorProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="metaTitle">Meta Title</Label>
+                <Label htmlFor="metaTitle">Meta Title (Optional)</Label>
                 <Input
                   id="metaTitle"
                   value={metaTitle}
@@ -330,7 +344,7 @@ export default function PageEditor({ params }: PageEditorProps) {
                   className="mt-1"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Recommended: 50-60 characters | Current: {metaTitle.length}
+                  SEO override for search engines. Leave empty to use Title field above.
                 </p>
               </div>
 
@@ -432,7 +446,8 @@ export default function PageEditor({ params }: PageEditorProps) {
             </CardContent>
           </Card>
         </div>
-      )}
+        }
+      />
 
       {/* Bottom Actions */}
       <div className="mt-8 flex justify-end gap-2">

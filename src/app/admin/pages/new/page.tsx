@@ -7,13 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LexicalEditor from '@/components/editor/LexicalEditor';
-import { ArrowLeft, Save } from 'lucide-react';
+import TemplateSelector from '@/components/pages/TemplateSelector';
+import ThreeColumnEditor from '@/components/pages/ThreeColumnEditor';
+import VisualHomepageEditor, { type HomepageData } from '@/components/pages/VisualHomepageEditor';
+import { type PageTemplate } from '@/lib/page-templates';
+import { ArrowLeft, Save, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NewPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
+  const [step, setStep] = useState<'template' | 'edit'>('template');
+  const [selectedTemplate, setSelectedTemplate] = useState<PageTemplate | null>(null);
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -21,6 +26,14 @@ export default function NewPage() {
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  
+  // Template fields
+  const [pageType, setPageType] = useState<string>('');
+  const [template, setTemplate] = useState<string>('');
+  const [isEssential, setIsEssential] = useState(false);
+
+  // Homepage data
+  const [homepageData, setHomepageData] = useState<HomepageData | null>(null);
 
   // SEO fields
   const [metaTitle, setMetaTitle] = useState('');
@@ -44,9 +57,48 @@ export default function NewPage() {
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    // Auto-generate slug if it hasn't been manually edited
-    if (!slug || slug === generateSlug(title)) {
+    // Auto-generate slug if it hasn't been manually edited (but not for homepage)
+    if (pageType !== 'homepage' && (!slug || slug === generateSlug(title))) {
       setSlug(generateSlug(newTitle));
+    }
+  };
+
+  const handleTemplateSelect = (template: PageTemplate | null) => {
+    if (template) {
+      // Apply template
+      setTitle(template.title);
+      setSlug(template.slug);
+      setContent(template.content);
+      setExcerpt(template.excerpt || '');
+      setMetaTitle(template.metaTitle);
+      setMetaDescription(template.metaDescription);
+      setMetaKeywords(template.metaKeywords);
+      setOgTitle(template.ogTitle || '');
+      setOgDescription(template.ogDescription || '');
+      setTwitterTitle(template.twitterTitle || '');
+      setTwitterDescription(template.twitterDescription || '');
+      setPageType(template.pageType);
+      setTemplate(template.id);
+      setIsEssential(template.isEssential);
+      setHomepageData(template.homepageData || null);
+      setStatus('draft'); // Start as draft
+    }
+    setSelectedTemplate(template);
+    setStep('edit');
+  };
+
+  const handleBack = () => {
+    if (step === 'edit') {
+      // Ask for confirmation if there's content
+      if (title || content) {
+        if (confirm('You have unsaved changes. Are you sure you want to go back?')) {
+          setStep('template');
+        }
+      } else {
+        setStep('template');
+      }
+    } else {
+      router.push('/admin/pages');
     }
   };
 
@@ -56,7 +108,8 @@ export default function NewPage() {
       return;
     }
 
-    if (!content.trim()) {
+    // For homepage, content can be minimal as sections are in homepageData
+    if (!content.trim() && pageType !== 'homepage') {
       alert('Please enter some content');
       return;
     }
@@ -82,6 +135,10 @@ export default function NewPage() {
           ogDescription: ogDescription || undefined,
           twitterTitle: twitterTitle || undefined,
           twitterDescription: twitterDescription || undefined,
+          pageType: pageType || undefined,
+          template: template || undefined,
+          isEssential: isEssential || undefined,
+          homepageData: homepageData || undefined,
         }),
       });
 
@@ -100,20 +157,55 @@ export default function NewPage() {
     }
   };
 
+  // Show template selector first
+  if (step === 'template') {
+    return (
+      <div className="container mx-auto max-w-[90%] py-8 px-4">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/admin/pages">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Sparkles className="h-8 w-8 text-blue-600" />
+                Create New Page
+              </h1>
+              <p className="text-gray-600">Choose a template or start from scratch</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Template Selector */}
+        <TemplateSelector
+          onSelectTemplate={handleTemplateSelect}
+          onClose={() => router.push('/admin/pages')}
+        />
+      </div>
+    );
+  }
+
+  // Show editor with split-screen preview
   return (
-    <div className="container mx-auto max-w-6xl py-8 px-4">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+    <div className="h-screen flex flex-col">
+      {/* Fixed Header */}
+      <div className="border-b bg-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/pages">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <Button variant="outline" size="sm" onClick={handleBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {step === 'edit' && selectedTemplate ? 'Choose Different Template' : 'Back'}
+          </Button>
           <div>
-            <h1 className="text-3xl font-bold">Create New Page</h1>
-            <p className="text-gray-600">Add a new page to your site</p>
+            <h1 className="text-2xl font-bold">{title || 'New Page'}</h1>
+            {selectedTemplate && (
+              <p className="text-sm text-gray-600">
+                Using template: {selectedTemplate.icon} {selectedTemplate.name}
+              </p>
+            )}
           </div>
         </div>
         <Button onClick={handleSave} disabled={saving}>
@@ -122,34 +214,22 @@ export default function NewPage() {
         </Button>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-4">
-          <button
-            className={`pb-2 px-1 ${
-              activeTab === 'content'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('content')}
-          >
-            Content
-          </button>
-          <button
-            className={`pb-2 px-1 ${
-              activeTab === 'seo'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('seo')}
-          >
-            SEO Settings
-          </button>
-        </div>
-      </div>
-
-      {/* Content Tab */}
-      {activeTab === 'content' && (
+      {/* Three Column Editor: Content | SEO | Preview */}
+      <ThreeColumnEditor
+        title={title}
+        slug={slug}
+        content={content}
+        metaTitle={metaTitle}
+        metaDescription={metaDescription}
+        metaKeywords={metaKeywords}
+        ogTitle={ogTitle}
+        ogDescription={ogDescription}
+        twitterTitle={twitterTitle}
+        twitterDescription={twitterDescription}
+        isHomepage={pageType === 'homepage'}
+        heroTitle={homepageData?.heroTitle || ''}
+        showPreviewByDefault={true}
+        contentSection={
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -166,6 +246,9 @@ export default function NewPage() {
                   placeholder="Enter page title"
                   className="mt-1"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Shows in browser tab and as page name
+                </p>
               </div>
 
               <div>
@@ -225,11 +308,17 @@ export default function NewPage() {
               />
             </CardContent>
           </Card>
-        </div>
-      )}
 
-      {/* SEO Tab */}
-      {activeTab === 'seo' && (
+          {/* Homepage Sections Editor - Only for Homepage */}
+          {pageType === 'homepage' && homepageData && (
+            <VisualHomepageEditor
+              data={homepageData}
+              onChange={setHomepageData}
+            />
+          )}
+        </div>
+        }
+        seoSection={
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -238,7 +327,7 @@ export default function NewPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="metaTitle">Meta Title</Label>
+                <Label htmlFor="metaTitle">Meta Title (Optional)</Label>
                 <Input
                   id="metaTitle"
                   value={metaTitle}
@@ -247,7 +336,7 @@ export default function NewPage() {
                   className="mt-1"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Recommended: 50-60 characters | Current: {metaTitle.length}
+                  SEO override for search engines. Leave empty to use Title field above.
                 </p>
               </div>
 
@@ -349,18 +438,8 @@ export default function NewPage() {
             </CardContent>
           </Card>
         </div>
-      )}
-
-      {/* Bottom Actions */}
-      <div className="mt-8 flex justify-end gap-2">
-        <Link href="/admin/pages">
-          <Button variant="outline">Cancel</Button>
-        </Link>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Creating...' : 'Create Page'}
-        </Button>
-      </div>
+        }
+      />
     </div>
   );
 }

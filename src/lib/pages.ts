@@ -10,12 +10,37 @@ export interface PageQueryOptions {
   order?: 'asc' | 'desc';
 }
 
+export interface HomepageData {
+  showHero: boolean;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImageId: string | null;
+  heroButtonText: string;
+  heroButtonUrl: string;
+  showFeaturedProducts: boolean;
+  featuredProductsTitle: string;
+  featuredProductsCount: number;
+  showCategories: boolean;
+  categoriesTitle: string;
+  categoriesCount: number;
+  showNewsletter: boolean;
+  newsletterTitle: string;
+  newsletterSubtitle: string;
+}
+
 export interface CreatePageInput {
   title: string;
   slug: string;
   content: string;
   excerpt?: string;
   status?: 'draft' | 'published';
+  // Template system
+  pageType?: string;
+  template?: string;
+  isEssential?: boolean;
+  // Homepage sections
+  homepageData?: HomepageData;
+  // SEO
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
@@ -36,6 +61,13 @@ export interface UpdatePageInput {
   content?: string;
   excerpt?: string;
   status?: 'draft' | 'published';
+  // Template system
+  pageType?: string;
+  template?: string;
+  isEssential?: boolean;
+  // Homepage sections
+  homepageData?: HomepageData;
+  // SEO
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
@@ -245,6 +277,13 @@ export async function createPage(data: CreatePageInput): Promise<Page> {
     content: data.content,
     excerpt: data.excerpt,
     status: data.status || 'draft',
+    // Template system
+    pageType: data.pageType,
+    template: data.template,
+    isEssential: data.isEssential || false,
+    // Homepage data
+    homepageData: data.homepageData ? JSON.stringify(data.homepageData) : null,
+    // SEO
     metaTitle: data.metaTitle,
     metaDescription: data.metaDescription,
     metaKeywords: data.metaKeywords,
@@ -292,6 +331,18 @@ export async function updatePage(id: string, data: UpdatePageInput): Promise<Pag
   if (data.title !== undefined) updateData.title = data.title;
   if (data.content !== undefined) updateData.content = data.content;
   if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
+  
+  // Template system
+  if (data.pageType !== undefined) updateData.pageType = data.pageType;
+  if (data.template !== undefined) updateData.template = data.template;
+  if (data.isEssential !== undefined) updateData.isEssential = data.isEssential;
+  
+  // Homepage data
+  if (data.homepageData !== undefined) {
+    updateData.homepageData = data.homepageData ? JSON.stringify(data.homepageData) : null;
+  }
+  
+  // SEO fields
   if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
   if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
   if (data.metaKeywords !== undefined) updateData.metaKeywords = data.metaKeywords;
@@ -392,4 +443,119 @@ export function extractExcerpt(html: string, maxLength: number = 160): string {
   const lastSpace = trimmed.lastIndexOf(' ');
   
   return (lastSpace > 0 ? trimmed.substring(0, lastSpace) : trimmed) + '...';
+}
+
+/**
+ * Get pages by type (homepage, about, contact, etc.)
+ */
+export async function getPagesByType(pageType: string) {
+  return db.page.findMany({
+    where: { pageType },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+/**
+ * Get essential pages (Terms, Privacy, etc.)
+ */
+export async function getEssentialPages() {
+  return db.page.findMany({
+    where: { isEssential: true },
+    orderBy: { createdAt: 'asc' },
+  });
+}
+
+/**
+ * Check if a page type already exists (for unique pages like homepage)
+ */
+export async function pageTypeExists(pageType: string, excludeId?: string): Promise<boolean> {
+  const where: Prisma.PageWhereInput = { pageType };
+  if (excludeId) {
+    where.id = { not: excludeId };
+  }
+  
+  const count = await db.page.count({ where });
+  return count > 0;
+}
+
+/**
+ * Get or create homepage
+ */
+export async function getOrCreateHomepage() {
+  // Try to find existing homepage by slug first (most reliable)
+  let homepage = await db.page.findFirst({
+    where: {
+      slug: '',
+    },
+  });
+
+  // If not found by slug, try other methods
+  if (!homepage) {
+    homepage = await db.page.findFirst({
+      where: {
+        OR: [
+          { pageType: 'homepage' },
+          { isHomepage: true }
+        ]
+      },
+    });
+  }
+
+  // If still no homepage exists, create one with defaults
+  if (!homepage) {
+    const defaultHomepageData: HomepageData = {
+      showHero: true,
+      heroTitle: 'Welcome to Our Store',
+      heroSubtitle: 'Discover amazing products at great prices',
+      heroImageId: null,
+      heroButtonText: 'Shop Now',
+      heroButtonUrl: '/products',
+      showFeaturedProducts: true,
+      featuredProductsTitle: 'Featured Products',
+      featuredProductsCount: 8,
+      showCategories: true,
+      categoriesTitle: 'Shop by Category',
+      categoriesCount: 6,
+      showNewsletter: true,
+      newsletterTitle: 'Stay Updated',
+      newsletterSubtitle: 'Subscribe to get special offers and updates',
+    };
+
+    try {
+      homepage = await createPage({
+        title: 'Homepage',
+        slug: '',
+        content: '<p>This is your homepage. Configure sections below.</p>',
+        status: 'published',
+        pageType: 'homepage',
+        template: 'homepage',
+        isEssential: true,
+        homepageData: defaultHomepageData,
+        metaTitle: 'Welcome to Our Store',
+        metaDescription: 'Discover amazing products at great prices. Shop our wide selection of quality products with fast shipping.',
+      });
+    } catch (error) {
+      // If creation fails (e.g., slug conflict), try to find it again
+      homepage = await db.page.findFirst({
+        where: {
+          slug: '',
+        },
+      });
+      
+      if (!homepage) {
+        throw error; // Re-throw if still not found
+      }
+    }
+  }
+
+  return homepage;
 }

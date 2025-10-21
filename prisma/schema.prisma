@@ -93,10 +93,18 @@ model Page {
   id               String    @id @default(cuid())
   title            String
   slug             String    @unique
-  content          String    @db.Text // TipTap JSON content
+  content          String    @db.Text // HTML content from Lexical editor
   excerpt          String?   @db.Text
   status           String    @default("draft") // draft, published
-  isHomepage       Boolean   @default(false)
+  
+  // Page Type & Template System
+  pageType         String?   // 'homepage', 'about', 'contact', 'terms', 'privacy', 'return', 'shipping', 'faq', 'custom'
+  template         String?   // Template used for creation
+  isEssential      Boolean   @default(false) // Essential pages can't be deleted
+  isHomepage       Boolean   @default(false) // Legacy field, kept for backward compatibility
+  
+  // Homepage sections configuration (JSON stored as text)
+  homepageData     String?   @db.Text // JSON: { showHero, heroTitle, showFeaturedProducts, etc. }
   
   // SEO fields
   metaTitle        String?
@@ -132,6 +140,7 @@ model Page {
   @@index([status])
   @@index([authorId])
   @@index([publishedAt])
+  @@index([pageType])
   @@map("pages")
 }
 

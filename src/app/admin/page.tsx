@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Home, Palette, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Palette, MessageCircle, TrendingUp } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -97,6 +97,25 @@ export default function AdminDashboard() {
                 </Card>
               </Link>
 
+              <Link href="/admin/seo" aria-label="SEO Dashboard">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-emerald-500" role="img" aria-label="SEO icon" />
+                      SEO Dashboard
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Monitor and optimize SEO across all pages
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      View Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
               <Link href="/admin/menus" aria-label="Menus">
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
@@ -111,25 +130,6 @@ export default function AdminDashboard() {
                     </p>
                     <Button variant="ghost" size="sm" className="w-full">
                       Open Menus <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link href="/admin/homepage" aria-label="Homepage">
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Home className="h-5 w-5 text-green-500" role="img" aria-label="Homepage icon" />
-                      Homepage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                      Customize homepage layout and sections
-                    </p>
-                    <Button variant="ghost" size="sm" className="w-full">
-                      Configure Homepage <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>
