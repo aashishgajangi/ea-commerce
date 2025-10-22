@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Mark this route as dynamic since it uses query parameters
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const size = parseInt(searchParams.get('size') || '192');
+    const size = parseInt(request.nextUrl.searchParams.get('size') || '192');
     
     // Create a simple SVG icon as a placeholder
     const svg = `

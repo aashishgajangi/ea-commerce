@@ -234,11 +234,33 @@ export default function SettingsPage() {
               </div>
               <div>
                 <Label htmlFor="currency">Currency</Label>
-                <Input
+                <select
                   id="currency"
                   value={general.currency}
                   onChange={(e) => setGeneral({ ...general, currency: e.target.value })}
-                />
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="USD">USD - US Dollar ($)</option>
+                  <option value="EUR">EUR - Euro (€)</option>
+                  <option value="GBP">GBP - British Pound (£)</option>
+                  <option value="INR">INR - Indian Rupee (₹)</option>
+                  <option value="JPY">JPY - Japanese Yen (¥)</option>
+                  <option value="AUD">AUD - Australian Dollar (A$)</option>
+                  <option value="CAD">CAD - Canadian Dollar (C$)</option>
+                  <option value="CHF">CHF - Swiss Franc (Fr)</option>
+                  <option value="CNY">CNY - Chinese Yuan (¥)</option>
+                  <option value="SEK">SEK - Swedish Krona (kr)</option>
+                  <option value="NZD">NZD - New Zealand Dollar (NZ$)</option>
+                  <option value="MXN">MXN - Mexican Peso ($)</option>
+                  <option value="SGD">SGD - Singapore Dollar (S$)</option>
+                  <option value="HKD">HKD - Hong Kong Dollar (HK$)</option>
+                  <option value="NOK">NOK - Norwegian Krone (kr)</option>
+                  <option value="KRW">KRW - South Korean Won (₩)</option>
+                  <option value="TRY">TRY - Turkish Lira (₺)</option>
+                  <option value="RUB">RUB - Russian Ruble (₽)</option>
+                  <option value="BRL">BRL - Brazilian Real (R$)</option>
+                  <option value="ZAR">ZAR - South African Rand (R)</option>
+                </select>
               </div>
               <div>
                 <Label htmlFor="language">Language</Label>

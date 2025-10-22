@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
       tagline: tagline || "",
     });
 
-    return NextResponse.json({ success: true });
+    // Clear cache to ensure new currency is immediately available
+    await config.clearCache();
+
+    return NextResponse.json({ success: true, message: "Settings updated successfully. Currency changes will be reflected immediately." });
   } catch (error) {
     console.error("Failed to update general settings:", error);
     return NextResponse.json(

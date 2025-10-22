@@ -6,20 +6,20 @@ import { auth } from "@/auth"
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session || session.user.role !== "admin") {
+    if (!session?.user || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get("page") || "1")
-    const limit = parseInt(searchParams.get("limit") || "20")
-    const search = searchParams.get("search") || ""
-    const role = searchParams.get("role") || ""
-    const verified = searchParams.get("verified") || ""
+    const page = parseInt(request.nextUrl.searchParams.get("page") || "1")
+    const limit = parseInt(request.nextUrl.searchParams.get("limit") || "20")
+    const search = request.nextUrl.searchParams.get("search") || ""
+    const role = request.nextUrl.searchParams.get("role") || ""
+    const verified = request.nextUrl.searchParams.get("verified") || ""
 
     const skip = (page - 1) * limit
 
-    const where: Record<string, unknown> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
 
     if (search) {
       where.OR = [

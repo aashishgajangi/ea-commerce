@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -28,8 +28,25 @@ export default function MobileSearchBar({ onClose, textColor, mobileMenuStyle }:
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [currency, setCurrency] = useState('USD');
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Fetch currency on mount
+  useEffect(() => {
+    const fetchCurrency = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/general');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrency(data.currency || 'USD');
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency:', error);
+      }
+    };
+    fetchCurrency();
+  }, []);
 
   // Fetch suggestions
   const fetchSuggestions = async (searchQuery: string) => {
@@ -115,7 +132,7 @@ export default function MobileSearchBar({ onClose, textColor, mobileMenuStyle }:
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(price);
   };
 

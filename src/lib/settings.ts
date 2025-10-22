@@ -368,9 +368,33 @@ export async function getSettingsByType(type: SettingType) {
 
 /**
  * Get general settings
+ * Reads from Configuration table (same as admin settings page)
  */
 export async function getGeneralSettings(): Promise<GeneralSettings> {
-  return await getSetting("general", DEFAULT_GENERAL_SETTINGS);
+  try {
+    const { config: configLib, ConfigKeys } = await import('./config');
+    
+    const [siteName, description, currency, timezone, language, tagline] = await Promise.all([
+      configLib.get(ConfigKeys.SITE_NAME),
+      configLib.get(ConfigKeys.SITE_DESCRIPTION),
+      configLib.get(ConfigKeys.CURRENCY),
+      configLib.get("timezone"),
+      configLib.get("language"),
+      configLib.get("tagline"),
+    ]);
+
+    return {
+      siteName: siteName || DEFAULT_GENERAL_SETTINGS.siteName,
+      tagline: tagline || DEFAULT_GENERAL_SETTINGS.tagline,
+      description: description || DEFAULT_GENERAL_SETTINGS.description,
+      timezone: timezone || DEFAULT_GENERAL_SETTINGS.timezone,
+      currency: currency || DEFAULT_GENERAL_SETTINGS.currency,
+      language: language || DEFAULT_GENERAL_SETTINGS.language,
+    };
+  } catch (error) {
+    console.error('Failed to get general settings:', error);
+    return DEFAULT_GENERAL_SETTINGS;
+  }
 }
 
 /**

@@ -48,6 +48,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'draft' | 'published' | 'archived'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [currency, setCurrency] = useState('USD');
   const [deleting, setDeleting] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
 
@@ -72,6 +73,22 @@ export default function ProductsPage() {
 
   // Import/Export
   const [importing, setImporting] = useState(false);
+
+  // Fetch currency on mount
+  useEffect(() => {
+    const fetchCurrency = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/general');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrency(data.currency || 'USD');
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency:', error);
+      }
+    };
+    fetchCurrency();
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -391,7 +408,7 @@ export default function ProductsPage() {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: currency,
     }).format(price);
   };
 

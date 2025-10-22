@@ -9,8 +9,7 @@ import { z } from 'zod';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
+    const sessionId = request.nextUrl.searchParams.get('sessionId');
 
     // Get cart for authenticated user or guest session
     const cart = await getOrCreateCart(
@@ -105,8 +104,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await auth();
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
+    const sessionId = request.nextUrl.searchParams.get('sessionId');
 
     // Get cart
     const cart = await getOrCreateCart(

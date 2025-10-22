@@ -7,7 +7,7 @@ import { config, ConfigKeys } from '@/lib/config';
 import MobileMenu from './MobileMenu';
 import AuthLinks from '@/components/auth/AuthLinks';
 import AnnouncementBar from './AnnouncementBar';
-import SearchBar from '@/components/search/SearchBar';
+import ModernSearchBar from '@/components/search/ModernSearchBar';
 import CartIcon from '@/components/cart/CartIcon';
 
 export default async function Header() {
@@ -210,10 +210,10 @@ export default async function Header() {
 
           {/* Right Side: Search, Cart, Auth, Mobile Menu */}
           <div className="flex items-center gap-4">
-            {/* Search Bar */}
+            {/* Modern Search Bar */}
             {settings.header.showSearch && (
-              <div className="hidden md:block w-80">
-                <SearchBar />
+              <div className="hidden md:block">
+                <ModernSearchBar />
               </div>
             )}
 

@@ -3,8 +3,7 @@ import { db } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const encodedToken = searchParams.get("token")
+    const encodedToken = request.nextUrl.searchParams.get("token")
 
     if (!encodedToken) {
       return NextResponse.json(
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Redirect to login page with success message
-    const loginUrl = new URL("/login", request.url)
+    const loginUrl = new URL("/login", request.nextUrl.origin)
     loginUrl.searchParams.set("verified", "true")
 
     return NextResponse.redirect(loginUrl)
