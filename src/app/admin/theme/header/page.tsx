@@ -16,6 +16,8 @@ interface HeaderSettings {
   showLogoImage: boolean;
   showLogoText: boolean;
   logoText: string;
+  logoImageSize: 'sm' | 'md' | 'lg' | 'xl';
+  logoTextSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
@@ -55,6 +57,8 @@ export default function HeaderSettingsPage() {
     showLogoImage: true,
     showLogoText: false,
     logoText: "",
+    logoImageSize: 'md',
+    logoTextSize: 'md',
     showTagline: true,
     showSearch: true,
     sticky: true,
@@ -306,6 +310,21 @@ export default function HeaderSettingsPage() {
                         />
                         <Label htmlFor="showLogoImage">Show Logo Image</Label>
                       </div>
+                      {header.showLogoImage && (
+                        <div>
+                          <Label>Logo Image Size</Label>
+                          <select
+                            value={header.logoImageSize}
+                            onChange={(e) => setHeader({ ...header, logoImageSize: e.target.value as 'sm' | 'md' | 'lg' | 'xl' })}
+                            className="w-full px-3 py-2 border rounded-md"
+                          >
+                            <option value="sm">Small (32px)</option>
+                            <option value="md">Medium (48px)</option>
+                            <option value="lg">Large (64px)</option>
+                            <option value="xl">Extra Large (80px)</option>
+                          </select>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
@@ -317,14 +336,31 @@ export default function HeaderSettingsPage() {
                         <Label htmlFor="showLogoText">Show Logo Text</Label>
                       </div>
                       {header.showLogoText && (
-                        <div>
-                          <Label>Logo Text</Label>
-                          <Input
-                            value={header.logoText}
-                            onChange={(e) => setHeader({ ...header, logoText: e.target.value })}
-                            placeholder="Your Brand Name"
-                          />
-                        </div>
+                        <>
+                          <div>
+                            <Label>Logo Text</Label>
+                            <Input
+                              value={header.logoText}
+                              onChange={(e) => setHeader({ ...header, logoText: e.target.value })}
+                              placeholder="Your Brand Name"
+                            />
+                          </div>
+                          <div>
+                            <Label>Logo Text Size</Label>
+                            <select
+                              value={header.logoTextSize}
+                              onChange={(e) => setHeader({ ...header, logoTextSize: e.target.value as 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' })}
+                              className="w-full px-3 py-2 border rounded-md"
+                            >
+                              <option value="sm">Small (16px)</option>
+                              <option value="md">Medium (20px)</option>
+                              <option value="lg">Large (24px)</option>
+                              <option value="xl">Extra Large (30px)</option>
+                              <option value="2xl">2X Large (36px)</option>
+                              <option value="3xl">3X Large (48px)</option>
+                            </select>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>

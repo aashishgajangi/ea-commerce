@@ -39,6 +39,8 @@ export interface HeaderSettings {
   showLogoImage: boolean;
   showLogoText: boolean;
   logoText: string;
+  logoImageSize: 'sm' | 'md' | 'lg' | 'xl';
+  logoTextSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   showTagline: boolean;
   showSearch: boolean;
   sticky: boolean;
@@ -185,6 +187,8 @@ export const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
   showLogoImage: true,
   showLogoText: false,
   logoText: "",
+  logoImageSize: 'md',
+  logoTextSize: 'md',
   showTagline: true,
   showSearch: true,
   sticky: true,

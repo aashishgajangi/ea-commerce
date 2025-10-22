@@ -21,6 +21,8 @@ interface MobileSettingsSectionProps {
     showLogoImage: boolean;
     showLogoText: boolean;
     logoText: string;
+    logoImageSize: 'sm' | 'md' | 'lg' | 'xl';
+    logoTextSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
     showTagline: boolean;
     showSearch: boolean;
     sticky: boolean;

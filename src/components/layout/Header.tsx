@@ -43,6 +43,24 @@ export default async function Header() {
     modern: 'border-b-2 rounded-b-lg shadow-md'
   };
 
+  // Logo image size classes (height)
+  const logoImageSizeClasses = {
+    sm: 'h-8',
+    md: 'h-12',
+    lg: 'h-16',
+    xl: 'h-20'
+  };
+
+  // Logo text size classes
+  const logoTextSizeClasses = {
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-2xl',
+    xl: 'text-3xl',
+    '2xl': 'text-4xl',
+    '3xl': 'text-5xl'
+  };
+
   const stickyClass = settings.header.sticky
     ? 'sticky top-0 z-40 backdrop-blur-sm'
     : '';
@@ -134,13 +152,13 @@ export default async function Header() {
                 alt={logo.alt || siteName}
                 width={180}
                 height={60}
-                className="h-12 w-auto object-contain"
+                className={`${logoImageSizeClasses[settings.header.logoImageSize || 'md']} w-auto object-contain`}
                 unoptimized={true}
               />
             )}
             {settings.header.showLogoText && (
               <div>
-                <h1 className="text-xl font-bold" style={{ color: 'var(--theme-header-text)' }}>
+                <h1 className={`${logoTextSizeClasses[settings.header.logoTextSize || 'md']} font-bold`} style={{ color: 'var(--theme-header-text)' }}>
                   {settings.header.logoText || siteName}
                 </h1>
                 {settings.header.showTagline && tagline && (
@@ -150,7 +168,7 @@ export default async function Header() {
             )}
             {!settings.header.showLogoImage && !settings.header.showLogoText && (
               <div>
-                <h1 className="text-xl font-bold" style={{ color: 'var(--theme-header-text)' }}>{siteName}</h1>
+                <h1 className={`${logoTextSizeClasses[settings.header.logoTextSize || 'md']} font-bold`} style={{ color: 'var(--theme-header-text)' }}>{siteName}</h1>
                 {settings.header.showTagline && tagline && (
                   <p className="text-sm" style={{ color: 'var(--theme-header-text)' }}>{tagline}</p>
                 )}
