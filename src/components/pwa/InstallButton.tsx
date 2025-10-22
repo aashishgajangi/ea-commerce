@@ -55,6 +55,23 @@ export default function InstallButton() {
     }
   }, [deferredPrompt, settings, isInstalled]);
 
+  // Debug logging - Enhanced
+  useEffect(() => {
+    console.log('🔍 PWA InstallButton Debug:', {
+      deferredPrompt: !!deferredPrompt,
+      settings,
+      isInstalled,
+      showPrompt,
+      pwaEnabled: settings?.enabled,
+      installPromptEnabled: settings?.installPromptEnabled,
+      sessionDismissed: sessionStorage.getItem('pwa-prompt-dismissed'),
+      userAgent: navigator.userAgent,
+      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+      serviceWorkerSupported: 'serviceWorker' in navigator,
+      beforeInstallPromptSupported: 'onbeforeinstallprompt' in window
+    });
+  }, [deferredPrompt, settings, isInstalled, showPrompt]);
+
   async function loadSettings() {
     try {
       const response = await fetch('/api/pwa/settings');

@@ -15,9 +15,10 @@ export async function GET() {
       themeColor: settings.themeColor,
       installPromptEnabled: settings.installPromptEnabled,
       installPromptDelay: settings.installPromptDelay,
+      enableOfflineMode: settings.enableOfflineMode, // REQUIRED for service worker registration
     }, {
       headers: {
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        'Cache-Control': 'public, max-age=60, s-maxage=60', // Reduced cache for faster updates
       },
     });
   } catch (error) {

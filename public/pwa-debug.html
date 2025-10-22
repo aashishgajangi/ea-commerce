@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Debug Tool</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      color: #10b981;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .status { display: flex; align-items: center; margin: 10px 0; }
+    .status-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .warning { color: #f59e0b; }
+    .info { color: #3b82f6; }
+    pre {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    button {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover { background: #059669; }
+    button:disabled {
+      background: #d1d5db;
+      cursor: not-allowed;
+    }
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: none;
+      max-width: 400px;
+      width: 90%;
+    }
+    .install-prompt.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 PWA Debug Tool</h1>
+    
+    <div class="section">
+      <h2>📱 Environment Check</h2>
+      <div id="env-check"></div>
+    </div>
+
+    <div class="section">
+      <h2>📄 Manifest Status</h2>
+      <div id="manifest-status"></div>
+      <button onclick="checkManifest()">Check Manifest</button>
+      <pre id="manifest-data" style="display:none;"></pre>
+    </div>
+
+    <div class="section">
+      <h2>⚙️ Service Worker Status</h2>
+      <div id="sw-status"></div>
+      <button onclick="registerSW()">Register Service Worker</button>
+      <button onclick="unregisterSW()">Unregister All</button>
+    </div>
+
+    <div class="section">
+      <h2>🎯 Install Prompt Status</h2>
+      <div id="install-status"></div>
+      <button id="install-btn" onclick="installApp()" disabled>Install App</button>
+    </div>
+
+    <div class="section">
+      <h2>📊 PWA Criteria</h2>
+      <div id="criteria"></div>
+    </div>
+
+    <div class="section">
+      <h2>🔧 Actions</h2>
+      <button onclick="clearCache()">Clear All Caches</button>
+      <button onclick="clearStorage()">Clear Session Storage</button>
+      <button onclick="location.reload()">Reload Page</button>
+    </div>
+  </div>
+
+  <div id="install-prompt" class="install-prompt">
+    <h3>Install App</h3>
+    <p>Install this app on your device for a better experience!</p>
+    <button onclick="installFromPrompt()">Install</button>
+    <button onclick="dismissPrompt()">Not Now</button>
+  </div>
+
+  <script>
+    let deferredPrompt = null;
+
+    // Environment Check
+    function checkEnvironment() {
+      const checks = [
+        { name: 'HTTPS or Localhost', pass: location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' },
+        { name: 'Service Worker Support', pass: 'serviceWorker' in navigator },
+        { name: 'Manifest Support', pass: 'onbeforeinstallprompt' in window || navigator.standalone !== undefined },
+        { name: 'Is Standalone', pass: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone },
+        { name: 'Online', pass: navigator.onLine }
+      ];
+
+      const html = checks.map(check => `
+        <div class="status">
+          <span class="status-icon ${check.pass ? 'success' : 'error'}">${check.pass ? '✅' : '❌'}</span>
+          <span>${check.name}: ${check.pass ? 'Yes' : 'No'}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('env-check').innerHTML = html;
+    }
+
+    // Check Manifest
+    async function checkManifest() {
+      try {
+        const response = await fetch('/manifest.json');
+        const manifest = await response.json();
+        
+        document.getElementById('manifest-status').innerHTML = `
+          <div class="status">
+            <span class="status-icon success">✅</span>
+            <span>Manifest loaded successfully</span>
+          </div>
+          <div class="status">
+            <span class="status-icon info">ℹ️</span>
+            <span>Name: ${manifest.name}</span>
+          </div>
+          <div class="status">
+            <span class="status-icon info">ℹ️</span>
+            <span>Icons: ${manifest.icons?.length || 0}</span>
+          </div>
+        `;
+        
+        document.getElementById('manifest-data').style.display = 'block';
+        document.getElementById('manifest-data').textContent = JSON.stringify(manifest, null, 2);
+      } catch (error) {
+        document.getElementById('manifest-status').innerHTML = `
+          <div class="status">
+            <span class="status-icon error">❌</span>
+            <span>Failed to load manifest: ${error.message}</span>
+          </div>
+        `;
+      }
+    }
+
+    // Service Worker
+    async function registerSW() {
+      if (!('serviceWorker' in navigator)) {
+        alert('Service Worker not supported');
+        return;
+      }
+
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        console.log('SW registered:', registration);
+        checkSWStatus();
+        alert('Service Worker registered successfully!');
+      } catch (error) {
+        console.error('SW registration failed:', error);
+        alert('Service Worker registration failed: ' + error.message);
+      }
+    }
+
+    async function unregisterSW() {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+      }
+      checkSWStatus();
+      alert('All service workers unregistered');
+    }
+
+    async function checkSWStatus() {
+      if (!('serviceWorker' in navigator)) {
+        document.getElementById('sw-status').innerHTML = `
+          <div class="status">
+            <span class="status-icon error">❌</span>
+            <span>Service Worker not supported</span>
+          </div>
+        `;
+        return;
+      }
+
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      
+      if (registrations.length === 0) {
+        document.getElementById('sw-status').innerHTML = `
+          <div class="status">
+            <span class="status-icon warning">⚠️</span>
+            <span>No service worker registered</span>
+          </div>
+        `;
+      } else {
+        const reg = registrations[0];
+        document.getElementById('sw-status').innerHTML = `
+          <div class="status">
+            <span class="status-icon success">✅</span>
+            <span>Service Worker registered</span>
+          </div>
+          <div class="status">
+            <span class="status-icon info">ℹ️</span>
+            <span>Scope: ${reg.scope}</span>
+          </div>
+          <div class="status">
+            <span class="status-icon info">ℹ️</span>
+            <span>Active: ${!!reg.active}</span>
+          </div>
+          <div class="status">
+            <span class="status-icon info">ℹ️</span>
+            <span>Installing: ${!!reg.installing}</span>
+          </div>
+        `;
+      }
+    }
+
+    // Install Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('✅ beforeinstallprompt event fired!');
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      document.getElementById('install-status').innerHTML = `
+        <div class="status">
+          <span class="status-icon success">✅</span>
+          <span>Install prompt available!</span>
+        </div>
+      `;
+      
+      document.getElementById('install-btn').disabled = false;
+      
+      // Show custom prompt after 2 seconds
+      setTimeout(() => {
+        document.getElementById('install-prompt').classList.add('show');
+      }, 2000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ App installed!');
+      document.getElementById('install-status').innerHTML = `
+        <div class="status">
+          <span class="status-icon success">✅</span>
+          <span>App installed successfully!</span>
+        </div>
+      `;
+      deferredPrompt = null;
+    });
+
+    async function installApp() {
+      if (!deferredPrompt) {
+        alert('Install prompt not available');
+        return;
+      }
+
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('Install outcome:', outcome);
+      
+      if (outcome === 'accepted') {
+        alert('App installed!');
+      } else {
+        alert('Install dismissed');
+      }
+      
+      deferredPrompt = null;
+      document.getElementById('install-btn').disabled = true;
+    }
+
+    function installFromPrompt() {
+      installApp();
+      dismissPrompt();
+    }
+
+    function dismissPrompt() {
+      document.getElementById('install-prompt').classList.remove('show');
+    }
+
+    // PWA Criteria
+    async function checkCriteria() {
+      const criteria = [];
+      
+      // Check manifest
+      try {
+        const response = await fetch('/manifest.json');
+        const manifest = await response.json();
+        criteria.push({ name: 'Valid manifest.json', pass: true });
+        criteria.push({ name: 'Has name', pass: !!manifest.name });
+        criteria.push({ name: 'Has icons', pass: manifest.icons && manifest.icons.length >= 2 });
+        criteria.push({ name: 'Has start_url', pass: !!manifest.start_url });
+      } catch {
+        criteria.push({ name: 'Valid manifest.json', pass: false });
+      }
+
+      // Check service worker
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      criteria.push({ name: 'Service worker registered', pass: registrations.length > 0 });
+
+      // Check HTTPS
+      criteria.push({ name: 'HTTPS or localhost', pass: location.protocol === 'https:' || location.hostname === 'localhost' });
+
+      const html = criteria.map(c => `
+        <div class="status">
+          <span class="status-icon ${c.pass ? 'success' : 'error'}">${c.pass ? '✅' : '❌'}</span>
+          <span>${c.name}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('criteria').innerHTML = html;
+    }
+
+    // Clear functions
+    async function clearCache() {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      alert('All caches cleared');
+    }
+
+    function clearStorage() {
+      sessionStorage.clear();
+      localStorage.removeItem('pwa-prompt-dismissed');
+      alert('Storage cleared');
+    }
+
+    // Initialize
+    checkEnvironment();
+    checkSWStatus();
+    checkManifest();
+    checkCriteria();
+
+    // Check install status
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('install-status').innerHTML = `
+        <div class="status">
+          <span class="status-icon success">✅</span>
+          <span>App is already installed!</span>
+        </div>
+      `;
+    } else {
+      document.getElementById('install-status').innerHTML = `
+        <div class="status">
+          <span class="status-icon warning">⚠️</span>
+          <span>Waiting for install prompt...</span>
+        </div>
+        <div class="status">
+          <span class="status-icon info">ℹ️</span>
+          <span>The beforeinstallprompt event will fire when criteria are met</span>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -46,7 +46,7 @@ export default function PWASettingsPage() {
   const [saving, setSaving] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [selectingIconType, setSelectingIconType] = useState<'512' | '192' | null>(null);
-  const [media, setMedia] = useState<Array<{id: string; url: string; altText?: string}>>([]);
+  const [media, setMedia] = useState<Array<{id: string; path: string; url?: string; alt?: string; originalName?: string; filename?: string}>>([]);
 
   useEffect(() => {
     loadSettings();
@@ -72,7 +72,7 @@ export default function PWASettingsPage() {
       const response = await fetch('/api/admin/media?limit=100');
       if (response.ok) {
         const data = await response.json();
-        setMedia(data.items || []);
+        setMedia(data.media || []);
       }
     } catch (error) {
       console.error('Failed to load media:', error);
@@ -253,7 +253,7 @@ export default function PWASettingsPage() {
                   {selectedIcon512 ? (
                     <div className="relative w-24 h-24 border-2 border-gray-200 rounded-lg overflow-hidden">
                       <Image
-                        src={selectedIcon512.url}
+                        src={selectedIcon512.path}
                         alt="App Icon"
                         fill
                         className="object-cover"
@@ -290,7 +290,7 @@ export default function PWASettingsPage() {
                   {selectedIcon192 ? (
                     <div className="relative w-16 h-16 border-2 border-gray-200 rounded-lg overflow-hidden">
                       <Image
-                        src={selectedIcon192.url}
+                        src={selectedIcon192.path}
                         alt="Small Icon"
                         fill
                         className="object-cover"
@@ -561,7 +561,7 @@ export default function PWASettingsPage() {
                         {selectedIcon512 ? (
                           <div className="relative w-20 h-20 mb-3">
                             <Image
-                              src={selectedIcon512.url}
+                              src={selectedIcon512.path}
                               alt="App Icon"
                               fill
                               className="object-cover rounded-2xl"
@@ -652,8 +652,8 @@ export default function PWASettingsPage() {
                     className="relative aspect-square border-2 border-gray-200 rounded-lg overflow-hidden hover:border-green-500 transition-colors"
                   >
                     <Image
-                      src={item.url}
-                      alt={item.altText || 'Media'}
+                      src={item.path}
+                      alt={item.alt || item.originalName || item.filename || 'Media'}
                       fill
                       className="object-cover"
                     />

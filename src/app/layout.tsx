@@ -32,8 +32,9 @@ export default async function RootLayout({
 }>) {
   // Get theme and appearance settings for global theme provider
   const themeSettings = await getThemeSettings();
-  const { getAppearanceSettings } = await import("@/lib/settings");
+  const { getAppearanceSettings, getPWASettings } = await import("@/lib/settings");
   const appearanceSettings = await getAppearanceSettings();
+  const pwaSettings = await getPWASettings();
   
   // Merge appearance colors into theme settings
   const mergedTheme = {
@@ -47,10 +48,15 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#10b981" />
+        <meta name="theme-color" content={pwaSettings.themeColor} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content={pwaSettings.appName} />
+        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <meta name="msapplication-TileColor" content={pwaSettings.themeColor} />
+        <meta name="msapplication-TileImage" content="/icon-192.svg" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

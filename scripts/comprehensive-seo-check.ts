@@ -19,18 +19,18 @@ async function comprehensiveSEOCheck() {
 
   const issues: SEOIssue[] = [];
   let score = 100;
-
+  
   // Find homepage
   const homepage = await db.page.findFirst({
-    where: { slug: '' },
+    where: { isHomepage: true },
   });
 
   if (!homepage) {
-    console.log('❌ Homepage not found!\n');
+    console.log('❌ No homepage found!');
     return;
   }
 
-  console.log('📄 Analyzing Homepage...\n');
+  const homepageData = homepage.homepageData as any;
 
   // 1. PAGE TITLE
   console.log('1️⃣  PAGE TITLE (Browser Tab)');
