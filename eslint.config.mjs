@@ -18,6 +18,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "scripts/comprehensive-seo-check.ts",
+      "scripts/test-all-homepage-fields.ts",
+      "scripts/verify-homepage-seo.ts",
     ],
   },
 ];

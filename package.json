@@ -16,6 +16,7 @@
     "setup:reset:full": "tsx scripts/reset-setup.ts 2",
     "test:favicon": "tsx scripts/test-favicon.ts",
     "test:cart": "tsx scripts/test-cart.ts",
+    "test:pwa": "tsx scripts/test-pwa.ts",
     "verify:seo": "tsx scripts/verify-homepage-seo.ts",
     "seo:check": "tsx scripts/comprehensive-seo-check.ts",
     "db:push": "prisma db push",

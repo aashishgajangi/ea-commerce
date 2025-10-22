@@ -30,8 +30,6 @@ async function comprehensiveSEOCheck() {
     return;
   }
 
-  const homepageData = homepage.homepageData as any;
-
   // 1. PAGE TITLE
   console.log('1️⃣  PAGE TITLE (Browser Tab)');
   const pageTitle = homepage.title || '';
@@ -118,11 +116,13 @@ async function comprehensiveSEOCheck() {
 
   // 3. HEADING STRUCTURE
   console.log('3️⃣  HEADING STRUCTURE (H1, H2, H3)');
-  let homepageData;
+  let homepageData: any = null;
   try {
-    homepageData = homepage.homepageData ? JSON.parse(homepage.homepageData) : null;
-  } catch (e) {
-    homepageData = null;
+    homepageData = typeof homepage.homepageData === 'string' 
+      ? JSON.parse(homepage.homepageData) 
+      : homepage.homepageData;
+  } catch {
+    homepageData = homepage.homepageData;
   }
 
   let h1Count = 0;
