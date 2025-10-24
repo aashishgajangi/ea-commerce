@@ -61,7 +61,27 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className={`grid gap-6 ${
+          settings.featuredProductsColumnsMobile === 1 && settings.featuredProductsColumnsDesktop === 1
+            ? 'grid-cols-1'
+            : settings.featuredProductsColumnsMobile === 1 && settings.featuredProductsColumnsDesktop === 2
+            ? 'grid-cols-1 md:grid-cols-2'
+            : settings.featuredProductsColumnsMobile === 1 && settings.featuredProductsColumnsDesktop === 3
+            ? 'grid-cols-1 md:grid-cols-3'
+            : settings.featuredProductsColumnsMobile === 1 && settings.featuredProductsColumnsDesktop === 4
+            ? 'grid-cols-1 md:grid-cols-4'
+            : settings.featuredProductsColumnsMobile === 2 && settings.featuredProductsColumnsDesktop === 2
+            ? 'grid-cols-2'
+            : settings.featuredProductsColumnsMobile === 2 && settings.featuredProductsColumnsDesktop === 3
+            ? 'grid-cols-2 md:grid-cols-3'
+            : settings.featuredProductsColumnsMobile === 2 && settings.featuredProductsColumnsDesktop === 4
+            ? 'grid-cols-2 md:grid-cols-4'
+            : settings.featuredProductsColumnsMobile === 2 && settings.featuredProductsColumnsDesktop === 5
+            ? 'grid-cols-2 md:grid-cols-5'
+            : settings.featuredProductsColumnsMobile === 2 && settings.featuredProductsColumnsDesktop === 6
+            ? 'grid-cols-2 md:grid-cols-6'
+            : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+        }`}>
           {products.map((product) => {
             const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
             const discount = calculateDiscount(product.price, product.compareAtPrice);

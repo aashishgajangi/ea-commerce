@@ -20,6 +20,8 @@ export interface HomepageData {
   showFeaturedProducts: boolean;
   featuredProductsTitle: string;
   featuredProductsCount: number;
+  featuredProductsColumnsMobile: number;
+  featuredProductsColumnsDesktop: number;
   showCategories: boolean;
   categoriesTitle: string;
   categoriesCount: number;
@@ -522,6 +524,8 @@ export async function getOrCreateHomepage() {
       showFeaturedProducts: true,
       featuredProductsTitle: 'Featured Products',
       featuredProductsCount: 8,
+      featuredProductsColumnsMobile: 2,
+      featuredProductsColumnsDesktop: 4,
       showCategories: true,
       categoriesTitle: 'Shop by Category',
       categoriesCount: 6,

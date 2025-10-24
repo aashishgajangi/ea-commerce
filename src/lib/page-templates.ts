@@ -52,6 +52,8 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
       showFeaturedProducts: true,
       featuredProductsTitle: 'Featured Products',
       featuredProductsCount: 8,
+      featuredProductsColumnsMobile: 2,
+      featuredProductsColumnsDesktop: 4,
       showCategories: true,
       categoriesTitle: 'Shop by Category',
       categoriesCount: 6,
