@@ -1031,6 +1031,53 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
       ],
     },
   },
+
+  // 9. 404 Not Found Template
+  {
+    id: 'notfound',
+    name: '404 Not Found',
+    description: 'Custom 404 error page with helpful navigation',
+    icon: '❌',
+    pageType: 'notfound',
+    slug: '404',
+    title: '404 - Page Not Found',
+    metaTitle: '404 - Page Not Found | [Your Store Name]',
+    metaDescription: 'Sorry, the page you are looking for could not be found. Browse our store or contact us for assistance.',
+    metaKeywords: '404, not found, error page',
+    excerpt: 'The page you are looking for could not be found',
+    isEssential: true,
+    content: `
+      <h1>404 - Page Not Found</h1>
+      <p>We're sorry, but the page you are looking for could not be found. It may have been moved, deleted, or never existed.</p>
+
+      <h2>What Can You Do?</h2>
+      <ul>
+        <li><strong>Check the URL:</strong> Make sure the web address is spelled correctly</li>
+        <li><strong>Go to Homepage:</strong> Start fresh from our homepage</li>
+        <li><strong>Browse Products:</strong> Discover our latest collection</li>
+        <li><strong>Use Search:</strong> Try searching for what you're looking for</li>
+        <li><strong>Contact Us:</strong> We're here to help if you need assistance</li>
+      </ul>
+
+      <h2>Popular Pages</h2>
+      <p>Here are some pages you might be interested in:</p>
+      <ul>
+        <li><a href="/">Homepage</a> - Start shopping</li>
+        <li><a href="/products">All Products</a> - Browse our full catalog</li>
+        <li><a href="/about-us">About Us</a> - Learn more about our store</li>
+        <li><a href="/contact-us">Contact Us</a> - Get in touch with our team</li>
+      </ul>
+
+      <h2>Need Help?</h2>
+      <p>If you believe this is an error or need assistance finding what you're looking for, please don't hesitate to <a href="/contact-us">contact our customer support team</a>. We're here to help!</p>
+    `,
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      'name': '404 Not Found',
+      'description': 'The page you are looking for could not be found',
+    },
+  },
 ];
 
 /**

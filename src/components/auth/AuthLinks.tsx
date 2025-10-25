@@ -24,8 +24,18 @@ export default function AuthLinks({ accountIconName = 'user' }: AuthLinksProps) 
   const { data: session, status } = useSession()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
+  // Show loading state
   if (status === "loading") {
-    return <div className="w-20 h-8 bg-gray-200 animate-pulse rounded"></div>
+    return (
+      <div className="flex items-center gap-2">
+        <div className="md:hidden">
+          <button className="flex items-center gap-1 p-2 text-gray-700">
+            <AccountIcon className="w-5 h-5" />
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (session) {
