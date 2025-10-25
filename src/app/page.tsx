@@ -7,8 +7,9 @@ import CategoriesShowcaseSection from '@/components/homepage/CategoriesShowcaseS
 import NewsletterSection from '@/components/homepage/NewsletterSection';
 import type { Metadata } from 'next';
 
-// Enable ISR - revalidate every 10 seconds for faster updates
-export const revalidate = 10;
+// Enable ISR - revalidate every 1 hour (matches Redis cache TTL)
+// Use on-demand revalidation for immediate updates when admin changes content
+export const revalidate = 3600;
 
 // Generate metadata for SEO
 export async function generateMetadata(): Promise<Metadata> {

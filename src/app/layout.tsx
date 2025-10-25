@@ -4,10 +4,11 @@ import { generateSiteMetadata } from "@/lib/metadata";
 import AuthSessionProvider from '@/components/providers/SessionProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
 import { CartProvider } from '@/components/cart/CartContext';
+import { CurrencyProvider } from '@/components/providers/CurrencyProvider';
 import WhatsAppWidget from '@/components/WhatsAppWidget';
 import InstallButton from '@/components/pwa/InstallButton';
 import PWARegister from '@/components/pwa/PWARegister';
-import { getThemeSettings } from "@/lib/settings";
+import { getThemeSettings, getAppearanceSettings, getPWASettings, getGeneralSettings } from "@/lib/settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,10 +32,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Get theme and appearance settings for global theme provider
-  const themeSettings = await getThemeSettings();
-  const { getAppearanceSettings, getPWASettings } = await import("@/lib/settings");
-  const appearanceSettings = await getAppearanceSettings();
-  const pwaSettings = await getPWASettings();
+  const [themeSettings, appearanceSettings, pwaSettings, generalSettings] = await Promise.all([
+    getThemeSettings(),
+    getAppearanceSettings(),
+    getPWASettings(),
+    getGeneralSettings(),
+  ]);
   
   // Merge appearance colors into theme settings
   const mergedTheme = {
@@ -60,16 +63,38 @@ export default async function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+        style={{
+          // Apply theme CSS variables directly to body
+          ['--theme-primary' as string]: mergedTheme.primaryColor || '#0070f3',
+          ['--theme-secondary' as string]: mergedTheme.secondaryColor || '#6c757d',
+          ['--theme-accent' as string]: mergedTheme.accentColor || '#ff6b35',
+          ['--theme-background' as string]: mergedTheme.backgroundColor || '#ffffff',
+          ['--theme-text' as string]: mergedTheme.textColor || '#1a1a1a',
+          ['--theme-header-background' as string]: mergedTheme.headerBackgroundColor || '#ffffff',
+          ['--theme-header-text' as string]: mergedTheme.headerTextColor || '#1a1a1a',
+          ['--theme-footer-background' as string]: mergedTheme.footerBackgroundColor || '#1a1a1a',
+          ['--theme-footer-text' as string]: mergedTheme.footerTextColor || '#ffffff',
+          ['--theme-radius' as string]: 
+            mergedTheme.borderRadius === 'none' ? '0px' :
+            mergedTheme.borderRadius === 'sm' ? '0.125rem' :
+            mergedTheme.borderRadius === 'lg' ? '0.5rem' :
+            mergedTheme.borderRadius === 'xl' ? '0.75rem' :
+            '0.375rem',
+          ['--theme-font' as string]: mergedTheme.fontFamily || 'Inter, sans-serif',
+        } as React.CSSProperties}
       >
         <ThemeProvider initialTheme={mergedTheme}>
-          <AuthSessionProvider>
-            <CartProvider>
-              {children}
-              <WhatsAppWidget />
-              <InstallButton />
-              <PWARegister />
-            </CartProvider>
-          </AuthSessionProvider>
+          <CurrencyProvider currency={generalSettings.currency}>
+            <AuthSessionProvider>
+              <CartProvider>
+                {children}
+                <WhatsAppWidget />
+                <InstallButton />
+                <PWARegister />
+              </CartProvider>
+            </AuthSessionProvider>
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

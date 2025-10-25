@@ -78,8 +78,14 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     return () => clearInterval(interval);
   }, []);
 
-  // Apply theme to CSS custom properties
+  // Apply theme to CSS custom properties (only when theme changes from admin)
   useEffect(() => {
+    // Skip initial render - CSS variables are already set on body by layout.tsx
+    // Only update when theme actually changes (e.g., from admin panel)
+    if (theme === initialTheme) {
+      return;
+    }
+
     const root = document.documentElement;
 
     // Apply colors
@@ -112,7 +118,7 @@ export default function ThemeProvider({ children, initialTheme }: ThemeProviderP
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme]);
+  }, [theme, initialTheme]);
 
   return (
     <ThemeContext.Provider value={{ theme, updateTheme }}>

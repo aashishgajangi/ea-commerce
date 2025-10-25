@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from './CartContext';
@@ -7,6 +8,12 @@ import { Button } from '@/components/ui/button';
 
 export default function CartIcon() {
   const { cartCount } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  // Only show cart count after component mounts to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Button
@@ -17,7 +24,7 @@ export default function CartIcon() {
     >
       <Link href="/cart">
         <ShoppingCart className="h-5 w-5" />
-        {cartCount > 0 && (
+        {mounted && cartCount > 0 && (
           <span
             className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold text-white rounded-full"
             style={{ backgroundColor: 'var(--theme-primary, #0070f3)' }}
@@ -25,7 +32,7 @@ export default function CartIcon() {
             {cartCount > 99 ? '99+' : cartCount}
           </span>
         )}
-        <span className="sr-only">Shopping Cart ({cartCount} items)</span>
+        <span className="sr-only">Shopping Cart ({mounted ? cartCount : 0} items)</span>
       </Link>
     </Button>
   );

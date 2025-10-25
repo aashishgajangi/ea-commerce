@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useCart } from '@/components/cart/CartContext';
 
 interface CartItem {
   id: string;
@@ -43,6 +44,7 @@ interface CartSummary {
 }
 
 export default function CartClient() {
+  const { refreshCart } = useCart(); // Get refresh function from context
   const [cart, setCart] = useState<Cart | null>(null);
   const [summary, setSummary] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,6 +124,8 @@ export default function CartClient() {
         const data = await response.json();
         setCart(data.cart);
         setSummary(data.summary);
+        // Update header cart count
+        await refreshCart();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to update cart');
@@ -148,6 +152,8 @@ export default function CartClient() {
         const data = await response.json();
         setCart(data.cart);
         setSummary(data.summary);
+        // Update header cart count
+        await refreshCart();
       }
     } catch (error) {
       console.error('Error removing item:', error);
@@ -169,7 +175,9 @@ export default function CartClient() {
       const response = await fetch(url, { method: 'DELETE' });
 
       if (response.ok) {
-        fetchCart();
+        await fetchCart();
+        // Update header cart count
+        await refreshCart();
       }
     } catch (error) {
       console.error('Error clearing cart:', error);

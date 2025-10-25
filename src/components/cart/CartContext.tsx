@@ -11,9 +11,21 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CART_CACHE_KEY = 'cartCount';
+const CART_TIMESTAMP_KEY = 'cartCountTimestamp';
+const CACHE_DURATION = 300000; // 5 minutes
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
-  const [cartCount, setCartCount] = useState(0);
+  
+  // Initialize from localStorage cache
+  const [cartCount, setCartCount] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(CART_CACHE_KEY);
+      return cached ? parseInt(cached, 10) : 0;
+    }
+    return 0;
+  });
 
   // Get or create session ID for guest users
   const getSessionId = () => {
@@ -26,6 +38,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return sessionId;
   };
 
+  // Check if cache is stale
+  const isCacheStale = useCallback(() => {
+    if (typeof window === 'undefined') return true;
+    const timestamp = localStorage.getItem(CART_TIMESTAMP_KEY);
+    if (!timestamp) return true;
+    return Date.now() - parseInt(timestamp, 10) > CACHE_DURATION;
+  }, []);
+
+  // Update cache
+  const updateCache = useCallback((count: number) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CART_CACHE_KEY, count.toString());
+    localStorage.setItem(CART_TIMESTAMP_KEY, Date.now().toString());
+  }, []);
+
   // Fetch cart count
   const refreshCart = useCallback(async () => {
     try {
@@ -35,12 +62,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        setCartCount(data.summary?.totalQuantity || 0);
+        const count = data.summary?.totalQuantity || 0;
+        setCartCount(count);
+        updateCache(count);
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
     }
-  }, []);
+  }, [updateCache]);
 
   // Add to cart function
   const addToCart = async (
@@ -79,10 +108,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load cart on mount and when session changes
+  // Load cart on mount only if cache is stale
   useEffect(() => {
-    refreshCart();
-  }, [session, refreshCart]);
+    if (isCacheStale()) {
+      refreshCart();
+    }
+  }, [session, refreshCart, isCacheStale]);
 
   return (
     <CartContext.Provider value={{ cartCount, refreshCart, addToCart }}>
