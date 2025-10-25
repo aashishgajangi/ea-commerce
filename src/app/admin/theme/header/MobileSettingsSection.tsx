@@ -6,8 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Smartphone } from "lucide-react";
 
 interface HeaderSettings {
-  mobileMenuStyle: 'slide' | 'dropdown' | 'fullscreen';
-  mobileMenuPosition: 'left' | 'right';
+  mobileMenuStyle: 'dropdown' | 'fullscreen';
   mobileMenuAnimation: 'fade' | 'slide' | 'scale';
   hamburgerIcon: 'menu' | 'bars' | 'grid' | 'list' | 'more';
   accountIcon: 'user' | 'person' | 'profile' | 'account' | 'avatar';
@@ -93,43 +92,7 @@ export default function MobileSettingsSection({ header, setHeader }: MobileSetti
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Slide Panel Option */}
-            <div
-              onClick={() => setHeader(prev => ({ ...prev, mobileMenuStyle: 'slide' }))}
-              className={`relative p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                header.mobileMenuStyle === 'slide'
-                  ? 'shadow-lg transform scale-105'
-                  : 'hover:border-slate-300 dark:hover:border-slate-600'
-              }`}
-              style={{
-                borderColor: header.mobileMenuStyle === 'slide' ? 'var(--theme-primary)' : undefined,
-                backgroundColor: header.mobileMenuStyle === 'slide' ? 'var(--theme-primary)10' : undefined
-              }}
-            >
-              {header.mobileMenuStyle === 'slide' && (
-                <div 
-                  className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--theme-primary)' }}
-                >
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-              <div className="text-center">
-                <div className="mb-1.5 flex justify-center">
-                  <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                    <svg className="w-2.5 h-2.5 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </div>
-                </div>
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-1">Slide Panel</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Slides in from left or right side</p>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Dropdown Option */}
             <div
               onClick={() => setHeader(prev => ({ ...prev, mobileMenuStyle: 'dropdown' }))}
@@ -203,70 +166,6 @@ export default function MobileSettingsSection({ header, setHeader }: MobileSetti
             </div>
           </div>
 
-          {/* Panel Position for Slide */}
-          {header.mobileMenuStyle === 'slide' && (
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 block">
-                📍 Panel Position
-              </Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  onClick={() => setHeader(prev => ({ ...prev, mobileMenuPosition: 'left' }))}
-                  className={`p-2 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md`}
-                  style={{
-                    borderColor: header.mobileMenuPosition === 'left' ? 'var(--theme-primary)' : undefined,
-                    backgroundColor: header.mobileMenuPosition === 'left' ? 'var(--theme-primary)10' : undefined
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm`}
-                      style={{
-                        backgroundColor: header.mobileMenuPosition === 'left' ? 'var(--theme-primary)' : undefined
-                      }}
-                    >
-                      <svg 
-                        className={`w-4 h-4 ${header.mobileMenuPosition === 'left' ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-slate-900 dark:text-white">Left Side</span>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setHeader(prev => ({ ...prev, mobileMenuPosition: 'right' }))}
-                  className={`p-2 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md`}
-                  style={{
-                    borderColor: header.mobileMenuPosition === 'right' ? 'var(--theme-primary)' : undefined,
-                    backgroundColor: header.mobileMenuPosition === 'right' ? 'var(--theme-primary)10' : undefined
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm`}
-                      style={{
-                        backgroundColor: header.mobileMenuPosition === 'right' ? 'var(--theme-primary)' : undefined
-                      }}
-                    >
-                      <svg 
-                        className={`w-4 h-4 ${header.mobileMenuPosition === 'right' ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-slate-900 dark:text-white">Right Side</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
 

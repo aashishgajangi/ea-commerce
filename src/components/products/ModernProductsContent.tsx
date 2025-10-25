@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,15 +35,13 @@ export default function ModernProductsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [currency, setCurrency] = useState('USD');
+  const searchParams = useSearchParams();
+  const categoryId = searchParams.get('category');
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCurrency();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch('/api/products');
+      const url = categoryId ? `/api/products?category=${categoryId}` : '/api/products';
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -52,7 +51,12 @@ export default function ModernProductsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCurrency();
+  }, [categoryId, fetchProducts]);
 
   const fetchCurrency = async () => {
     try {

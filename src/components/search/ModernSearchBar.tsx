@@ -189,8 +189,8 @@ export default function ModernSearchBar() {
       {isOpen && (
         <div className="fixed inset-0 z-[999999] flex items-start justify-center pt-[10vh] px-4">
           {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          <div
+            className="absolute inset-0 animate-in fade-in duration-200"
             onClick={() => setIsOpen(false)}
           />
 

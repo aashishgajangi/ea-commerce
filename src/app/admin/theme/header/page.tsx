@@ -39,8 +39,7 @@ interface HeaderSettings {
   navMenuFontSize: 'sm' | 'md' | 'lg';
   navMenuFontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
   showNavMenuIcons: boolean;
-  mobileMenuStyle: 'slide' | 'dropdown' | 'fullscreen';
-  mobileMenuPosition: 'left' | 'right';
+  mobileMenuStyle: 'dropdown' | 'fullscreen';
   mobileMenuAnimation: 'fade' | 'slide' | 'scale';
   showMobileSearch: boolean;
   mobileMenuListStyle: 'default' | 'bordered' | 'pills' | 'cards' | 'minimal' | 'underline' | 'gradient' | 'outlined' | 'divided' | 'compact' | 'spacious' | 'modern';
@@ -80,8 +79,7 @@ export default function HeaderSettingsPage() {
     navMenuFontSize: 'md',
     navMenuFontWeight: 'medium',
     showNavMenuIcons: false,
-    mobileMenuStyle: 'slide',
-    mobileMenuPosition: 'right',
+    mobileMenuStyle: 'dropdown',
     mobileMenuAnimation: 'slide',
     showMobileSearch: true,
     mobileMenuListStyle: 'default',

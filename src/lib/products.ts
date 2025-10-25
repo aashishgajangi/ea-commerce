@@ -560,6 +560,9 @@ export async function exportProductsToCSV(options: {
     'Compare At Price',
     'Cost Per Item',
     'Weight Based Pricing',
+    'Weight Slot Base',
+    'Weight Slot Min',
+    'Weight Slot Max',
     'Track Inventory',
     'Stock Quantity',
     'Low Stock Threshold',
@@ -591,6 +594,9 @@ export async function exportProductsToCSV(options: {
     product.compareAtPrice?.toString() || '',
     product.costPerItem?.toString() || '',
     product.weightBasedPricing ? 'true' : 'false',
+    product.weightSlotBase?.toString() || '',
+    product.weightSlotMin?.toString() || '',
+    product.weightSlotMax?.toString() || '',
     product.trackInventory ? 'true' : 'false',
     product.stockQuantity.toString(),
     product.lowStockThreshold?.toString() || '',
@@ -629,6 +635,7 @@ export async function importProductsFromCSV(csvContent: string) {
   const expectedHeaders = [
     'ID', 'Name', 'Slug', 'SKU', 'Description', 'Short Description', 'Category',
     'Price', 'Compare At Price', 'Cost Per Item', 'Weight Based Pricing',
+    'Weight Slot Base', 'Weight Slot Min', 'Weight Slot Max',
     'Track Inventory', 'Stock Quantity', 'Low Stock Threshold', 'Is Featured',
     'Is Active', 'Status', 'Weight', 'Length', 'Width', 'Height',
     'Meta Title', 'Meta Description', 'Meta Keywords', 'Created At', 'Updated At', 'Published At'
@@ -677,6 +684,34 @@ export async function importProductsFromCSV(csvContent: string) {
         continue;
       }
 
+      // Validate weight-based pricing logic
+      const isWeightBased = rowData['Weight Based Pricing']?.toLowerCase() === 'true';
+      if (isWeightBased) {
+        const weightSlotBase = rowData['Weight Slot Base'] ? parseFloat(rowData['Weight Slot Base']) : null;
+        const weightSlotMin = rowData['Weight Slot Min'] ? parseFloat(rowData['Weight Slot Min']) : null;
+        const weightSlotMax = rowData['Weight Slot Max'] ? parseFloat(rowData['Weight Slot Max']) : null;
+
+        if (!weightSlotBase || weightSlotBase <= 0) {
+          results.errors.push(`Row ${i + 1}: Weight Slot Base must be a positive number for weight-based products`);
+          continue;
+        }
+
+        if (weightSlotMin !== null && weightSlotMin < 0) {
+          results.errors.push(`Row ${i + 1}: Weight Slot Min cannot be negative`);
+          continue;
+        }
+
+        if (weightSlotMax !== null && weightSlotMax <= 0) {
+          results.errors.push(`Row ${i + 1}: Weight Slot Max must be a positive number`);
+          continue;
+        }
+
+        if (weightSlotMin !== null && weightSlotMax !== null && weightSlotMin >= weightSlotMax) {
+          results.errors.push(`Row ${i + 1}: Weight Slot Min must be less than Weight Slot Max`);
+          continue;
+        }
+      }
+
       // Find or create category
       let categoryId: string | undefined;
       if (rowData['Category']?.trim()) {
@@ -695,6 +730,8 @@ export async function importProductsFromCSV(csvContent: string) {
         }
       }
 
+      const weightBasedPricing = isWeightBased;
+
       const productData = {
         name: rowData['Name'].trim(),
         slug: rowData['Slug']?.trim() || undefined,
@@ -705,7 +742,10 @@ export async function importProductsFromCSV(csvContent: string) {
         price: parseFloat(rowData['Price']),
         compareAtPrice: rowData['Compare At Price'] ? parseFloat(rowData['Compare At Price']) : undefined,
         costPerItem: rowData['Cost Per Item'] ? parseFloat(rowData['Cost Per Item']) : undefined,
-        weightBasedPricing: rowData['Weight Based Pricing']?.toLowerCase() === 'true',
+        weightBasedPricing,
+        weightSlotBase: weightBasedPricing && rowData['Weight Slot Base'] ? parseFloat(rowData['Weight Slot Base']) : undefined,
+        weightSlotMin: weightBasedPricing && rowData['Weight Slot Min'] ? parseFloat(rowData['Weight Slot Min']) : undefined,
+        weightSlotMax: weightBasedPricing && rowData['Weight Slot Max'] ? parseFloat(rowData['Weight Slot Max']) : undefined,
         trackInventory: rowData['Track Inventory']?.toLowerCase() !== 'false', // Default true
         stockQuantity: rowData['Stock Quantity'] ? parseInt(rowData['Stock Quantity']) : 0,
         lowStockThreshold: rowData['Low Stock Threshold'] ? parseInt(rowData['Low Stock Threshold']) : undefined,

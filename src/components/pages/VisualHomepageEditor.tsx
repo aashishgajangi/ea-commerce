@@ -17,6 +17,8 @@ export interface HomepageData {
   showFeaturedProducts: boolean;
   featuredProductsTitle: string;
   featuredProductsCount: number;
+  featuredProductsColumnsMobile: number;
+  featuredProductsColumnsDesktop: number;
   showCategories: boolean;
   categoriesTitle: string;
   categoriesCount: number;
@@ -208,7 +210,15 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                   {/* Preview */}
                   <div className="bg-white p-6 rounded-lg border">
                     <h3 className="text-2xl font-bold mb-4 text-center">{data.featuredProductsTitle}</h3>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className={`grid gap-2 ${
+                      data.featuredProductsColumnsMobile === 1 && data.featuredProductsColumnsDesktop === 4
+                        ? 'grid-cols-1 md:grid-cols-4'
+                        : data.featuredProductsColumnsMobile === 2 && data.featuredProductsColumnsDesktop === 4
+                        ? 'grid-cols-2 md:grid-cols-4'
+                        : data.featuredProductsColumnsMobile === 2 && data.featuredProductsColumnsDesktop === 3
+                        ? 'grid-cols-2 md:grid-cols-3'
+                        : 'grid-cols-2 md:grid-cols-4'
+                    }`}>
                       {[1, 2, 3, 4, 5, 6, 7, 8].slice(0, data.featuredProductsCount).map((i) => (
                         <div key={i} className="bg-gray-100 aspect-square rounded flex items-center justify-center text-gray-400 text-xs">
                           Product {i}
@@ -216,7 +226,7 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       ))}
                     </div>
                     <p className="text-xs text-gray-500 text-center mt-2">
-                      Showing {data.featuredProductsCount} products in grid
+                      Showing {data.featuredProductsCount} products • {data.featuredProductsColumnsMobile} cols mobile, {data.featuredProductsColumnsDesktop} cols desktop
                     </p>
                   </div>
 
@@ -246,6 +256,36 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">How many products to display (1-20)</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Mobile Columns</Label>
+                        <select
+                          value={data.featuredProductsColumnsMobile}
+                          onChange={(e) => updateField('featuredProductsColumnsMobile', parseInt(e.target.value))}
+                          className="w-full mt-1 px-3 py-2 border rounded-md"
+                        >
+                          <option value={1}>1 Column</option>
+                          <option value={2}>2 Columns</option>
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">Mobile layout</p>
+                      </div>
+                      <div>
+                        <Label>Desktop Columns</Label>
+                        <select
+                          value={data.featuredProductsColumnsDesktop}
+                          onChange={(e) => updateField('featuredProductsColumnsDesktop', parseInt(e.target.value))}
+                          className="w-full mt-1 px-3 py-2 border rounded-md"
+                        >
+                          <option value={2}>2 Columns</option>
+                          <option value={3}>3 Columns</option>
+                          <option value={4}>4 Columns</option>
+                          <option value={5}>5 Columns</option>
+                          <option value={6}>6 Columns</option>
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">Desktop layout</p>
+                      </div>
                     </div>
                   </div>
                 </>

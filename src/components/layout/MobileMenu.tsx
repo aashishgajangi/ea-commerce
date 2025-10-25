@@ -98,7 +98,7 @@ export default function MobileMenu({
         } else { // slide animation
           dropdownTransform = isOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none';
         }
-        return `fixed z-[999999] ${base} left-4 right-4 top-20 max-h-[calc(100vh-6rem)] overflow-hidden shadow-xl rounded-lg ${dropdownTransform}`;
+        return `fixed z-[999999] ${base} left-4 right-4 top-20 max-h-[calc(100vh-4rem)] overflow-visible shadow-xl rounded-lg ${dropdownTransform}`;
     }
   };
 

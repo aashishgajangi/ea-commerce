@@ -177,13 +177,16 @@ export default function MobileSearchBar({ onClose, textColor, mobileMenuStyle }:
 
       {/* Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <div 
-          className="absolute top-full left-0 right-0 mt-2 border rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+        <div
+          className="absolute top-full left-0 right-0 mt-2 border rounded-lg shadow-xl z-[1000000] overflow-y-auto"
           style={{
             borderColor: `${textColor}20`,
             backgroundColor: mobileMenuStyle === 'fullscreen'
               ? 'rgba(255, 255, 255, 0.98)'
               : 'var(--theme-background, #ffffff)',
+            maxHeight: mobileMenuStyle === 'dropdown'
+              ? `${Math.min(suggestions.length * 72 + 80, 500)}px`
+              : `${Math.min(suggestions.length * 72 + 80, 600)}px`
           }}
         >
           <div className="p-2">

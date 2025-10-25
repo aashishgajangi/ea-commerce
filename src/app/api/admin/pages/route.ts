@@ -24,6 +24,8 @@ const createPageSchema = z.object({
     showFeaturedProducts: z.boolean(),
     featuredProductsTitle: z.string(),
     featuredProductsCount: z.number(),
+    featuredProductsColumnsMobile: z.number(),
+    featuredProductsColumnsDesktop: z.number(),
     showCategories: z.boolean(),
     categoriesTitle: z.string(),
     categoriesCount: z.number(),
