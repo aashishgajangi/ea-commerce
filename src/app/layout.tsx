@@ -8,6 +8,7 @@ import { CurrencyProvider } from '@/components/providers/CurrencyProvider';
 import WhatsAppWidget from '@/components/WhatsAppWidget';
 import InstallButton from '@/components/pwa/InstallButton';
 import PWARegister from '@/components/pwa/PWARegister';
+import { Toaster } from '@/components/ui/toaster';
 import { getThemeSettings, getAppearanceSettings, getPWASettings, getGeneralSettings } from "@/lib/settings";
 
 const geistSans = Geist({
@@ -92,6 +93,7 @@ export default async function RootLayout({
                 <WhatsAppWidget />
                 <InstallButton />
                 <PWARegister />
+                <Toaster />
               </CartProvider>
             </AuthSessionProvider>
           </CurrencyProvider>

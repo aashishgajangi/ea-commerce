@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 
 interface CartContextType {
   cartCount: number;
@@ -98,12 +99,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return true;
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to add to cart');
+        toast.error(error.error || 'Failed to add to cart');
         return false;
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Failed to add to cart');
+      toast.error('Failed to add to cart');
       return false;
     }
   };

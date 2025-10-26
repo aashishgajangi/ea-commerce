@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Package, ShoppingCart, Heart, Share2, Truck, Shield, ArrowLeft, Minus, Plus, Star, MessageSquare } from 'lucide-react';
 import { useCart } from '@/components/cart/CartContext';
+import { toast } from 'sonner';
 
 interface ProductImage {
   id: string;
@@ -216,7 +217,7 @@ function ProductContent({ product: initialProduct, initialCurrency }: { product:
   const handleWishlistToggle = () => {
     setIsWishlisted(!isWishlisted);
     // TODO: Implement actual wishlist functionality
-    alert(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+    toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
   };
 
   // Handle share
@@ -233,12 +234,12 @@ function ProductContent({ product: initialProduct, initialCurrency }: { product:
       } catch {
         // Fallback to clipboard
         navigator.clipboard.writeText(url);
-        alert('Link copied to clipboard!');
+        toast.success('Link copied to clipboard!');
       }
     } else {
       // Fallback for browsers without Web Share API
       navigator.clipboard.writeText(url);
-      alert('Link copied to clipboard!');
+      toast.success('Link copied to clipboard!');
     }
   };
 
@@ -254,7 +255,7 @@ function ProductContent({ product: initialProduct, initialCurrency }: { product:
       );
 
       if (success) {
-        alert(`${product.name} added to cart!`);
+        toast.success(`${product.name} added to cart!`);
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -278,7 +279,7 @@ function ProductContent({ product: initialProduct, initialCurrency }: { product:
       });
 
       if (response.ok) {
-        alert('Thank you for your review! It will be published after approval.');
+        toast.success('Thank you for your review! It will be published after approval.');
         setReviewForm({ rating: 5, title: '', comment: '' });
         setShowReviewForm(false);
         // Refresh reviews
@@ -289,11 +290,11 @@ function ProductContent({ product: initialProduct, initialCurrency }: { product:
         }
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to submit review');
+        toast.error(error.error || 'Failed to submit review');
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Failed to submit review');
+      toast.error('Failed to submit review');
     } finally {
       setSubmittingReview(false);
     }

@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCart } from '@/components/cart/CartContext';
+import { toast } from 'sonner';
 
 interface CartItem {
   id: string;
@@ -164,11 +165,11 @@ export default function CartClient() {
         await refreshCart();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to update cart');
+        toast.error(error.error || 'Failed to update cart');
       }
     } catch (error) {
       console.error('Error updating cart:', error);
-      alert('Failed to update cart');
+      toast.error('Failed to update cart');
     } finally {
       setUpdating(null);
     }
@@ -199,7 +200,7 @@ export default function CartClient() {
       }
     } catch (error) {
       console.error('Error removing item:', error);
-      alert('Failed to remove item');
+      toast.error('Failed to remove item');
     } finally {
       setUpdating(null);
     }
@@ -223,7 +224,7 @@ export default function CartClient() {
       }
     } catch (error) {
       console.error('Error clearing cart:', error);
-      alert('Failed to clear cart');
+      toast.error('Failed to clear cart');
     } finally {
       setLoading(false);
     }
