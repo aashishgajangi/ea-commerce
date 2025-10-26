@@ -126,9 +126,11 @@ export async function getOrCreateCart(userId?: string, sessionId?: string) {
   return cart;
 }
 
-// Get cart by ID
+// Get cart by ID (bypasses cache, always fresh from DB)
 export async function getCart(cartId: string) {
-  return await db.cart.findUnique({
+  console.log('📦 Fetching cart from database:', cartId);
+  
+  const cart = await db.cart.findUnique({
     where: { id: cartId },
     include: {
       items: {
@@ -146,6 +148,17 @@ export async function getCart(cartId: string) {
       },
     },
   });
+
+  if (cart) {
+    console.log('📦 Cart items from DB:', cart.items.map(i => ({
+      id: i.id.slice(-8),
+      productId: i.productId.slice(-8),
+      selectedWeight: i.selectedWeight,
+      quantity: i.quantity,
+    })));
+  }
+
+  return cart;
 }
 
 // Add item to cart
@@ -305,6 +318,7 @@ export async function updateCartItem(
       });
     } else {
       // Update quantity
+      console.log(`💾 Updating cart item ${cartItemId.slice(-8)} to quantity ${quantity}`);
       await db.cartItem.update({
         where: { id: cartItemId },
         data: {
@@ -312,6 +326,7 @@ export async function updateCartItem(
           updatedAt: new Date(),
         },
       });
+      console.log(`✅ Database updated successfully`);
     }
 
     // Update cart timestamp
@@ -323,7 +338,10 @@ export async function updateCartItem(
     // Clear cart cache
     await clearCartCache(cartItem.cartId);
 
-    // Get updated cart
+    // IMPORTANT: Wait a bit to ensure database write is complete
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Get updated cart (fresh from DB)
     const updatedCart = await getCart(cartItem.cartId);
 
     return {

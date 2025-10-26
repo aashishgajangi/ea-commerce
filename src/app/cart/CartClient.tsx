@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,9 @@ export default function CartClient() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string>('USD');
+  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
+  const updateQueueRef = useRef<Map<string, Array<{ quantity: number; timestamp: number }>>>(new Map());
+  const processingRef = useRef<Set<string>>(new Set());
 
   // Get or create session ID for guest users
   const getSessionId = () => {
@@ -82,7 +85,6 @@ export default function CartClient() {
         const data = await response.json();
         console.log('🛒 Cart loaded:', {
           totalItems: data.cart?.items?.length,
-          currency: data.currency,
           items: data.cart?.items?.map((i: CartItem) => ({
             id: i.id,
             productId: i.productId,
@@ -92,7 +94,8 @@ export default function CartClient() {
             price: i.price,
           })),
         });
-        setCart(data.cart);
+        // Force state update with new object reference
+        setCart({ ...data.cart, items: [...data.cart.items] });
         setSummary(data.summary);
         // Set currency from cart API response (no separate call needed!)
         if (data.currency) {
@@ -110,58 +113,112 @@ export default function CartClient() {
     fetchCart();
   }, [fetchCart]);
 
-  // Update item quantity
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity < 0) return;
-
-    // Prevent concurrent updates to avoid race condition
-    if (updating) {
-      console.warn('Update in progress, please wait...');
+  // Process queued updates for an item
+  const processUpdateQueue = async (itemId: string) => {
+    if (processingRef.current.has(itemId)) {
+      console.log('⏳ Already processing queue for:', itemId.slice(-8));
       return;
     }
 
-    // Debug logging
+    const queue = updateQueueRef.current.get(itemId);
+    if (!queue || queue.length === 0) {
+      return;
+    }
+
+    // Get the latest update (discard intermediate ones)
+    const latestUpdate = queue[queue.length - 1];
+    updateQueueRef.current.set(itemId, []);
+
+    processingRef.current.add(itemId);
+    setPendingUpdates(prev => new Set([...prev, itemId]));
+    setUpdating(itemId);
+
     const item = cart?.items.find(i => i.id === itemId);
-    console.log('🔄 Updating cart item:', {
-      itemId,
+    console.log('🔄 Processing update for item:', {
+      itemId: itemId.slice(-8),
       productName: item?.product.name,
       selectedWeight: item?.selectedWeight,
       currentQty: item?.quantity,
-      newQty: newQuantity,
+      newQty: latestUpdate.quantity,
     });
 
-    setUpdating(itemId);
     try {
-      const response = await fetch(`/api/cart/items/${itemId}`, {
+      // IMPORTANT: Add cache-busting timestamp
+      const response = await fetch(`/api/cart/items/${itemId}?_t=${Date.now()}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQuantity }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+        body: JSON.stringify({ quantity: latestUpdate.quantity }),
+        cache: 'no-store',
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Cart updated successfully:', {
+        console.log('✅ Server response:', {
           totalItems: data.cart?.items?.length,
           items: data.cart?.items?.map((i: CartItem) => ({
-            id: i.id,
-            name: i.product.name,
+            id: i.id.slice(-8),
             weight: i.selectedWeight,
             qty: i.quantity,
           })),
         });
-        setCart(data.cart);
-        setSummary(data.summary);
-        // Update header cart count
+        
+        // Force complete state replacement
+        setCart(null);
+        setTimeout(() => {
+          setCart(data.cart);
+          setSummary(data.summary);
+        }, 0);
+        
         await refreshCart();
       } else {
         const error = await response.json();
         toast.error(error.error || 'Failed to update cart');
+        await fetchCart();
       }
     } catch (error) {
       console.error('Error updating cart:', error);
       toast.error('Failed to update cart');
+      await fetchCart();
     } finally {
+      processingRef.current.delete(itemId);
+      setPendingUpdates(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
       setUpdating(null);
+
+      // Process next queued update if any
+      setTimeout(() => {
+        const queue = updateQueueRef.current.get(itemId);
+        if (queue && queue.length > 0) {
+          processUpdateQueue(itemId);
+        }
+      }, 100);
+    }
+  };
+
+  // Queue-based update system
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 0) return;
+
+    // Add to queue
+    const queue = updateQueueRef.current.get(itemId) || [];
+    queue.push({ quantity: newQuantity, timestamp: Date.now() });
+    updateQueueRef.current.set(itemId, queue);
+
+    console.log('📥 Queued update:', {
+      itemId: itemId.slice(-8),
+      newQty: newQuantity,
+      queueLength: queue.length,
+    });
+
+    // Start processing if not already
+    if (!processingRef.current.has(itemId)) {
+      processUpdateQueue(itemId);
     }
   };
 
@@ -183,8 +240,14 @@ export default function CartClient() {
 
       if (response.ok) {
         const data = await response.json();
-        setCart(data.cart);
+        console.log('✅ Item removed:', {
+          totalItems: data.cart?.items?.length,
+        });
+        
+        // Force state update with new object reference
+        setCart(data.cart ? { ...data.cart, items: [...data.cart.items] } : null);
         setSummary(data.summary);
+        
         // Update header cart count
         await refreshCart();
       }
@@ -304,9 +367,9 @@ export default function CartClient() {
                         </p>
                       )}
 
-                      {/* Debug: Show item ID */}
+                      {/* Debug: Show item ID and weight */}
                       <p className="text-xs text-gray-400 mb-2 font-mono">
-                        ID: {item.id.slice(-8)}
+                        ID: {item.id.slice(-8)} | Weight: {item.selectedWeight || 'N/A'}kg | Qty: {item.quantity}
                       </p>
 
                       {/* Quantity Controls */}
@@ -316,7 +379,7 @@ export default function CartClient() {
                             size="sm"
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={!!updating || item.quantity <= 1}
+                            disabled={pendingUpdates.has(item.id) || item.quantity <= 1}
                             className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
                             <Minus className="h-4 w-4 sm:h-3 sm:w-3" />
@@ -330,7 +393,7 @@ export default function CartClient() {
                                 updateQuantity(item.id, val);
                               }
                             }}
-                            disabled={!!updating}
+                            disabled={pendingUpdates.has(item.id)}
                             className="h-10 sm:h-8 w-16 text-center border-0 focus-visible:ring-0"
                             min="1"
                           />
@@ -338,7 +401,7 @@ export default function CartClient() {
                             size="sm"
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={!!updating}
+                            disabled={pendingUpdates.has(item.id)}
                             className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
                             <Plus className="h-4 w-4 sm:h-3 sm:w-3" />
