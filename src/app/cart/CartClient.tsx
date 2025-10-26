@@ -112,6 +112,12 @@ export default function CartClient() {
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 0) return;
 
+    // Prevent concurrent updates to avoid race condition
+    if (updating) {
+      console.warn('Update in progress, please wait...');
+      return;
+    }
+
     setUpdating(itemId);
     try {
       const response = await fetch(`/api/cart/items/${itemId}`, {
@@ -141,6 +147,12 @@ export default function CartClient() {
   // Remove item
   const removeItem = async (itemId: string) => {
     if (!confirm('Remove this item from cart?')) return;
+
+    // Prevent concurrent updates to avoid race condition
+    if (updating) {
+      console.warn('Update in progress, please wait...');
+      return;
+    }
 
     setUpdating(itemId);
     try {
@@ -284,7 +296,7 @@ export default function CartClient() {
                             size="sm"
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={updating === item.id || item.quantity <= 1}
+                            disabled={!!updating || item.quantity <= 1}
                             className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
                             <Minus className="h-4 w-4 sm:h-3 sm:w-3" />
@@ -298,7 +310,7 @@ export default function CartClient() {
                                 updateQuantity(item.id, val);
                               }
                             }}
-                            disabled={updating === item.id}
+                            disabled={!!updating}
                             className="h-10 sm:h-8 w-16 text-center border-0 focus-visible:ring-0"
                             min="1"
                           />
@@ -306,7 +318,7 @@ export default function CartClient() {
                             size="sm"
                             variant="ghost"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={updating === item.id}
+                            disabled={!!updating}
                             className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                           >
                             <Plus className="h-4 w-4 sm:h-3 sm:w-3" />
@@ -317,7 +329,7 @@ export default function CartClient() {
                           size="sm"
                           variant="ghost"
                           onClick={() => removeItem(item.id)}
-                          disabled={updating === item.id}
+                          disabled={!!updating}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 sm:h-auto min-w-[100px]"
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
