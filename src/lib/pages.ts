@@ -12,22 +12,22 @@ export interface PageQueryOptions {
 
 export interface HomepageData {
   showHero: boolean;
-  heroTitle: string;
-  heroSubtitle: string;
-  heroImageId: string | null;
-  heroButtonText: string;
-  heroButtonUrl: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImageId?: string | null;
+  heroButtonText?: string;
+  heroButtonUrl?: string;
   showFeaturedProducts: boolean;
-  featuredProductsTitle: string;
-  featuredProductsCount: number;
-  featuredProductsColumnsMobile: number;
-  featuredProductsColumnsDesktop: number;
+  featuredProductsTitle?: string;
+  featuredProductsCount?: number;
+  featuredProductsColumnsMobile?: number;
+  featuredProductsColumnsDesktop?: number;
   showCategories: boolean;
-  categoriesTitle: string;
-  categoriesCount: number;
+  categoriesTitle?: string;
+  categoriesCount?: number;
   showNewsletter: boolean;
-  newsletterTitle: string;
-  newsletterSubtitle: string;
+  newsletterTitle?: string;
+  newsletterSubtitle?: string;
 }
 
 export interface CreatePageInput {

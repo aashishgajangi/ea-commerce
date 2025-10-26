@@ -41,30 +41,37 @@ export default async function Home() {
   try {
     homepage = await getOrCreateHomepage();
     
-    // Parse homepage data
-    homepageSettings = homepage.homepageData 
+    // Parse homepage data with defaults
+    const parsedData = homepage.homepageData 
       ? JSON.parse(homepage.homepageData) 
-      : {
-          showHero: true,
-          heroTitle: 'Welcome to Our Store',
-          heroSubtitle: 'Discover amazing products at great prices',
-          heroImageId: null,
-          heroButtonText: 'Shop Now',
-          heroButtonUrl: '/products',
-          showFeaturedProducts: true,
-          featuredProductsTitle: 'Featured Products',
-          featuredProductsCount: 8,
-          showCategories: true,
-          categoriesTitle: 'Shop by Category',
-          categoriesCount: 6,
-          showNewsletter: true,
-          newsletterTitle: 'Stay Updated',
-          newsletterSubtitle: 'Subscribe to get special offers and updates',
-        };
+      : {};
+    
+    // Merge with defaults to handle optional fields
+    homepageSettings = {
+      layout: 'sections' as const,
+      showHero: parsedData.showHero ?? true,
+      heroTitle: parsedData.heroTitle || 'Welcome to Our Store',
+      heroSubtitle: parsedData.heroSubtitle || 'Discover amazing products at great prices',
+      heroImageId: parsedData.heroImageId || null,
+      heroButtonText: parsedData.heroButtonText || 'Shop Now',
+      heroButtonUrl: parsedData.heroButtonUrl || '/products',
+      showFeaturedProducts: parsedData.showFeaturedProducts ?? true,
+      featuredProductsTitle: parsedData.featuredProductsTitle || 'Featured Products',
+      featuredProductsCount: parsedData.featuredProductsCount || 8,
+      featuredProductsColumnsMobile: parsedData.featuredProductsColumnsMobile || 2,
+      featuredProductsColumnsDesktop: parsedData.featuredProductsColumnsDesktop || 4,
+      showCategories: parsedData.showCategories ?? true,
+      categoriesTitle: parsedData.categoriesTitle || 'Shop by Category',
+      categoriesCount: parsedData.categoriesCount || 6,
+      showNewsletter: parsedData.showNewsletter ?? true,
+      newsletterTitle: parsedData.newsletterTitle || 'Stay Updated',
+      newsletterSubtitle: parsedData.newsletterSubtitle || 'Subscribe to get special offers and updates',
+    };
   } catch (error) {
     console.error('Error loading homepage:', error);
     // Fallback to default settings
     homepageSettings = {
+      layout: 'sections' as const,
       showHero: true,
       heroTitle: 'Welcome to Our Store',
       heroSubtitle: 'Discover amazing products at great prices',
@@ -74,6 +81,8 @@ export default async function Home() {
       showFeaturedProducts: true,
       featuredProductsTitle: 'Featured Products',
       featuredProductsCount: 8,
+      featuredProductsColumnsMobile: 2,
+      featuredProductsColumnsDesktop: 4,
       showCategories: true,
       categoriesTitle: 'Shop by Category',
       categoriesCount: 6,

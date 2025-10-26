@@ -9,22 +9,22 @@ import { useState } from 'react';
 
 export interface HomepageData {
   showHero: boolean;
-  heroTitle: string;
-  heroSubtitle: string;
-  heroImageId: string | null;
-  heroButtonText: string;
-  heroButtonUrl: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImageId?: string | null;
+  heroButtonText?: string;
+  heroButtonUrl?: string;
   showFeaturedProducts: boolean;
-  featuredProductsTitle: string;
-  featuredProductsCount: number;
-  featuredProductsColumnsMobile: number;
-  featuredProductsColumnsDesktop: number;
+  featuredProductsTitle?: string;
+  featuredProductsCount?: number;
+  featuredProductsColumnsMobile?: number;
+  featuredProductsColumnsDesktop?: number;
   showCategories: boolean;
-  categoriesTitle: string;
-  categoriesCount: number;
+  categoriesTitle?: string;
+  categoriesCount?: number;
   showNewsletter: boolean;
-  newsletterTitle: string;
-  newsletterSubtitle: string;
+  newsletterTitle?: string;
+  newsletterSubtitle?: string;
 }
 
 interface VisualHomepageEditorProps {
@@ -106,10 +106,10 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                 <>
                   {/* Preview */}
                   <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-8 rounded-lg text-white text-center">
-                    <h2 className="text-3xl font-bold mb-3">{data.heroTitle}</h2>
-                    <p className="text-lg opacity-90 mb-4">{data.heroSubtitle}</p>
+                    <h2 className="text-3xl font-bold mb-3">{data.heroTitle || 'Welcome to Our Store'}</h2>
+                    <p className="text-lg opacity-90 mb-4">{data.heroSubtitle || 'Discover amazing products'}</p>
                     <button className="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold">
-                      {data.heroButtonText}
+                      {data.heroButtonText || 'Shop Now'}
                     </button>
                   </div>
 
@@ -118,20 +118,20 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                     <div>
                       <Label>Main Heading (H1 - SEO Critical)</Label>
                       <Input
-                        value={data.heroTitle}
+                        value={data.heroTitle || ''}
                         onChange={(e) => updateField('heroTitle', e.target.value)}
                         placeholder="Welcome to Our Store"
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        ✨ SEO: This is your main H1 tag | Current: {data.heroTitle.length} chars | Recommended: 40-60 chars
+                        ✨ SEO: This is your main H1 tag | Current: {(data.heroTitle || '').length} chars | Recommended: 40-60 chars
                       </p>
                     </div>
 
                     <div>
                       <Label>Subtitle</Label>
                       <Input
-                        value={data.heroSubtitle}
+                        value={data.heroSubtitle || ''}
                         onChange={(e) => updateField('heroSubtitle', e.target.value)}
                         placeholder="Discover amazing products"
                         className="mt-1"
@@ -143,16 +143,15 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       <div>
                         <Label>Button Text</Label>
                         <Input
-                          value={data.heroButtonText}
+                          value={data.heroButtonText || ''}
                           onChange={(e) => updateField('heroButtonText', e.target.value)}
                           placeholder="Shop Now"
-                          className="mt-1"
                         />
                       </div>
                       <div>
                         <Label>Button Link</Label>
                         <Input
-                          value={data.heroButtonUrl}
+                          value={data.heroButtonUrl || ''}
                           onChange={(e) => updateField('heroButtonUrl', e.target.value)}
                           placeholder="/products"
                           className="mt-1"
@@ -235,13 +234,13 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                     <div>
                       <Label>Section Title (H2 - SEO Important)</Label>
                       <Input
-                        value={data.featuredProductsTitle}
+                        value={data.featuredProductsTitle || ''}
                         onChange={(e) => updateField('featuredProductsTitle', e.target.value)}
                         placeholder="Featured Products"
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        🎯 SEO: This creates an H2 heading | Current: {data.featuredProductsTitle.length} chars | Tip: Use descriptive keywords
+                        🎯 SEO: This creates an H2 heading | Current: {(data.featuredProductsTitle || '').length} chars | Tip: Use descriptive keywords
                       </p>
                     </div>
 
@@ -249,7 +248,7 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       <Label>Number of Products</Label>
                       <Input
                         type="number"
-                        value={data.featuredProductsCount}
+                        value={data.featuredProductsCount || 8}
                         onChange={(e) => updateField('featuredProductsCount', parseInt(e.target.value) || 8)}
                         min={1}
                         max={20}
@@ -262,7 +261,7 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       <div>
                         <Label>Mobile Columns</Label>
                         <select
-                          value={data.featuredProductsColumnsMobile}
+                          value={data.featuredProductsColumnsMobile || 2}
                           onChange={(e) => updateField('featuredProductsColumnsMobile', parseInt(e.target.value))}
                           className="w-full mt-1 px-3 py-2 border rounded-md"
                         >
@@ -274,7 +273,7 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       <div>
                         <Label>Desktop Columns</Label>
                         <select
-                          value={data.featuredProductsColumnsDesktop}
+                          value={data.featuredProductsColumnsDesktop || 4}
                           onChange={(e) => updateField('featuredProductsColumnsDesktop', parseInt(e.target.value))}
                           className="w-full mt-1 px-3 py-2 border rounded-md"
                         >
@@ -355,13 +354,13 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                     <div>
                       <Label>Section Title (H2 - SEO Important)</Label>
                       <Input
-                        value={data.categoriesTitle}
+                        value={data.categoriesTitle || ''}
                         onChange={(e) => updateField('categoriesTitle', e.target.value)}
                         placeholder="Shop by Category"
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        🎯 SEO: This creates an H2 heading | Current: {data.categoriesTitle.length} chars | Tip: Use descriptive keywords
+                        🎯 SEO: This creates an H2 heading | Current: {(data.categoriesTitle || '').length} chars | Tip: Use descriptive keywords
                       </p>
                     </div>
 
@@ -369,7 +368,7 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                       <Label>Number of Categories</Label>
                       <Input
                         type="number"
-                        value={data.categoriesCount}
+                        value={data.categoriesCount || 6}
                         onChange={(e) => updateField('categoriesCount', parseInt(e.target.value) || 6)}
                         min={1}
                         max={12}
@@ -448,26 +447,26 @@ export default function VisualHomepageEditor({ data, onChange }: VisualHomepageE
                     <div>
                       <Label>Main Heading (H2 - SEO Important)</Label>
                       <Input
-                        value={data.newsletterTitle}
+                        value={data.newsletterTitle || ''}
                         onChange={(e) => updateField('newsletterTitle', e.target.value)}
                         placeholder="Stay Updated"
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        🎯 SEO: This creates an H2 heading | Current: {data.newsletterTitle.length} chars | Tip: Use action words
+                        🎯 SEO: This creates an H2 heading | Current: {(data.newsletterTitle || '').length} chars | Tip: Use action words
                       </p>
                     </div>
 
                     <div>
                       <Label>Subtitle</Label>
                       <Input
-                        value={data.newsletterSubtitle}
+                        value={data.newsletterSubtitle || ''}
                         onChange={(e) => updateField('newsletterSubtitle', e.target.value)}
                         placeholder="Subscribe to get special offers"
                         className="mt-1"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Supporting text | Current: {data.newsletterSubtitle.length} chars
+                        Supporting text | Current: {(data.newsletterSubtitle || '').length} chars
                       </p>
                     </div>
                   </div>
