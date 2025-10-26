@@ -88,13 +88,7 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
 
             return (
               <Link key={product.id} href={`/products/${product.slug}`}>
-                <Card 
-                  className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden"
-                  style={{
-                    backgroundColor: 'var(--theme-background, #ffffff)',
-                    borderColor: 'rgba(0, 0, 0, 0.1)',
-                  }}
-                >
+                <Card className="h-full hover:shadow-lg transition-all duration-300 group overflow-hidden">
                   <div className="aspect-square relative overflow-hidden bg-gray-100">
                     {primaryImage ? (
                       <Image
@@ -102,15 +96,15 @@ export default async function FeaturedProductsSection({ settings }: FeaturedProd
                         alt={primaryImage.alt || product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        unoptimized={true}
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        loading="lazy"
+                        quality={85}
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-4xl">📦</span>
                       </div>
                     )}
-
-                    {/* Featured badge */}
                     <div 
                       className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1"
                       style={{

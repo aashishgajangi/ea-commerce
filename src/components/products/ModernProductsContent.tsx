@@ -88,14 +88,24 @@ export default function ModernProductsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: 'var(--theme-background, #ffffff)' }}
-      >
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2"
-            style={{ borderColor: 'var(--theme-primary, #0070f3)' }}
-          ></div>
-          <p className="mt-4" style={{ color: 'var(--theme-text, #1a1a1a)' }}>Loading products...</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 space-y-4">
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
+        </div>
+        
+        {/* Product Grid Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 dark:bg-gray-700 rounded-lg aspect-square mb-4"></div>
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
