@@ -33,10 +33,13 @@ if npx prisma migrate deploy; then
     echo "✅ Database migrations applied successfully!"
 else
     echo "⚠️  Migration failed, trying db push as fallback..."
-    if npx prisma db push; then
+    if npx prisma db push --accept-data-loss; then
         echo "✅ Database schema synced via push!"
     else
         echo "❌ Database sync failed!"
+        echo "💡 If there's a failed migration, you may need to:"
+        echo "   1. Mark it as resolved: npx prisma migrate resolve --applied <migration_name>"
+        echo "   2. Or reset the database: npx prisma migrate reset (WARNING: deletes data)"
         exit 1
     fi
 fi

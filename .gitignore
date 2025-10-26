@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local env files
+.env*.local
+
+# Old migrations backup (keep in repo for reference)
+# prisma/old_migrations_backup/
+
 # vercel
 .vercel
 
