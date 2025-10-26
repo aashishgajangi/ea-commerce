@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import CartClient from './CartClient';
 import PublicLayout from '@/components/layout/PublicLayout';
+import CartSkeleton from '@/components/cart/CartSkeleton';
 
 export const metadata: Metadata = {
   title: 'Shopping Cart',
@@ -11,13 +12,7 @@ export const metadata: Metadata = {
 export default function CartPage() {
   return (
     <PublicLayout>
-      <Suspense
-        fallback={
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center">Loading cart...</div>
-          </div>
-        }
-      >
+      <Suspense fallback={<CartSkeleton />}>
         <CartClient />
       </Suspense>
     </PublicLayout>

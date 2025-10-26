@@ -487,6 +487,24 @@ async function clearCartCache(cartId: string) {
   if (!redis) return;
 
   try {
+    // Get the cart to find userId or sessionId
+    const cart = await db.cart.findUnique({
+      where: { id: cartId },
+      select: { userId: true, sessionId: true },
+    });
+
+    if (cart) {
+      // Clear cache based on the correct key format
+      if (cart.userId) {
+        await redis.del(`cart:user:${cart.userId}`);
+        console.log(`🗑️ Cleared cache: cart:user:${cart.userId}`);
+      } else if (cart.sessionId) {
+        await redis.del(`cart:session:${cart.sessionId}`);
+        console.log(`🗑️ Cleared cache: cart:session:${cart.sessionId}`);
+      }
+    }
+
+    // Also clear old format cache key (for backward compatibility)
     await redis.del(`cart:${cartId}`);
   } catch (error) {
     console.error('Error clearing cart cache:', error);

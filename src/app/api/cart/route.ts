@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getOrCreateCart, addToCart, clearCart, calculateCartSummary } from '@/lib/cart';
+import { cache as redis } from '@/lib/redis';
 import { z } from 'zod';
 
 // ============================================
@@ -10,20 +11,47 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     const sessionId = request.nextUrl.searchParams.get('sessionId');
+    const userId = session?.user?.id;
+    
+    // Create cache key based on user or session
+    const cacheKey = userId 
+      ? `cart:user:${userId}` 
+      : sessionId 
+      ? `cart:session:${sessionId}` 
+      : null;
+
+    // Try to get from cache if we have a cache key
+    if (cacheKey) {
+      const cached = await redis.get(cacheKey);
+      if (cached && typeof cached === 'string') {
+        console.log('✅ Cart served from cache:', cacheKey);
+        return NextResponse.json(JSON.parse(cached));
+      }
+    }
 
     // Get cart for authenticated user or guest session
-    const cart = await getOrCreateCart(
-      session?.user?.id,
-      sessionId || undefined
-    );
+    const cart = await getOrCreateCart(userId, sessionId || undefined);
 
     // Calculate cart summary
     const summary = calculateCartSummary(cart);
 
-    return NextResponse.json({
+    // Fetch currency setting (cached separately)
+    const { config: configLib, ConfigKeys } = await import('@/lib/config');
+    const currency = await configLib.get(ConfigKeys.CURRENCY).catch(() => 'USD');
+
+    const response = {
       cart,
       summary,
-    });
+      currency: currency || 'USD',
+    };
+
+    // Cache for 30 seconds (short TTL since cart changes frequently)
+    if (cacheKey) {
+      await redis.set(cacheKey, JSON.stringify(response), 30);
+      console.log('💾 Cart cached for 30 seconds:', cacheKey);
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching cart:', error);
     return NextResponse.json(

@@ -71,7 +71,7 @@ export default function CartClient() {
     }).format(price);
   };
 
-  // Fetch cart
+  // Fetch cart (now includes currency in same response)
   const fetchCart = useCallback(async () => {
     try {
       const sessionId = getSessionId();
@@ -82,6 +82,7 @@ export default function CartClient() {
         const data = await response.json();
         console.log('🛒 Cart loaded:', {
           totalItems: data.cart?.items?.length,
+          currency: data.currency,
           items: data.cart?.items?.map((i: CartItem) => ({
             id: i.id,
             productId: i.productId,
@@ -93,6 +94,10 @@ export default function CartClient() {
         });
         setCart(data.cart);
         setSummary(data.summary);
+        // Set currency from cart API response (no separate call needed!)
+        if (data.currency) {
+          setCurrency(data.currency);
+        }
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -103,21 +108,6 @@ export default function CartClient() {
 
   useEffect(() => {
     fetchCart();
-    
-    // Fetch currency setting
-    const fetchCurrency = async () => {
-      try {
-        const response = await fetch('/api/admin/settings/general');
-        if (response.ok) {
-          const data = await response.json();
-          setCurrency(data.currency || 'USD');
-        }
-      } catch (error) {
-        console.error('Failed to fetch currency:', error);
-      }
-    };
-    
-    fetchCurrency();
   }, [fetchCart]);
 
   // Update item quantity
@@ -230,14 +220,8 @@ export default function CartClient() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading cart...</div>
-      </div>
-    );
-  }
-
+  // Loading is handled by Suspense fallback in page.tsx
+  // Just show empty state if still loading
   const isEmpty = !cart || !cart.items || cart.items.length === 0;
 
   return (
