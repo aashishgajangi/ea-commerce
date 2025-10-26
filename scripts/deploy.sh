@@ -27,13 +27,18 @@ npm ci
 echo "🗄️ Generating Prisma client..."
 npx prisma generate
 
-# Sync database schema (SAFE - no data loss)
-echo "📊 Syncing database schema..."
-if npx prisma db push --accept-data-loss; then
-    echo "✅ Database schema synced successfully!"
+# Run database migrations (production-safe)
+echo "📊 Running database migrations..."
+if npx prisma migrate deploy; then
+    echo "✅ Database migrations applied successfully!"
 else
-    echo "❌ Database sync failed!"
-    exit 1
+    echo "⚠️  Migration failed, trying db push as fallback..."
+    if npx prisma db push; then
+        echo "✅ Database schema synced via push!"
+    else
+        echo "❌ Database sync failed!"
+        exit 1
+    fi
 fi
 
 # Build the application

@@ -603,8 +603,14 @@ model CartItem {
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
   
+  // Indexes
   @@index([cartId])
   @@index([productId])
   @@index([variantId])
+  
+  // Unique constraint: Prevent duplicate items with same cart, product, variant, and weight
+  // This ensures 500g and 1kg are treated as separate items
+  @@unique([cartId, productId, variantId, selectedWeight])
+  
   @@map("cart_items")
 }

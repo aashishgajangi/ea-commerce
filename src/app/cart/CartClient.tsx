@@ -79,6 +79,17 @@ export default function CartClient() {
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
+        console.log('🛒 Cart loaded:', {
+          totalItems: data.cart?.items?.length,
+          items: data.cart?.items?.map((i: CartItem) => ({
+            id: i.id,
+            productId: i.productId,
+            name: i.product.name,
+            weight: i.selectedWeight,
+            qty: i.quantity,
+            price: i.price,
+          })),
+        });
         setCart(data.cart);
         setSummary(data.summary);
       }
@@ -118,6 +129,16 @@ export default function CartClient() {
       return;
     }
 
+    // Debug logging
+    const item = cart?.items.find(i => i.id === itemId);
+    console.log('🔄 Updating cart item:', {
+      itemId,
+      productName: item?.product.name,
+      selectedWeight: item?.selectedWeight,
+      currentQty: item?.quantity,
+      newQty: newQuantity,
+    });
+
     setUpdating(itemId);
     try {
       const response = await fetch(`/api/cart/items/${itemId}`, {
@@ -128,6 +149,15 @@ export default function CartClient() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Cart updated successfully:', {
+          totalItems: data.cart?.items?.length,
+          items: data.cart?.items?.map((i: CartItem) => ({
+            id: i.id,
+            name: i.product.name,
+            weight: i.selectedWeight,
+            qty: i.quantity,
+          })),
+        });
         setCart(data.cart);
         setSummary(data.summary);
         // Update header cart count
@@ -288,6 +318,11 @@ export default function CartClient() {
                           Weight: {item.selectedWeight}kg
                         </p>
                       )}
+
+                      {/* Debug: Show item ID */}
+                      <p className="text-xs text-gray-400 mb-2 font-mono">
+                        ID: {item.id.slice(-8)}
+                      </p>
 
                       {/* Quantity Controls */}
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3">
