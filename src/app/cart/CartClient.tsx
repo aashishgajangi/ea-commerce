@@ -94,8 +94,19 @@ export default function CartClient() {
             price: i.price,
           })),
         });
-        // Force state update with new object reference
-        setCart({ ...data.cart, items: [...data.cart.items] });
+        // Force state update with stable sorted order
+        const sortedCart = data.cart ? {
+          ...data.cart,
+          items: [...data.cart.items].sort((a, b) => {
+            // Sort by product ID first, then by weight
+            if (a.productId !== b.productId) {
+              return a.productId.localeCompare(b.productId);
+            }
+            return (a.selectedWeight || 0) - (b.selectedWeight || 0);
+          })
+        } : null;
+        
+        setCart(sortedCart);
         setSummary(data.summary);
         // Set currency from cart API response (no separate call needed!)
         if (data.currency) {
@@ -165,10 +176,21 @@ export default function CartClient() {
           })),
         });
         
-        // Force complete state replacement
+        // Force complete state replacement with stable item order
+        const sortedCart = data.cart ? {
+          ...data.cart,
+          items: [...data.cart.items].sort((a, b) => {
+            // Sort by product ID first, then by weight
+            if (a.productId !== b.productId) {
+              return a.productId.localeCompare(b.productId);
+            }
+            return (a.selectedWeight || 0) - (b.selectedWeight || 0);
+          })
+        } : null;
+        
         setCart(null);
         setTimeout(() => {
-          setCart(data.cart);
+          setCart(sortedCart);
           setSummary(data.summary);
         }, 0);
         
@@ -324,7 +346,7 @@ export default function CartClient() {
           {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-4">
             {cart.items.map((item) => (
-              <Card key={item.id}>
+              <Card key={`${item.id}-${item.selectedWeight}-${item.quantity}`}>
                 <CardContent className="p-4">
                   <div className="flex gap-4">
                     {/* Product Image */}
