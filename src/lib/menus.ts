@@ -125,6 +125,17 @@ export async function getMenu(id: string): Promise<MenuWithItems | null> {
     }
   });
 
+  // Third pass: sort children by order
+  const sortChildren = (items: MenuItemWithChildren[]) => {
+    items.forEach((item) => {
+      if (item.children.length > 0) {
+        item.children.sort((a, b) => a.order - b.order);
+        sortChildren(item.children);
+      }
+    });
+  };
+  sortChildren(rootItems);
+
   return {
     ...menu,
     items: rootItems,
@@ -185,6 +196,17 @@ export async function getMenuByLocation(location: string): Promise<MenuWithItems
         rootItems.push(menuItem);
       }
     });
+
+    // Sort children by order recursively
+    const sortChildren = (items: MenuItemWithChildren[]) => {
+      items.forEach((item) => {
+        if (item.children.length > 0) {
+          item.children.sort((a, b) => a.order - b.order);
+          sortChildren(item.children);
+        }
+      });
+    };
+    sortChildren(rootItems);
 
     const result: MenuWithItems = {
       ...menu,
