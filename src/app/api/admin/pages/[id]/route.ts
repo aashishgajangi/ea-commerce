@@ -114,6 +114,24 @@ export async function PATCH(
     // Update the page
     const page = await updatePage(id, updateData);
 
+    // Revalidate the page path for immediate updates
+    try {
+      const { revalidatePath } = await import('next/cache');
+      
+      // Revalidate the specific page
+      if (page.slug) {
+        revalidatePath(`/${page.slug}`);
+      }
+      
+      // If it's the homepage, revalidate root path
+      if (page.isHomepage || page.slug === '' || page.pageType === 'homepage') {
+        revalidatePath('/');
+      }
+    } catch (revalidateError) {
+      console.error('Error revalidating path:', revalidateError);
+      // Don't fail the request if revalidation fails
+    }
+
     return NextResponse.json(page);
   } catch (error) {
     console.error('Error updating page:', error);
@@ -153,6 +171,21 @@ export async function DELETE(
 
     // Delete the page
     await deletePage(id);
+
+    // Revalidate the page path
+    try {
+      const { revalidatePath } = await import('next/cache');
+      
+      if (page.slug) {
+        revalidatePath(`/${page.slug}`);
+      }
+      
+      if (page.isHomepage || page.slug === '' || page.pageType === 'homepage') {
+        revalidatePath('/');
+      }
+    } catch (revalidateError) {
+      console.error('Error revalidating path:', revalidateError);
+    }
 
     return NextResponse.json(
       { message: 'Page deleted successfully' },
