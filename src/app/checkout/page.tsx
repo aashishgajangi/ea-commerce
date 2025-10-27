@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import CheckoutClient from './CheckoutClient';
 

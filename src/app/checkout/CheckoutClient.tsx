@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,6 @@ interface CheckoutClientProps {
 }
 
 export default function CheckoutClient({ session }: CheckoutClientProps) {
-  const router = useRouter();
   const [location, setLocation] = useState<LocationData | null>(null);
   const [cart, setCart] = useState<{ items: unknown[] } | null>(null);
   const [summary, setSummary] = useState<CartSummary | null>(null);

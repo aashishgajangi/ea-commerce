@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useJsApiLoader, GoogleMap, Marker } from '@react-google-maps/api';
 
 const libraries: ('places' | 'geometry' | 'drawing')[] = ['places'];
@@ -8,25 +8,14 @@ const libraries: ('places' | 'geometry' | 'drawing')[] = ['places'];
 export default function TestMapsPage() {
   const [location, setLocation] = useState({ lat: 28.6139, lng: 77.2090 }); // Delhi default
   const [address, setAddress] = useState('');
-  const [apiKeyStatus, setApiKeyStatus] = useState('checking');
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries,
   });
 
-  useEffect(() => {
-    if (isLoaded) {
-      setApiKeyStatus('success');
-      testGeocodingAPI();
-    }
-    if (loadError) {
-      setApiKeyStatus('error');
-    }
-  }, [isLoaded, loadError]);
-
   // Test Geocoding API (server-side simulation)
-  const testGeocodingAPI = async () => {
+  const testGeocodingAPI = useCallback(async () => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
@@ -41,7 +30,13 @@ export default function TestMapsPage() {
     } catch (error) {
       console.error('Geocoding API test failed:', error);
     }
-  };
+  }, [location.lat, location.lng]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      testGeocodingAPI();
+    }
+  }, [isLoaded, testGeocodingAPI]);
 
   // Test GPS location
   const getCurrentLocation = () => {
@@ -140,7 +135,6 @@ export default function TestMapsPage() {
               <p className="text-2xl font-bold text-green-700">✓ Active</p>
             </div>
             <div className="bg-green-50 border border-green-300 rounded p-4">
-              <p className="text-sm text-green-600 font-medium">Geocoding API</p>
               <p className="text-2xl font-bold text-green-700">✓ Active</p>
             </div>
           </div>
@@ -185,7 +179,7 @@ export default function TestMapsPage() {
               <Marker
                 position={location}
                 draggable={true}
-                onDragEnd={(e) => {
+                onDragEnd={(e: google.maps.MapMouseEvent) => {
                   const lat = e.latLng?.lat();
                   const lng = e.latLng?.lng();
                   if (lat && lng) {
@@ -228,7 +222,7 @@ export default function TestMapsPage() {
           <div className="mt-4 p-4 bg-green-50 border border-green-300 rounded">
             <p className="text-sm text-green-700">
               <strong>✓ Drag the marker</strong> to test reverse geocoding<br />
-              <strong>✓ Click "Get My Current Location"</strong> to test GPS<br />
+              <strong>✓ Click &quot;Get My Current Location&quot;</strong> to test GPS<br />
               <strong>✓ All 3 APIs are working correctly!</strong>
             </p>
           </div>
