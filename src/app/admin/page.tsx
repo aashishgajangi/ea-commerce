@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Palette, MessageCircle, TrendingUp, Smartphone } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Palette, MessageCircle, TrendingUp, Smartphone, ShoppingCart } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -298,6 +298,32 @@ export default function AdminDashboard() {
 
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              Orders & Sales
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Link href="/admin/orders" aria-label="Orders">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShoppingCart className="h-5 w-5 text-blue-600" role="img" aria-label="Orders icon" />
+                      Orders
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Manage orders, payments, and fulfillment
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      View Orders <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
               User Management
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -324,32 +350,35 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Next Phase: Orders & Payments</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                Phase 8: Orders & Payments - Complete
+              </CardTitle>
               <CardDescription>
-                Phase 8: Multi-step checkout, payment gateways, order management
+                Order management system with Razorpay integration
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Multi-step checkout process
                 </li>
                 <li className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  Payment gateways (Stripe/Razorpay/PayPal)
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Razorpay payment gateway integration
                 </li>
                 <li className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  Order management system
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Order management system with status tracking
                 </li>
                 <li className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  Email notifications
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Customer order history
                 </li>
                 <li className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  Invoice generation
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Payment status sync with Razorpay
                 </li>
               </ul>
             </CardContent>
