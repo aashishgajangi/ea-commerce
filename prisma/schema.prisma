@@ -495,10 +495,17 @@ model Address {
   // Address fields
   streetAddress String
   apartment     String?
+  landmark      String?  // For easier delivery
   city          String
   state         String
   postalCode    String
-  country       String   @default("US")
+  country       String   @default("IN")
+
+  // GPS coordinates (for delivery)
+  latitude      Float?
+  longitude     Float?
+  placeId       String?  // Google Places ID
+  formattedAddress String? @db.Text // Full formatted address from Google
 
   // Contact
   phone         String?
@@ -613,4 +620,176 @@ model CartItem {
   @@unique([cartId, productId, variantId, selectedWeight])
   
   @@map("cart_items")
+}
+
+// ============================================
+// ORDERS & CHECKOUT SYSTEM
+// ============================================
+
+// Order model for customer orders
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique // ORD-20250127-001
+  
+  // Customer info
+  userId            String?     // Nullable for guest checkout
+  guestEmail        String?     // For guest orders
+  guestPhone        String?     // For guest orders
+  
+  // Order status
+  status            String      @default("pending") // pending, confirmed, preparing, out_for_delivery, delivered, cancelled
+  paymentStatus     String      @default("pending") // pending, paid, failed, refunded
+  
+  // Delivery address (snapshot at order time)
+  deliveryAddress   Json        // Full address object with GPS coordinates
+  deliveryLat       Float?      // Latitude for map display
+  deliveryLng       Float?      // Longitude for map display
+  deliveryZone      String?     // Zone ID for delivery charge calculation
+  
+  // Delivery details
+  deliveryDate      DateTime?   // Scheduled delivery date
+  deliverySlot      String?     // Morning, Afternoon, Evening
+  deliveryInstructions String?  @db.Text
+  contactPhone      String
+  alternatePhone    String?
+  
+  // Pricing (snapshot at order time)
+  subtotal          Float       // Cart subtotal
+  deliveryCharge    Float       @default(0)
+  discount          Float       @default(0)
+  tax               Float       @default(0)
+  total             Float       // Final amount
+  currency          String      @default("INR")
+  
+  // Payment details
+  paymentMethod     String?     // cod, card, upi, wallet
+  paymentId         String?     // Payment gateway transaction ID
+  paymentData       Json?       // Additional payment info
+  
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  confirmedAt       DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  
+  // Relations
+  items             OrderItem[]
+  statusHistory     OrderStatusHistory[]
+  
+  // Indexes
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// Order items (snapshot of cart at order time)
+model OrderItem {
+  id                String      @id @default(cuid())
+  orderId           String
+  
+  // Product snapshot (in case product changes/deleted)
+  productId         String
+  productName       String
+  productSlug       String
+  productImage      String?
+  
+  // Variant info
+  variantId         String?
+  variantName       String?
+  
+  // Pricing snapshot
+  price             Float       // Price per unit at order time
+  quantity          Int
+  selectedWeight    Float?      // For weight-based products
+  subtotal          Float       // price * quantity
+  
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  
+  // Relations
+  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// Order status history for tracking
+model OrderStatusHistory {
+  id          String      @id @default(cuid())
+  orderId     String
+  
+  status      String      // Status value
+  comment     String?     @db.Text
+  updatedBy   String?     // Admin user ID
+  
+  createdAt   DateTime    @default(now())
+  
+  // Relations
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("order_status_history")
+}
+
+// Delivery zones for area-based delivery charges
+model DeliveryZone {
+  id            String      @id @default(cuid())
+  name          String      // "Zone A - City Center"
+  description   String?     @db.Text
+  
+  // Geographic boundaries (polygon coordinates)
+  boundaries    Json        // Array of {lat, lng} points
+  
+  // Delivery settings
+  isActive      Boolean     @default(true)
+  deliveryCharge Float      @default(0)
+  minOrderValue Float?      // Minimum order value for this zone
+  maxOrderValue Float?      // Maximum order value (if any)
+  
+  // Delivery time
+  estimatedTime String?     // "30-45 mins"
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([isActive])
+  @@map("delivery_zones")
+}
+
+// Coupon/Promo code model
+model Coupon {
+  id              String      @id @default(cuid())
+  code            String      @unique
+  description     String?     @db.Text
+  
+  // Discount settings
+  discountType    String      // percentage, fixed
+  discountValue   Float       // 10 (for 10%) or 100 (for ₹100)
+  
+  // Validity
+  isActive        Boolean     @default(true)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  
+  // Usage limits
+  maxUses         Int?        // Total uses allowed
+  usedCount       Int         @default(0)
+  maxUsesPerUser  Int?        // Per user limit
+  
+  // Conditions
+  minOrderValue   Float?      // Minimum order value
+  maxDiscount     Float?      // Maximum discount amount
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([code])
+  @@index([isActive])
+  @@map("coupons")
 }

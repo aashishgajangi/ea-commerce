@@ -495,9 +495,11 @@ export default function CartClient() {
                   </div>
                 </div>
 
-                <Button className="w-full mb-3" size="lg">
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button className="w-full mb-3" size="lg" asChild>
+                  <Link href="/checkout">
+                    Proceed to Checkout
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
 
                 <Button variant="outline" className="w-full" asChild>
