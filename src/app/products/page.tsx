@@ -10,6 +10,7 @@ import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
 import type { BlockInstance } from '@/lib/blocks/block-types';
 
 export const revalidate = 60; // Revalidate every 60 seconds
+export const dynamic = 'force-dynamic'; // Force dynamic rendering to avoid build-time errors
 
 // Generate SEO metadata from the Products system page
 export async function generateMetadata(): Promise<Metadata> {

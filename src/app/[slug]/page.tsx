@@ -9,6 +9,7 @@ import type { BlockInstance } from '@/lib/blocks/block-types';
 
 // Enable ISR - revalidate every 60 seconds
 export const revalidate = 60;
+export const dynamic = 'force-dynamic'; // Force dynamic rendering for blocks
 
 interface PageProps {
   params: Promise<{
