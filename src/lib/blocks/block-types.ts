@@ -150,7 +150,6 @@ export const BLOCK_TYPES: Record<string, BlockType> = {
       columnsDesktop: 4,
       showPrice: true,
       showAddToCart: true,
-      showQuickView: false,
     },
   },
 

@@ -14,7 +14,6 @@ interface ProductsGridBlockData {
   columnsDesktop: number;
   showPrice: boolean;
   showAddToCart: boolean;
-  showQuickView: boolean;
 }
 
 interface ProductsGridBlockEditorProps {
@@ -126,17 +125,6 @@ export default function ProductsGridBlockEditor({ data, onChange }: ProductsGrid
             className="w-4 h-4"
           />
           <Label htmlFor="showAddToCart">Show Add to Cart Button</Label>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="showQuickView"
-            checked={data.showQuickView}
-            onChange={(e) => updateField('showQuickView', e.target.checked)}
-            className="w-4 h-4"
-          />
-          <Label htmlFor="showQuickView">Show Quick View</Label>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -21,6 +21,9 @@ interface ProductsGridBlockProps {
   products: Product[];
   backgroundColor?: string;
   textColor?: string;
+  currency?: string;
+  showPrice?: boolean;
+  showAddToCart?: boolean;
 }
 
 export default function ProductsGridBlock({
@@ -29,24 +32,12 @@ export default function ProductsGridBlock({
   products,
   backgroundColor = 'var(--theme-background, #f9fafb)',
   textColor = 'var(--theme-text, #1a1a1a)',
+  currency: initialCurrency = 'USD',
+  showPrice = true,
+  showAddToCart = true,
 }: ProductsGridBlockProps) {
-  const [currency, setCurrency] = useState('USD');
+  const [currency] = useState(initialCurrency);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-
-  // Fetch currency from admin settings
-  useEffect(() => {
-    const fetchCurrency = async () => {
-      try {
-        const response = await fetch('/api/admin/settings/general');
-        const data = await response.json();
-        setCurrency(data.currency || 'USD');
-      } catch (error) {
-        console.error('Failed to fetch currency:', error);
-      }
-    };
-    fetchCurrency();
-  }, []);
 
   // Format price with dynamic currency
   const formatPrice = (price: number) => {
@@ -100,17 +91,6 @@ export default function ProductsGridBlock({
     }
   };
 
-  // Quick view handler
-  const handleQuickView = (product: Product, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setQuickViewProduct(product);
-  };
-
-  // Close quick view
-  const closeQuickView = () => {
-    setQuickViewProduct(null);
-  };
 
   return (
     <>
@@ -147,76 +127,56 @@ export default function ProductsGridBlock({
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden relative"
+                  className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
                 >
                   {/* Out of Stock Badge */}
                   {product.stock <= 0 && (
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                    <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-md">
                       Out of Stock
                     </div>
                   )}
 
                   {/* Sale Badge */}
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                    <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-md">
                       SALE
                     </div>
                   )}
 
-                  <Link href={`/products/${product.slug}`}>
-                    {/* Product Image */}
-                    <div className="relative aspect-square overflow-hidden bg-gray-100">
+                  {/* Product Image */}
+                  <Link href={`/products/${product.slug}`} className="relative">
+                    <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                       {product.image ? (
                         <Image
                           src={product.image.url}
                           alt={product.image.alt}
                           width={400}
                           height={400}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          No Image
+                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
                         </div>
                       )}
-
-                      {/* Quick Action Buttons (Show on Hover) */}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                        {/* Quick View */}
-                        <button
-                          onClick={(e) => handleQuickView(product, e)}
-                          className="bg-white text-gray-900 p-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg transform hover:scale-110"
-                          title="Quick View"
-                        >
-                          <Eye className="w-5 h-5" />
-                        </button>
-
-                        {/* Add to Cart */}
-                        <button
-                          onClick={(e) => handleAddToCart(product, e)}
-                          disabled={product.stock <= 0 || addingToCart === product.id}
-                          className="bg-white text-gray-900 p-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Add to Cart"
-                        >
-                          {addingToCart === product.id ? (
-                            <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <ShoppingCart className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
                     </div>
+                  </Link>
 
-                    {/* Product Info */}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  {/* Product Info */}
+                  <div className="p-4 flex flex-col flex-grow">
+                    <Link href={`/products/${product.slug}`}>
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors min-h-[3rem]">
                         {product.name}
                       </h3>
+                    </Link>
 
-                      {/* Price */}
-                      <div className="flex items-center gap-2">
+                    {/* Price */}
+                    {showPrice && (
+                      <div className="flex items-center gap-2 mb-3">
                         <p
-                          className="text-lg font-bold"
+                          className="text-xl font-bold"
                           style={{ color: 'var(--theme-primary, #0070f3)' }}
                         >
                           {formatPrice(product.price)}
@@ -224,18 +184,46 @@ export default function ProductsGridBlock({
                         
                         {/* Compare at Price */}
                         {product.compareAtPrice && product.compareAtPrice > product.price && (
-                          <p className="text-sm text-gray-500 line-through">
+                          <p className="text-sm text-gray-400 line-through">
                             {formatPrice(product.compareAtPrice)}
                           </p>
                         )}
                       </div>
+                    )}
 
-                      {/* Stock Status */}
-                      <p className={`text-xs mt-1 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {/* Stock Status */}
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                      <p className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                       </p>
                     </div>
-                  </Link>
+
+                    {/* Add to Cart Button - Always Visible at Bottom */}
+                    {showAddToCart && (
+                      <button
+                        onClick={(e) => handleAddToCart(product, e)}
+                        disabled={product.stock <= 0 || addingToCart === product.id}
+                        className="w-full mt-auto py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: product.stock <= 0 ? '#e5e7eb' : 'var(--theme-primary, #0070f3)',
+                          color: product.stock <= 0 ? '#9ca3af' : '#ffffff',
+                        }}
+                      >
+                        {addingToCart === product.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4" />
+                            {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -259,97 +247,6 @@ export default function ProductsGridBlock({
         </div>
       </section>
 
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-[99999] flex items-center justify-center p-4"
-          onClick={closeQuickView}
-        >
-          <div
-            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6">
-              {/* Close Button */}
-              <button
-                onClick={closeQuickView}
-                className="float-right text-gray-500 hover:text-gray-900"
-              >
-                ✕
-              </button>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Image */}
-                <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden">
-                  {quickViewProduct.image ? (
-                    <Image
-                      src={quickViewProduct.image.url}
-                      alt={quickViewProduct.image.alt}
-                      width={400}
-                      height={400}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Info */}
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">{quickViewProduct.name}</h2>
-                  
-                  {/* Price */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <p
-                      className="text-3xl font-bold"
-                      style={{ color: 'var(--theme-primary, #0070f3)' }}
-                    >
-                      {formatPrice(quickViewProduct.price)}
-                    </p>
-                    {quickViewProduct.compareAtPrice && quickViewProduct.compareAtPrice > quickViewProduct.price && (
-                      <p className="text-xl text-gray-500 line-through">
-                        {formatPrice(quickViewProduct.compareAtPrice)}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Stock */}
-                  <p className={`text-sm mb-6 ${quickViewProduct.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {quickViewProduct.stock > 0 ? `${quickViewProduct.stock} in stock` : 'Out of stock'}
-                  </p>
-
-                  {/* Buttons */}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={(e) => handleAddToCart(quickViewProduct, e)}
-                      disabled={quickViewProduct.stock <= 0 || addingToCart === quickViewProduct.id}
-                      className="flex-1 px-6 py-3 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        backgroundColor: 'var(--theme-primary, #0070f3)',
-                      }}
-                    >
-                      {addingToCart === quickViewProduct.id ? 'Adding...' : 'Add to Cart'}
-                    </button>
-
-                    <Link
-                      href={`/products/${quickViewProduct.slug}`}
-                      className="px-6 py-3 border-2 font-semibold rounded-lg transition-all text-center"
-                      style={{
-                        borderColor: 'var(--theme-primary, #0070f3)',
-                        color: 'var(--theme-primary, #0070f3)',
-                      }}
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
