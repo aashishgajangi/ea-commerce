@@ -1,10 +1,72 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ProductsClient from '@/components/products/ProductsClient';
 import { getProducts } from '@/lib/products';
 import { config, ConfigKeys } from '@/lib/config';
+import { db } from '@/lib/db';
+import { generateSEOData } from '@/lib/seo';
+import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
+import type { BlockInstance } from '@/lib/blocks/block-types';
 
 export const revalidate = 60; // Revalidate every 60 seconds
+
+// Generate SEO metadata from the Products system page
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    // Fetch the Products page from database for SEO control
+    const productsPage = await db.page.findUnique({
+      where: { slug: 'products' },
+      include: {
+        featuredImage: true,
+      },
+    });
+
+    if (!productsPage || productsPage.status !== 'published') {
+      // Fallback to default metadata
+      return {
+        title: 'Shop All Products',
+        description: 'Browse our complete collection of products',
+      };
+    }
+
+    // Use localhost for development, or get from environment
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+    // Generate SEO data using the advanced SEO system
+    const seoData = await generateSEOData(productsPage, siteUrl);
+
+    return {
+      title: seoData.title,
+      description: seoData.description,
+      keywords: seoData.keywords,
+      robots: seoData.robots,
+      alternates: {
+        canonical: seoData.canonicalUrl,
+      },
+      openGraph: {
+        title: seoData.ogTitle,
+        description: seoData.ogDescription,
+        url: `${siteUrl}/products`,
+        images: seoData.ogImage ? [seoData.ogImage] : [],
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: seoData.twitterTitle,
+        description: seoData.twitterDescription,
+        images: seoData.twitterImage ? [seoData.twitterImage] : [],
+      },
+    };
+  } catch (error) {
+    console.error('Error generating products page metadata:', error);
+    // Fallback to default metadata
+    return {
+      title: 'Shop All Products',
+      description: 'Browse our complete collection of products',
+    };
+  }
+}
 
 // Skeleton component for loading state
 function ProductsSkeleton() {
@@ -35,8 +97,8 @@ function ProductsSkeleton() {
 async function ProductsContent({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const params = await searchParams;
   
-  // Fetch products and currency in parallel on SERVER
-  const [{ products }, currencyValue] = await Promise.all([
+  // Fetch products, currency, and page blocks in parallel on SERVER
+  const [{ products }, currencyValue, productsPage] = await Promise.all([
     getProducts({
       status: 'published',
       isActive: true,
@@ -44,10 +106,40 @@ async function ProductsContent({ searchParams }: { searchParams: Promise<{ categ
       limit: 50,
     }),
     config.get(ConfigKeys.CURRENCY).catch(() => 'USD'),
+    db.page.findUnique({
+      where: { slug: 'products' },
+      select: { blocks: true },
+    }),
   ]);
 
-  // Pass data to client component
-  return <ProductsClient initialProducts={products} currency={currencyValue || 'USD'} />;
+  // Parse blocks if they exist
+  let blocks: BlockInstance[] = [];
+  if (productsPage?.blocks) {
+    try {
+      blocks = JSON.parse(productsPage.blocks);
+    } catch (e) {
+      console.error('Failed to parse products page blocks:', e);
+    }
+  }
+
+  return (
+    <>
+      {/* Render blocks BEFORE products grid */}
+      {blocks.length > 0 && (
+        <div
+          style={{
+            backgroundColor: 'var(--theme-background, #ffffff)',
+            color: 'var(--theme-text, #1a1a1a)',
+          }}
+        >
+          <ServerBlockRenderer blocks={blocks} />
+        </div>
+      )}
+      
+      {/* Products grid */}
+      <ProductsClient initialProducts={products} currency={currencyValue || 'USD'} />
+    </>
+  );
 }
 
 export default function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {

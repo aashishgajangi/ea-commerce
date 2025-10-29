@@ -12,6 +12,9 @@ interface Page {
   title: string;
   slug: string;
   status: 'draft' | 'published';
+  pageType: string | null;
+  isSystemPage: boolean;
+  isEssential: boolean;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
@@ -216,6 +219,16 @@ export default function PagesPage() {
                             Homepage
                           </span>
                         )}
+                        {page.isSystemPage && (
+                          <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-800">
+                            System Page
+                          </span>
+                        )}
+                        {page.isEssential && (
+                          <span className="text-xs px-2 py-1 rounded bg-orange-100 text-orange-800">
+                            Essential
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
                         {page.slug === '' ? '/ (Homepage)' : `/${page.slug}`}
@@ -244,14 +257,26 @@ export default function PagesPage() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(page.id)}
-                        disabled={deleting}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
+                      {!page.isEssential && !page.isSystemPage && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(page.id)}
+                          disabled={deleting}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      )}
+                      {(page.isEssential || page.isSystemPage) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled
+                          title="This page cannot be deleted"
+                        >
+                          <Trash2 className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

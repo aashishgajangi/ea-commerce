@@ -98,9 +98,10 @@ model Page {
   status           String    @default("draft") // draft, published
   
   // Page Type & Template System
-  pageType         String?   // 'homepage', 'about', 'contact', 'terms', 'privacy', 'return', 'shipping', 'faq', 'custom'
+  pageType         String?   // 'homepage', 'about', 'contact', 'terms', 'privacy', 'return', 'shipping', 'faq', 'products', 'custom'
   template         String?   // Template used for creation
   isEssential      Boolean   @default(false) // Essential pages can't be deleted
+  isSystemPage     Boolean   @default(false) // System pages (products, search) - editable SEO but not deletable
   isHomepage       Boolean   @default(false) // Legacy field, kept for backward compatibility
   
   // Homepage sections configuration (JSON stored as text)
@@ -151,6 +152,7 @@ model Page {
   @@index([authorId])
   @@index([publishedAt])
   @@index([pageType])
+  @@index([isSystemPage])
   @@map("pages")
 }
 
