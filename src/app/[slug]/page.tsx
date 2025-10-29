@@ -42,13 +42,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const seoData = generateSEOData(page, siteUrl);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
+  const seoData = await generateSEOData(page, siteUrl);
 
   return {
     title: seoData.title,
     description: seoData.description,
     keywords: seoData.keywords,
+    robots: seoData.robots ? {
+      index: seoData.robots.includes('index'),
+      follow: seoData.robots.includes('follow'),
+    } : undefined,
     openGraph: {
       title: seoData.ogTitle,
       description: seoData.ogDescription,
@@ -77,7 +81,7 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'My Store';
   
   // Generate structured data for SEO
@@ -97,7 +101,7 @@ export default async function Page({ params }: PageProps) {
   return (
     <PublicLayout>
       {/* JSON-LD Structured Data for SEO */}
-      <StructuredData data={structuredData} />
+      {structuredData && <StructuredData data={structuredData} />}
       <StructuredData data={breadcrumbData} />
 
       {/* Render Blocks */}

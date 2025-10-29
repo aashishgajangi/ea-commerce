@@ -6,19 +6,21 @@ export function calculateSEOScore(data: SEOData): SEOScore {
   let score = 0;
 
   // Meta Title (15 points)
-  if (data.metaTitle) {
+  if (data.metaTitle && data.metaTitle.trim().length > 0) {
     if (data.metaTitle.length >= 50 && data.metaTitle.length <= 60) {
       score += 15;
-    } else if (data.metaTitle.length > 0) {
-      score += 8;
+    } else if (data.metaTitle.length >= 30) {
+      score += 10;
       if (data.metaTitle.length < 50) {
-        issues.push('Meta title is too short (< 50 chars)');
-        suggestions.push('Expand your meta title to 50-60 characters');
+        suggestions.push('Meta title could be longer (50-60 chars is ideal)');
       }
       if (data.metaTitle.length > 60) {
-        issues.push('Meta title is too long (> 60 chars)');
-        suggestions.push('Shorten your meta title to 50-60 characters');
+        suggestions.push('Meta title is a bit long. Consider shortening to 50-60 characters');
       }
+    } else {
+      score += 5;
+      issues.push('Meta title is too short (< 30 chars)');
+      suggestions.push('Expand your meta title to 50-60 characters');
     }
   } else {
     issues.push('Meta title is missing');
@@ -26,19 +28,24 @@ export function calculateSEOScore(data: SEOData): SEOScore {
   }
 
   // Meta Description (15 points)
-  if (data.metaDescription) {
+  if (data.metaDescription && data.metaDescription.trim().length > 0) {
     if (data.metaDescription.length >= 150 && data.metaDescription.length <= 160) {
       score += 15;
-    } else if (data.metaDescription.length > 0) {
-      score += 8;
+    } else if (data.metaDescription.length >= 120) {
+      score += 12;
       if (data.metaDescription.length < 150) {
-        issues.push('Meta description is too short (< 150 chars)');
-        suggestions.push('Expand your meta description to 150-160 characters');
+        suggestions.push('Meta description could be longer (150-160 chars is ideal)');
       }
       if (data.metaDescription.length > 160) {
-        issues.push('Meta description is too long (> 160 chars)');
-        suggestions.push('Shorten your meta description to 150-160 characters');
+        suggestions.push('Meta description is a bit long. Consider shortening to 150-160 characters');
       }
+    } else if (data.metaDescription.length >= 70) {
+      score += 8;
+      suggestions.push('Meta description is quite short. Aim for 150-160 characters');
+    } else {
+      score += 4;
+      issues.push('Meta description is too short (< 70 chars)');
+      suggestions.push('Expand your meta description to 150-160 characters');
     }
   } else {
     issues.push('Meta description is missing');
@@ -47,32 +54,31 @@ export function calculateSEOScore(data: SEOData): SEOScore {
 
   // Focus Keyphrase (20 points total)
   const keyphrases = data.focusKeyphrases || (data.focusKeyphrase ? [data.focusKeyphrase] : []);
+  const validKeyphrases = keyphrases.filter(kp => kp && kp.trim().length > 0);
   
-  if (keyphrases.length > 0) {
+  if (validKeyphrases.length > 0) {
     score += 10;
     
     // Check primary keyphrase (first one) in title and description
-    const primaryKeyphrase = keyphrases[0];
+    const primaryKeyphrase = validKeyphrases[0];
     
     // Check if keyphrase is in title
     if (data.metaTitle?.toLowerCase().includes(primaryKeyphrase.toLowerCase())) {
       score += 5;
     } else {
-      issues.push('Primary keyphrase not found in meta title');
-      suggestions.push('Include your primary keyphrase in the meta title');
+      suggestions.push('Consider including your primary keyphrase in the meta title');
     }
     
     // Check if keyphrase is in description
     if (data.metaDescription?.toLowerCase().includes(primaryKeyphrase.toLowerCase())) {
       score += 5;
     } else {
-      issues.push('Primary keyphrase not found in meta description');
-      suggestions.push('Include your primary keyphrase in the meta description');
+      suggestions.push('Consider including your primary keyphrase in the meta description');
     }
     
     // Bonus: Check secondary keyphrases
-    if (keyphrases.length > 1) {
-      const secondaryInContent = keyphrases.slice(1).some(kp => 
+    if (validKeyphrases.length > 1) {
+      const secondaryInContent = validKeyphrases.slice(1).some(kp => 
         data.metaDescription?.toLowerCase().includes(kp.toLowerCase())
       );
       if (!secondaryInContent) {
@@ -80,60 +86,68 @@ export function calculateSEOScore(data: SEOData): SEOScore {
       }
     }
   } else {
-    issues.push('Focus keyphrase is missing');
-    suggestions.push('Set at least one focus keyphrase for this page');
+    suggestions.push('Add at least one focus keyphrase for better targeting');
   }
 
   // Open Graph (15 points)
-  if (data.ogTitle && data.ogDescription) {
+  if (data.ogTitle && data.ogTitle.trim().length > 0 && data.ogDescription && data.ogDescription.trim().length > 0) {
     score += 10;
     if (data.ogImageUrl || data.ogImageId) {
       score += 5;
     } else {
-      issues.push('Open Graph image is missing');
-      suggestions.push('Add an Open Graph image (1200x630px recommended)');
+      suggestions.push('Add an Open Graph image (1200x630px recommended) for better social sharing');
     }
-  } else {
-    issues.push('Open Graph data is incomplete');
+  } else if (data.ogTitle || data.ogDescription) {
+    score += 5;
     suggestions.push('Complete Open Graph title and description for social sharing');
+  } else {
+    suggestions.push('Add Open Graph tags for better social media sharing');
   }
 
   // Twitter Card (10 points)
-  if (data.twitterTitle && data.twitterDescription) {
+  if (data.twitterTitle && data.twitterTitle.trim().length > 0 && data.twitterDescription && data.twitterDescription.trim().length > 0) {
     score += 10;
+  } else if (data.twitterTitle || data.twitterDescription) {
+    score += 5;
+    suggestions.push('Complete Twitter Card title and description');
   } else {
-    issues.push('Twitter Card data is incomplete');
-    suggestions.push('Add Twitter Card title and description');
+    suggestions.push('Add Twitter Card tags for better Twitter sharing');
   }
 
   // Canonical URL (10 points)
-  if (data.canonicalUrl) {
+  if (data.canonicalUrl && data.canonicalUrl.trim().length > 0) {
     score += 10;
   } else {
-    issues.push('Canonical URL is missing');
     suggestions.push('Set a canonical URL to prevent duplicate content issues');
   }
 
   // Structured Data (10 points)
   if (data.schemaType && data.schemaData) {
     score += 10;
+  } else if (data.schemaType) {
+    score += 5;
+    suggestions.push('Generate JSON-LD schema data for your selected schema type');
   } else {
-    issues.push('Structured data (JSON-LD) is missing');
     suggestions.push('Add JSON-LD structured data for rich search results');
   }
 
   // Keywords (5 points)
-  if (data.metaKeywords && data.metaKeywords.split(',').length >= 3) {
+  const keywords = data.metaKeywords?.split(',').filter(k => k.trim().length > 0) || [];
+  if (keywords.length >= 3) {
     score += 5;
+  } else if (keywords.length > 0) {
+    score += 2;
+    suggestions.push('Add 3-5 relevant keywords for better targeting');
   } else {
     suggestions.push('Add 3-5 relevant keywords');
   }
 
-  // Robots (5 points)
-  if (data.robots) {
+  // Robots (5 points) - Give credit if set, it's optional
+  if (data.robots && data.robots.trim().length > 0) {
     score += 5;
   } else {
-    suggestions.push('Set robots meta tag (defaults to index,follow)');
+    // Robots is optional, default is index,follow which is good
+    score += 3;
   }
 
   return { score, issues, suggestions };

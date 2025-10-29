@@ -1,4 +1,6 @@
 import { getOrCreateHomepage } from '@/lib/pages';
+import { generateSEOData, generateStructuredData, generateBreadcrumbData } from '@/lib/seo';
+import StructuredData from '@/components/seo/StructuredData';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
 import Link from 'next/link';
@@ -9,18 +11,37 @@ import type { BlockInstance } from '@/lib/blocks/block-types';
 // This is needed for Products Grid to fetch real products from database
 export const dynamic = 'force-dynamic';
 
-// Generate metadata for SEO
+// Generate metadata for SEO with full metadata support
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const homepage = await getOrCreateHomepage();
-    
-    // ALWAYS use Title as primary for browser tab
-    // Meta Title only used as fallback if Title is empty
-    const browserTitle = homepage.title || homepage.metaTitle || 'Welcome';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
+    const seoData = await generateSEOData(homepage, siteUrl);
     
     return {
-      title: browserTitle,
-      description: homepage.metaDescription || 'E-Commerce Platform',
+      title: seoData.title,
+      description: seoData.description,
+      keywords: seoData.keywords,
+      robots: seoData.robots ? {
+        index: seoData.robots.includes('index'),
+        follow: seoData.robots.includes('follow'),
+      } : undefined,
+      openGraph: {
+        title: seoData.ogTitle,
+        description: seoData.ogDescription,
+        type: 'website',
+        url: siteUrl,
+        images: seoData.ogImage ? [{ url: seoData.ogImage }] : [],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: seoData.twitterTitle,
+        description: seoData.twitterDescription,
+        images: seoData.twitterImage ? [seoData.twitterImage] : [],
+      },
+      alternates: {
+        canonical: seoData.canonicalUrl, // Use canonical URL from database
+      },
     };
   } catch (error) {
     console.error('Error generating metadata:', error);
@@ -35,6 +56,13 @@ export default async function Home() {
   try {
     // Get or create homepage
     const homepage = await getOrCreateHomepage();
+    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
+    const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'My Store';
+    
+    // Generate structured data for SEO
+    const structuredData = generateStructuredData(homepage, siteUrl);
+    const breadcrumbData = generateBreadcrumbData(homepage, siteUrl, siteName);
 
     // Parse blocks if they exist
     let blocks: BlockInstance[] = [];
@@ -48,9 +76,13 @@ export default async function Home() {
       }
     }
 
-    // Render homepage with blocks
+    // Render homepage with blocks and structured data
     return (
       <PublicLayout>
+        {/* JSON-LD Structured Data for SEO */}
+        {structuredData && <StructuredData data={structuredData} />}
+        <StructuredData data={breadcrumbData} />
+        
         <div
           style={{
             backgroundColor: 'var(--theme-background, #ffffff)',

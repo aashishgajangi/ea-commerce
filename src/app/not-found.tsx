@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageBySlug('404');
   
   if (page) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const seoData = generateSEOData(page, siteUrl);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
+    const seoData = await generateSEOData(page, siteUrl);
 
     return {
       title: seoData.title,
@@ -43,13 +43,13 @@ export default async function NotFound() {
   
   // If custom 404 page exists in database, render it
   if (page && page.status === 'published') {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || '';
     
     const structuredData = generateStructuredData(page, siteUrl);
 
     return (
       <PublicLayout>
-        <StructuredData data={structuredData} />
+        {structuredData && <StructuredData data={structuredData} />}
         <ModernPageContent page={page} />
       </PublicLayout>
     );

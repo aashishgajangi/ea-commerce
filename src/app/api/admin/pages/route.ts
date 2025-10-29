@@ -37,7 +37,7 @@ const createPageSchema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),
-  canonicalUrl: z.string().url().optional().or(z.literal('')),
+  canonicalUrl: z.string().optional().transform(val => val === '' ? undefined : val),
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImageId: z.string().optional(),
@@ -48,10 +48,28 @@ const createPageSchema = z.object({
   authorId: z.string().optional(),
   // Phase 3: New SEO fields
   focusKeyphrase: z.string().optional(),
-  focusKeyphrases: z.array(z.string()).optional(),
+  focusKeyphrases: z.union([
+    z.array(z.string()),
+    z.string().transform(val => {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return [];
+      }
+    })
+  ]).optional(),
   robots: z.string().optional(),
   schemaType: z.string().optional(),
-  schemaData: z.record(z.any()).optional(),
+  schemaData: z.union([
+    z.record(z.any()),
+    z.string().transform(val => {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return undefined;
+      }
+    })
+  ]).optional(),
   // Phase 4: Block data
   blocks: z.array(z.any()).optional(),
 });

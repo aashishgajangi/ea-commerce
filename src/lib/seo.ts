@@ -1,10 +1,12 @@
 import type { Page } from '@prisma/client';
+import { db } from './db';
 
 export interface SEOData {
   title: string;
   description: string;
   keywords?: string;
   canonicalUrl?: string;
+  robots?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
@@ -17,33 +19,63 @@ export interface SEOData {
 
 /**
  * Generate SEO metadata from a page
+ * Handles all SEO fields including robots, custom images, and OG/Twitter types
  */
-export function generateSEOData(
+export async function generateSEOData(
   page: Page & {
     featuredImage?: { path: string; alt: string | null } | null;
+    ogImage?: { path: string; alt: string | null } | null;
+    twitterImage?: { path: string; alt: string | null } | null;
   },
   siteUrl: string
-): SEOData {
+): Promise<SEOData> {
   const pageUrl = `${siteUrl}/${page.slug}`;
+  
+  // Fetch custom OG and Twitter images if IDs are provided
+  let ogImageUrl: string | undefined = undefined;
+  let twitterImageUrl: string | undefined = undefined;
+  
+  try {
+    if (page.ogImageId && page.ogImageId.trim().length > 0) {
+      const ogImage = await db.media.findUnique({
+        where: { id: page.ogImageId },
+        select: { path: true },
+      }).catch(() => null);
+      if (ogImage) ogImageUrl = `${siteUrl}${ogImage.path}`;
+    }
+    
+    if (page.twitterImageId && page.twitterImageId.trim().length > 0) {
+      const twitterImage = await db.media.findUnique({
+        where: { id: page.twitterImageId },
+        select: { path: true },
+      }).catch(() => null);
+      if (twitterImage) twitterImageUrl = `${siteUrl}${twitterImage.path}`;
+    }
+  } catch (error) {
+    console.error('Error fetching SEO images:', error);
+    // Continue without custom images
+  }
   
   return {
     title: page.metaTitle || page.title,
     description: page.metaDescription || page.excerpt || '',
     keywords: page.metaKeywords || undefined,
     canonicalUrl: page.canonicalUrl || pageUrl,
+    robots: page.robots || undefined,
     ogTitle: page.ogTitle || page.metaTitle || page.title,
     ogDescription: page.ogDescription || page.metaDescription || page.excerpt || '',
-    ogImage: page.featuredImage?.path ? `${siteUrl}${page.featuredImage.path}` : undefined,
+    ogImage: ogImageUrl || (page.ogImage?.path ? `${siteUrl}${page.ogImage.path}` : undefined) || (page.featuredImage?.path ? `${siteUrl}${page.featuredImage.path}` : undefined),
     ogType: 'website',
     twitterCard: 'summary_large_image',
     twitterTitle: page.twitterTitle || page.metaTitle || page.title,
     twitterDescription: page.twitterDescription || page.metaDescription || page.excerpt || '',
-    twitterImage: page.featuredImage?.path ? `${siteUrl}${page.featuredImage.path}` : undefined,
+    twitterImage: twitterImageUrl || (page.twitterImage?.path ? `${siteUrl}${page.twitterImage.path}` : undefined) || (page.featuredImage?.path ? `${siteUrl}${page.featuredImage.path}` : undefined),
   };
 }
 
 /**
  * Generate JSON-LD structured data for a page
+ * Uses custom schema data if provided, otherwise generates default WebPage schema
  */
 export function generateStructuredData(
   page: Page & {
@@ -51,12 +83,35 @@ export function generateStructuredData(
     featuredImage?: { path: string; alt: string | null } | null;
   },
   siteUrl: string
-): Record<string, unknown> {
+): Record<string, unknown> | null {
   const pageUrl = `${siteUrl}/${page.slug}`;
   
+  // If page has custom schema data, use it
+  if (page.schemaData) {
+    try {
+      const customSchema = typeof page.schemaData === 'string' 
+        ? JSON.parse(page.schemaData) 
+        : page.schemaData;
+      
+      // Ensure it has @context and @type
+      if (!customSchema['@context']) {
+        customSchema['@context'] = 'https://schema.org';
+      }
+      if (!customSchema['@type'] && page.schemaType) {
+        customSchema['@type'] = page.schemaType;
+      }
+      
+      return customSchema as Record<string, unknown>;
+    } catch (error) {
+      console.error('Error parsing custom schema data:', error);
+      // Fall through to default schema generation
+    }
+  }
+  
+  // Generate default WebPage schema
   const structuredData: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': 'WebPage',
+    '@type': page.schemaType || 'WebPage',
     '@id': pageUrl,
     name: page.title,
     headline: page.title,
