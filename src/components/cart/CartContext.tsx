@@ -116,6 +116,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [session, refreshCart, isCacheStale]);
 
+  // Listen for cart updates from other components
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      refreshCart();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, [refreshCart]);
+
   return (
     <CartContext.Provider value={{ cartCount, refreshCart, addToCart }}>
       {children}
