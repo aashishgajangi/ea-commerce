@@ -45,6 +45,14 @@ const updatePageSchema = z.object({
   twitterDescription: z.string().optional(),
   twitterImageId: z.string().optional().nullable(),
   featuredImageId: z.string().optional().nullable(),
+  // Phase 3: New SEO fields
+  focusKeyphrase: z.string().optional(),
+  focusKeyphrases: z.array(z.string()).optional(),
+  robots: z.string().optional(),
+  schemaType: z.string().optional(),
+  schemaData: z.record(z.any()).optional(),
+  // Phase 4: Block data
+  blocks: z.array(z.any()).optional(),
 });
 
 interface RouteParams {

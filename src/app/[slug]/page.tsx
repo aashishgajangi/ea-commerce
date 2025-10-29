@@ -3,8 +3,9 @@ import { getPageBySlug, getPublishedPages } from '@/lib/pages';
 import { generateSEOData, generateStructuredData, generateBreadcrumbData } from '@/lib/seo';
 import StructuredData from '@/components/seo/StructuredData';
 import PublicLayout from '@/components/layout/PublicLayout';
-import ModernPageContent from '@/components/pages/ModernPageContent';
+import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
 import type { Metadata } from 'next';
+import type { BlockInstance } from '@/lib/blocks/block-types';
 
 // Enable ISR - revalidate every 60 seconds
 export const revalidate = 60;
@@ -83,14 +84,31 @@ export default async function Page({ params }: PageProps) {
   const structuredData = generateStructuredData(page, siteUrl);
   const breadcrumbData = generateBreadcrumbData(page, siteUrl, siteName);
 
+  // Parse blocks if exists
+  let blocks: BlockInstance[] = [];
+  if (page.blocks) {
+    try {
+      blocks = JSON.parse(page.blocks);
+    } catch (e) {
+      console.error('Failed to parse blocks:', e);
+    }
+  }
+
   return (
     <PublicLayout>
       {/* JSON-LD Structured Data for SEO */}
       <StructuredData data={structuredData} />
       <StructuredData data={breadcrumbData} />
 
-      {/* Modern Page Content with Theme Colors */}
-      <ModernPageContent page={page} />
+      {/* Render Blocks */}
+      <div
+        style={{
+          backgroundColor: 'var(--theme-background, #ffffff)',
+          color: 'var(--theme-text, #1a1a1a)',
+        }}
+      >
+        <ServerBlockRenderer blocks={blocks} />
+      </div>
     </PublicLayout>
   );
 }

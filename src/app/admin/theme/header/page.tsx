@@ -386,6 +386,30 @@ export default function HeaderSettingsPage() {
                         />
                         <Label htmlFor="showSearch">Show Search Bar</Label>
                       </div>
+                      
+                      {/* Search Configuration (expandable) */}
+                      {header.showSearch && (
+                        <div className="pl-6 space-y-3 border-l-2 border-blue-200">
+                          <p className="text-sm text-gray-600">
+                            ✨ Search bar is currently using ModernSearchBar with ⌘K shortcut
+                          </p>
+                          <div className="p-3 bg-blue-50 rounded-md text-sm">
+                            <p className="font-medium text-blue-900 mb-1">Current Features:</p>
+                            <ul className="text-blue-700 space-y-1 ml-4 list-disc">
+                              <li>Modal overlay search (⌘K / Ctrl+K)</li>
+                              <li>Real-time product suggestions</li>
+                              <li>Keyboard navigation (↑↓ arrows)</li>
+                              <li>Dynamic currency support</li>
+                              <li>Mobile responsive</li>
+                            </ul>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            💡 Search settings are configured in the search component. 
+                            Future updates will add position and style options here.
+                          </p>
+                        </div>
+                      )}
+                      
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"

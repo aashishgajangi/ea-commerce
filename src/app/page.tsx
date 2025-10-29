@@ -1,15 +1,13 @@
 import { getOrCreateHomepage } from '@/lib/pages';
-import { db } from '@/lib/db';
 import PublicLayout from '@/components/layout/PublicLayout';
-import HeroSection from '@/components/homepage/HeroSection';
-import FeaturedProductsSection from '@/components/homepage/FeaturedProductsSection';
-import CategoriesShowcaseSection from '@/components/homepage/CategoriesShowcaseSection';
-import NewsletterSection from '@/components/homepage/NewsletterSection';
+import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
+import Link from 'next/link';
 import type { Metadata } from 'next';
+import type { BlockInstance } from '@/lib/blocks/block-types';
 
-// Enable ISR - revalidate every 1 hour (matches Redis cache TTL)
-// Use on-demand revalidation for immediate updates when admin changes content
-export const revalidate = 3600;
+// Force dynamic rendering to ensure ServerBlockRenderer runs on every request
+// This is needed for Products Grid to fetch real products from database
+export const dynamic = 'force-dynamic';
 
 // Generate metadata for SEO
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,97 +32,56 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  // Get homepage from pages
-  let homepage;
-  let homepageSettings;
-  
   try {
-    homepage = await getOrCreateHomepage();
-    
-    // Parse homepage data with defaults
-    const parsedData = homepage.homepageData 
-      ? JSON.parse(homepage.homepageData) 
-      : {};
-    
-    // Merge with defaults to handle optional fields
-    homepageSettings = {
-      layout: 'sections' as const,
-      showHero: parsedData.showHero ?? true,
-      heroTitle: parsedData.heroTitle || 'Welcome to Our Store',
-      heroSubtitle: parsedData.heroSubtitle || 'Discover amazing products at great prices',
-      heroImageId: parsedData.heroImageId || null,
-      heroButtonText: parsedData.heroButtonText || 'Shop Now',
-      heroButtonUrl: parsedData.heroButtonUrl || '/products',
-      showFeaturedProducts: parsedData.showFeaturedProducts ?? true,
-      featuredProductsTitle: parsedData.featuredProductsTitle || 'Featured Products',
-      featuredProductsCount: parsedData.featuredProductsCount || 8,
-      featuredProductsColumnsMobile: parsedData.featuredProductsColumnsMobile || 2,
-      featuredProductsColumnsDesktop: parsedData.featuredProductsColumnsDesktop || 4,
-      showCategories: parsedData.showCategories ?? true,
-      categoriesTitle: parsedData.categoriesTitle || 'Shop by Category',
-      categoriesCount: parsedData.categoriesCount || 6,
-      showNewsletter: parsedData.showNewsletter ?? true,
-      newsletterTitle: parsedData.newsletterTitle || 'Stay Updated',
-      newsletterSubtitle: parsedData.newsletterSubtitle || 'Subscribe to get special offers and updates',
-    };
+    // Get or create homepage
+    const homepage = await getOrCreateHomepage();
+
+    // Parse blocks if they exist
+    let blocks: BlockInstance[] = [];
+    if (homepage.blocks) {
+      try {
+        blocks = typeof homepage.blocks === 'string' 
+          ? JSON.parse(homepage.blocks) 
+          : homepage.blocks;
+      } catch (e) {
+        console.error('Failed to parse homepage blocks:', e);
+      }
+    }
+
+    // Render homepage with blocks
+    return (
+      <PublicLayout>
+        <div
+          style={{
+            backgroundColor: 'var(--theme-background, #ffffff)',
+            color: 'var(--theme-text, #1a1a1a)',
+          }}
+        >
+          <ServerBlockRenderer blocks={blocks} />
+        </div>
+      </PublicLayout>
+    );
   } catch (error) {
     console.error('Error loading homepage:', error);
-    // Fallback to default settings
-    homepageSettings = {
-      layout: 'sections' as const,
-      showHero: true,
-      heroTitle: 'Welcome to Our Store',
-      heroSubtitle: 'Discover amazing products at great prices',
-      heroImageId: null,
-      heroButtonText: 'Shop Now',
-      heroButtonUrl: '/products',
-      showFeaturedProducts: true,
-      featuredProductsTitle: 'Featured Products',
-      featuredProductsCount: 8,
-      featuredProductsColumnsMobile: 2,
-      featuredProductsColumnsDesktop: 4,
-      showCategories: true,
-      categoriesTitle: 'Shop by Category',
-      categoriesCount: 6,
-      showNewsletter: true,
-      newsletterTitle: 'Stay Updated',
-      newsletterSubtitle: 'Subscribe to get special offers and updates',
-    };
-  }
-
-  // Fetch hero image if needed
-  let heroImage = null;
-  if (homepageSettings.heroImageId) {
-    heroImage = await db.media.findUnique({
-      where: { id: homepageSettings.heroImageId },
-      select: {
-        id: true,
-        path: true,
-        alt: true,
-      },
-    });
-  }
-
-  // Render sections based on settings
-  return (
-    <PublicLayout>
-      {homepageSettings.showHero && <HeroSection settings={homepageSettings} heroImage={heroImage} />}
-      
-      {/* Page Content Section - Rich text editor content */}
-      {homepage && homepage.content && homepage.content.trim() !== '' && homepage.content !== '<p></p>' && (
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <article 
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: homepage.content }}
-            />
+    
+    // Fallback: Show empty homepage with message
+    return (
+      <PublicLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center p-8">
+            <h1 className="text-3xl font-bold mb-4">Welcome to Our Store</h1>
+            <p className="text-gray-600 mb-6">
+              The homepage is being set up. Please check back soon!
+            </p>
+            <Link 
+              href="/products" 
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Browse Products
+            </Link>
           </div>
-        </section>
-      )}
-      
-      {homepageSettings.showCategories && <CategoriesShowcaseSection settings={homepageSettings} />}
-      {homepageSettings.showFeaturedProducts && <FeaturedProductsSection settings={homepageSettings} />}
-      {homepageSettings.showNewsletter && <NewsletterSection settings={homepageSettings} />}
-    </PublicLayout>
-  );
+        </div>
+      </PublicLayout>
+    );
+  }
 }

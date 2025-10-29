@@ -33,7 +33,7 @@ export interface HomepageData {
 export interface CreatePageInput {
   title: string;
   slug: string;
-  content: string;
+  content?: string; // Optional - using blocks instead
   excerpt?: string;
   status?: 'draft' | 'published';
   // Template system
@@ -53,6 +53,14 @@ export interface CreatePageInput {
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImageId?: string;
+  // Phase 3: Advanced SEO
+  focusKeyphrase?: string;
+  focusKeyphrases?: string[];
+  robots?: string;
+  schemaType?: string;
+  schemaData?: Record<string, unknown>;
+  // Phase 4: Blocks
+  blocks?: unknown[];
   featuredImageId?: string;
   authorId?: string;
 }
@@ -80,6 +88,14 @@ export interface UpdatePageInput {
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImageId?: string;
+  // Phase 3: Advanced SEO
+  focusKeyphrase?: string;
+  focusKeyphrases?: string[];
+  robots?: string;
+  schemaType?: string;
+  schemaData?: Record<string, unknown>;
+  // Phase 4: Blocks
+  blocks?: unknown[];
   featuredImageId?: string;
 }
 
@@ -276,7 +292,7 @@ export async function createPage(data: CreatePageInput): Promise<Page> {
   const pageData: Prisma.PageCreateInput = {
     title: data.title,
     slug,
-    content: data.content,
+    content: data.content || ' ', // Default to space if not provided
     excerpt: data.excerpt,
     status: data.status || 'draft',
     // Template system
@@ -294,7 +310,15 @@ export async function createPage(data: CreatePageInput): Promise<Page> {
     ogDescription: data.ogDescription,
     twitterTitle: data.twitterTitle,
     twitterDescription: data.twitterDescription,
-  };
+    // Phase 3: Advanced SEO
+    ...(data.focusKeyphrase && { focusKeyphrase: data.focusKeyphrase }),
+    ...(data.focusKeyphrases && { focusKeyphrases: JSON.stringify(data.focusKeyphrases) }),
+    ...(data.robots && { robots: data.robots }),
+    ...(data.schemaType && { schemaType: data.schemaType }),
+    ...(data.schemaData && { schemaData: JSON.stringify(data.schemaData) }),
+    // Phase 4: Blocks
+    ...(data.blocks && { blocks: JSON.stringify(data.blocks) }),
+  } as Prisma.PageCreateInput;
 
   // Add optional relations
   if (data.authorId) {
@@ -353,6 +377,31 @@ export async function updatePage(id: string, data: UpdatePageInput): Promise<Pag
   if (data.ogDescription !== undefined) updateData.ogDescription = data.ogDescription;
   if (data.twitterTitle !== undefined) updateData.twitterTitle = data.twitterTitle;
   if (data.twitterDescription !== undefined) updateData.twitterDescription = data.twitterDescription;
+  
+  // Phase 3: Advanced SEO fields (using type assertion for new fields)
+  const extendedUpdateData = updateData as Prisma.PageUpdateInput & {
+    focusKeyphrase?: string | null;
+    focusKeyphrases?: string | null;
+    robots?: string | null;
+    schemaType?: string | null;
+    schemaData?: string | null;
+    blocks?: string | null;
+  };
+  
+  if (data.focusKeyphrase !== undefined) extendedUpdateData.focusKeyphrase = data.focusKeyphrase;
+  if (data.focusKeyphrases !== undefined) {
+    extendedUpdateData.focusKeyphrases = data.focusKeyphrases ? JSON.stringify(data.focusKeyphrases) : null;
+  }
+  if (data.robots !== undefined) extendedUpdateData.robots = data.robots;
+  if (data.schemaType !== undefined) extendedUpdateData.schemaType = data.schemaType;
+  if (data.schemaData !== undefined) {
+    extendedUpdateData.schemaData = data.schemaData ? JSON.stringify(data.schemaData) : null;
+  }
+  
+  // Phase 4: Blocks
+  if (data.blocks !== undefined) {
+    extendedUpdateData.blocks = data.blocks ? JSON.stringify(data.blocks) : null;
+  }
 
   // Handle slug update
   if (data.slug !== undefined) {
@@ -415,7 +464,7 @@ export async function updatePage(id: string, data: UpdatePageInput): Promise<Pag
 
   return db.page.update({
     where: { id },
-    data: updateData,
+    data: extendedUpdateData,
   });
 }
 

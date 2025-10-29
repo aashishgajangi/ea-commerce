@@ -6,7 +6,7 @@ import { z } from 'zod';
 const createPageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   slug: z.string().optional(),
-  content: z.string(), // Not required for homepage
+  content: z.string().optional(), // Optional - using blocks instead
   excerpt: z.string().optional(),
   status: z.enum(['draft', 'published']).optional(),
   // Template system
@@ -46,6 +46,14 @@ const createPageSchema = z.object({
   twitterImageId: z.string().optional(),
   featuredImageId: z.string().optional(),
   authorId: z.string().optional(),
+  // Phase 3: New SEO fields
+  focusKeyphrase: z.string().optional(),
+  focusKeyphrases: z.array(z.string()).optional(),
+  robots: z.string().optional(),
+  schemaType: z.string().optional(),
+  schemaData: z.record(z.any()).optional(),
+  // Phase 4: Block data
+  blocks: z.array(z.any()).optional(),
 });
 
 /**
@@ -100,7 +108,8 @@ export async function POST(request: NextRequest) {
     const data = validationResult.data;
 
     // Generate slug if not provided
-    const slug = data.slug || await generateUniqueSlug(data.title);
+    // Note: Allow empty string for homepage (slug === '')
+    const slug = data.slug !== undefined ? data.slug : await generateUniqueSlug(data.title);
 
     // Create the page
     const page = await createPage({

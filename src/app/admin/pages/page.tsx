@@ -121,7 +121,7 @@ export default function PagesPage() {
                 {total} {total === 1 ? 'page' : 'pages'} total
               </CardDescription>
             </div>
-            <Link href="/admin/pages/new">
+            <Link href="/admin/pages/create">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 New Page
@@ -183,7 +183,7 @@ export default function PagesPage() {
                   : 'Get started by creating your first page'}
               </p>
               {!search && status === 'all' && (
-                <Link href="/admin/pages/new">
+                <Link href="/admin/pages/create">
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Page
@@ -239,7 +239,7 @@ export default function PagesPage() {
                           </Button>
                         </Link>
                       )}
-                      <Link href={`/admin/pages/${page.id}`}>
+                      <Link href={`/admin/pages/${page.id}/edit`}>
                         <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>

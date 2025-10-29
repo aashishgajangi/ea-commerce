@@ -122,6 +122,16 @@ model Page {
   twitterDescription String? @db.Text
   twitterImageId   String?
   
+  // Phase 3: Advanced SEO fields
+  focusKeyphrase   String?
+  focusKeyphrases  String?   @db.Text // JSON array: ["keyword1", "keyword2"]
+  robots           String?   @default("index,follow")
+  schemaType       String?   // 'Article', 'WebPage', 'Product', etc.
+  schemaData       String?   @db.Text // JSON-LD structured data
+  
+  // Phase 4: Block-based content
+  blocks           String?   @db.Text // JSON array of block instances
+  
   // Featured image
   featuredImageId  String?
   

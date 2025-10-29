@@ -123,7 +123,7 @@ export default function NewPage() {
         },
         body: JSON.stringify({
           title,
-          slug: slug || undefined,
+          slug: pageType === 'homepage' ? '' : (slug || undefined),
           content,
           excerpt: excerpt || undefined,
           status,
