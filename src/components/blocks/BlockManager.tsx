@@ -9,6 +9,7 @@ import HeroBlockEditor from './editors/HeroBlockEditor';
 import ContentBlockEditor from './editors/ContentBlockEditor';
 import ProductsGridBlockEditor from './editors/ProductsGridBlockEditor';
 import NewsletterBlockEditor from './editors/NewsletterBlockEditor';
+import MediaHeroBlockEditor from './editors/MediaHeroBlockEditor';
 
 interface BlockManagerProps {
   blocks: BlockInstance[];
@@ -77,6 +78,8 @@ export default function BlockManager({ blocks, onChange }: BlockManagerProps) {
     switch (block.type) {
       case 'hero':
         return <HeroBlockEditor data={blockData} onChange={(data) => updateBlock(block.id, data)} />;
+      case 'media_hero':
+        return <MediaHeroBlockEditor data={blockData} onChange={(data) => updateBlock(block.id, data)} />;
       case 'content':
         return <ContentBlockEditor data={blockData} onChange={(data) => updateBlock(block.id, data)} />;
       case 'products_grid':

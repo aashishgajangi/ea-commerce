@@ -131,8 +131,93 @@ export const BLOCK_TYPES: Record<string, BlockType> = {
     },
   },
 
-  // ==================== ECOMMERCE BLOCKS ====================
+  media_hero: {
+    id: 'media_hero',
+    name: 'Media Hero',
+    icon: '🎬',
+    description: 'Advanced hero with image/video/slider background and mobile optimization',
+    category: 'media',
+    defaultData: {
+      // Content
+      title: 'Welcome to Our Store',
+      subtitle: 'Discover amazing products at great prices',
+      buttonText: 'Shop Now',
+      buttonUrl: '/products',
+      
+      // Background Type
+      backgroundType: 'image', // 'image', 'video', 'slider'
+      
+      // Single Image Background
+      desktopImageId: null,
+      desktopImageUrl: null,
+      mobileImageId: null,
+      mobileImageUrl: null,
+      
+      // Video Background
+      videoType: 'youtube', // 'youtube', 'vimeo', 'upload'
+      videoUrl: '', // YouTube/Vimeo URL
+      videoId: null, // Uploaded video ID
+      videoAutoplay: true,
+      videoMuted: true,
+      videoLoop: true,
+      
+      // Slider Background (multiple images)
+      slides: [], // Array of { desktopImageId, desktopImageUrl, mobileImageId, mobileImageUrl }
+      sliderAutoplay: true,
+      sliderSpeed: 5000, // milliseconds
+      sliderShowDots: true,
+      sliderShowArrows: true,
+      sliderTransition: 'fade', // 'fade', 'slide'
+      
+      // Layout
+      height: 'large', // 'medium' (60vh), 'large' (80vh), 'full' (100vh)
+      contentAlignment: 'center', // 'left', 'center', 'right'
+      verticalAlignment: 'center', // 'top', 'center', 'bottom'
+      
+      // Desktop Image Settings
+      desktopImageFit: 'cover', // 'contain' (show full), 'cover' (fill/crop) - cover fills screen
+      desktopImagePosition: 'center', // 'center', 'top', 'bottom', 'left', 'right'
+      
+      // Mobile Image Settings
+      mobileImageFit: 'contain', // 'contain' (show full), 'cover' (fill/crop)
+      mobileImagePosition: 'center', // 'center', 'top', 'bottom', 'left', 'right'
+      
+      // Styling
+      overlay: true,
+      overlayColor: '#000000',
+      textColor: '#ffffff',
+      titleSize: 'large', // 'medium', 'large', 'xlarge'
+      
+      // Button Styling
+      buttonStyle: 'solid', // 'solid' (BG only), 'outline' (border only), 'both' (BG + border), 'ghost' (none)
+      buttonColor: '#10b981',
+      buttonTextColor: '#ffffff',
+      buttonSize: 'large', // 'medium', 'large'
+      buttonTextBold: false,
+      buttonBackgroundOpacity: 1, // 0-1 (0% to 100%)
+      
+      // Animation
+      animateContent: true,
+      animationDelay: 300, // milliseconds
+      
+      // Content visibility toggles
+      showTitle: true,
+      showSubtitle: true,
+      showButton: true,
+      
+      // Custom positioning
+      contentMaxWidth: 'lg', // 'sm' (640px), 'md' (768px), 'lg' (1024px), 'xl' (1280px), 'full'
+      contentPaddingX: 'md', // 'none', 'sm' (1rem), 'md' (2rem), 'lg' (3rem)
+      contentPaddingY: 'md', // 'none', 'sm' (1rem), 'md' (2rem), 'lg' (3rem)
+      
+      // Fine-tuned positioning
+      useCustomPosition: false,
+      customVerticalPosition: 50, // 0-100 (percentage from top)
+      customHorizontalPosition: 50, // 0-100 (percentage from left)
+    },
+  },
 
+  // ==================== ECOMMERCE BLOCKS ====================
   products_grid: {
     id: 'products_grid',
     name: 'Products Grid',

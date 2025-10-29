@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { BlockInstance } from '@/lib/blocks/block-types';
+import MediaHeroBlock from './MediaHeroBlock';
 
 interface BlockRendererProps {
   blocks: BlockInstance[];
@@ -51,11 +52,14 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
   }
 
   return (
-    <div className="space-y-0">
+    <>
       {blocks.map((block) => {
         switch (block.type) {
           case 'hero':
             return <HeroBlock key={block.id} data={block.data as HeroBlockData} />;
+          case 'media_hero':
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return <MediaHeroBlock key={block.id} data={block.data as any} />;
           case 'content':
             return <ContentBlock key={block.id} data={block.data as ContentBlockData} />;
           case 'products_grid':
@@ -66,7 +70,7 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
             return null;
         }
       })}
-    </div>
+    </>
   );
 }
 
