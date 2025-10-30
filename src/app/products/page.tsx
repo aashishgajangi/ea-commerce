@@ -9,6 +9,20 @@ import { generateSEOData } from '@/lib/seo';
 import ServerBlockRenderer from '@/components/blocks/ServerBlockRenderer';
 import type { BlockInstance } from '@/lib/blocks/block-types';
 
+// Helper function to get category ID by slug
+async function getCategoryIdBySlug(slug: string): Promise<string | undefined> {
+  try {
+    const category = await db.category.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    return category?.id;
+  } catch (error) {
+    console.error('Error finding category by slug:', error);
+    return undefined;
+  }
+}
+
 export const revalidate = 60; // Revalidate every 60 seconds
 export const dynamic = 'force-dynamic'; // Force dynamic rendering to avoid build-time errors
 
@@ -97,13 +111,13 @@ function ProductsSkeleton() {
 // Server component - fetches data on server
 async function ProductsContent({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const params = await searchParams;
-  
+
   // Fetch products, currency, and page blocks in parallel on SERVER
   const [{ products }, currencyValue, productsPage] = await Promise.all([
     getProducts({
       status: 'published',
       isActive: true,
-      categoryId: params.category || undefined,
+      categoryId: params.category ? await getCategoryIdBySlug(params.category) : undefined,
       limit: 50,
     }),
     config.get(ConfigKeys.CURRENCY).catch(() => 'USD'),

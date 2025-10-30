@@ -46,6 +46,16 @@ interface NewsletterBlockData {
   buttonColor?: string;
 }
 
+interface CategoriesGridBlockData {
+  title?: string;
+  subtitle?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  showCount?: boolean;
+  style?: 'card' | 'minimal' | 'overlay';
+  columns?: number;
+}
+
 export default function BlockRenderer({ blocks }: BlockRendererProps) {
   if (!blocks || blocks.length === 0) {
     return null;
@@ -64,6 +74,8 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
             return <ContentBlock key={block.id} data={block.data as ContentBlockData} />;
           case 'products_grid':
             return <ProductsGridBlock key={block.id} data={block.data as ProductsGridBlockData} />;
+          case 'categories_grid':
+            return <CategoriesGridBlock key={block.id} data={block.data as CategoriesGridBlockData} />;
           case 'newsletter':
             return <NewsletterBlock key={block.id} data={block.data as NewsletterBlockData} />;
           default:
@@ -261,6 +273,78 @@ function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
             }}
           >
             View All Products
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Categories Grid Block Component
+function CategoriesGridBlock({ data }: { data: CategoriesGridBlockData }) {
+  // For now, show placeholder - in real implementation, this would fetch categories
+  return (
+    <section
+      className="py-16"
+      style={{
+        backgroundColor: data.backgroundColor || 'var(--theme-background, #f9fafb)',
+      }}
+    >
+      <div className="container mx-auto px-4">
+        {data.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold mb-8 text-center"
+            style={{
+              color: data.textColor || 'var(--theme-text, #1a1a1a)',
+            }}
+          >
+            {data.title}
+          </h2>
+        )}
+
+        {data.subtitle && (
+          <p
+            className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80"
+            style={{
+              color: data.textColor || 'var(--theme-text, #1a1a1a)',
+            }}
+          >
+            {data.subtitle}
+          </p>
+        )}
+
+        {/* Categories Grid Placeholder */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow-md overflow-hidden"
+            >
+              {/* Category Image Placeholder */}
+              <div className="relative aspect-square overflow-hidden bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400">Category {i}</span>
+              </div>
+
+              {/* Category Info Placeholder */}
+              <div className="p-4">
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-300 rounded w-16"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center">
+          <Link
+            href="/categories"
+            className="inline-block px-8 py-3 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            style={{
+              backgroundColor: 'var(--theme-primary, #0070f3)',
+              color: '#ffffff',
+            }}
+          >
+            View All Categories
           </Link>
         </div>
       </div>
