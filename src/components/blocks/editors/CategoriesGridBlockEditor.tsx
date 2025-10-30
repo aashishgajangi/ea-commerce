@@ -12,7 +12,9 @@ interface CategoriesGridBlockData {
   textColor?: string;
   showCount?: boolean;
   style?: 'card' | 'minimal' | 'overlay';
-  columns?: number;
+  columnsMobile?: number;
+  columnsTablet?: number;
+  columnsDesktop?: number;
   shape?: 'square' | 'circle';
 }
 
@@ -69,20 +71,48 @@ export default function CategoriesGridBlockEditor({ data, onChange }: Categories
           <CardTitle>Layout Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="columns">Columns</Label>
-            <select
-              id="columns"
-              value={data.columns || 3}
-              onChange={(e) => updateField('columns', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value={2}>2 Columns</option>
-              <option value={3}>3 Columns</option>
-              <option value={4}>4 Columns</option>
-              <option value={5}>5 Columns</option>
-              <option value={6}>6 Columns</option>
-            </select>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="columnsMobile">Mobile Columns</Label>
+              <select
+                id="columnsMobile"
+                value={data.columnsMobile || 1}
+                onChange={(e) => updateField('columnsMobile', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value={1}>1 Column</option>
+                <option value={2}>2 Columns</option>
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="columnsTablet">Tablet Columns</Label>
+              <select
+                id="columnsTablet"
+                value={data.columnsTablet || 2}
+                onChange={(e) => updateField('columnsTablet', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value={2}>2 Columns</option>
+                <option value={3}>3 Columns</option>
+                <option value={4}>4 Columns</option>
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="columnsDesktop">Desktop Columns</Label>
+              <select
+                id="columnsDesktop"
+                value={data.columnsDesktop || 3}
+                onChange={(e) => updateField('columnsDesktop', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value={3}>3 Columns</option>
+                <option value={4}>4 Columns</option>
+                <option value={5}>5 Columns</option>
+                <option value={6}>6 Columns</option>
+              </select>
+            </div>
           </div>
 
           <div>

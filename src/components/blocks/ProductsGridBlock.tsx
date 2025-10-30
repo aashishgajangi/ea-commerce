@@ -24,6 +24,9 @@ interface ProductsGridBlockProps {
   currency?: string;
   showPrice?: boolean;
   showAddToCart?: boolean;
+  columnsMobile?: number;
+  columnsTablet?: number;
+  columnsDesktop?: number;
 }
 
 export default function ProductsGridBlock({
@@ -35,6 +38,9 @@ export default function ProductsGridBlock({
   currency: initialCurrency = 'USD',
   showPrice = true,
   showAddToCart = true,
+  columnsMobile = 1,
+  columnsTablet = 2,
+  columnsDesktop = 4,
 }: ProductsGridBlockProps) {
   const [currency] = useState(initialCurrency);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
@@ -123,7 +129,7 @@ export default function ProductsGridBlock({
 
           {/* Products Grid */}
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            <div className={`grid grid-cols-${columnsMobile} sm:grid-cols-${columnsTablet} md:grid-cols-${columnsDesktop} gap-6 mb-8`}>
               {products.map((product) => (
                 <div
                   key={product.id}

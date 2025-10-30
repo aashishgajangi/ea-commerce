@@ -174,6 +174,9 @@ export default async function ServerBlockRenderer({ blocks }: ServerBlockRendere
               currency={currency}
               showPrice={data.showPrice !== false}
               showAddToCart={data.showAddToCart !== false}
+              columnsMobile={(data.columnsMobile as number) || 1}
+              columnsTablet={(data.columnsTablet as number) || 2}
+              columnsDesktop={(data.columnsDesktop as number) || 4}
             />
           );
         }
@@ -201,7 +204,9 @@ export default async function ServerBlockRenderer({ blocks }: ServerBlockRendere
               textColor={(data.textColor as string) || 'var(--theme-text, #1a1a1a)'}
               showCount={data.showCount !== false}
               style={(data.style as 'card' | 'minimal' | 'overlay') || 'card'}
-              columns={(data.columns as number) || 3}
+              columnsMobile={(data.columnsMobile as number) || 1}
+              columnsTablet={(data.columnsTablet as number) || 2}
+              columnsDesktop={(data.columnsDesktop as number) || 3}
               shape={(data.shape as 'square' | 'circle') || 'square'}
             />
           );

@@ -24,7 +24,9 @@ interface CategoriesGridBlockProps {
   textColor?: string;
   showCount?: boolean;
   style?: 'card' | 'minimal' | 'overlay';
-  columns?: number;
+  columnsMobile?: number;
+  columnsTablet?: number;
+  columnsDesktop?: number;
   shape?: 'square' | 'circle';
 }
 
@@ -36,7 +38,9 @@ const CategoriesGridBlock = memo(function CategoriesGridBlock({
   textColor = 'var(--theme-text, #1a1a1a)',
   showCount = true,
   style = 'card',
-  columns = 3,
+  columnsMobile = 1,
+  columnsTablet = 2,
+  columnsDesktop = 3,
   shape = 'square',
 }: CategoriesGridBlockProps) {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
@@ -51,14 +55,7 @@ const CategoriesGridBlock = memo(function CategoriesGridBlock({
   };
 
   const getGridCols = () => {
-    switch (columns) {
-      case 2: return 'grid-cols-1 sm:grid-cols-2';
-      case 3: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3';
-      case 4: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
-      case 5: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
-      case 6: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6';
-      default: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3';
-    }
+    return `grid-cols-${columnsMobile} sm:grid-cols-${columnsTablet} md:grid-cols-${columnsDesktop}`;
   };
 
   return (
@@ -90,7 +87,7 @@ const CategoriesGridBlock = memo(function CategoriesGridBlock({
         )}
 
         {/* Categories Grid */}
-        <Suspense fallback={<CategorySkeleton columns={columns} />}>
+        <Suspense fallback={<CategorySkeleton columns={columnsDesktop} />}>
           {categories.length > 0 ? (
             <div className={`grid ${getGridCols()} gap-6 mb-8 animate-in fade-in-0 duration-700`}>
               {categories.map((category, index) => (
