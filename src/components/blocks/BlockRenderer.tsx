@@ -54,6 +54,7 @@ interface CategoriesGridBlockData {
   showCount?: boolean;
   style?: 'card' | 'minimal' | 'overlay';
   columns?: number;
+  shape?: 'square' | 'circle';
 }
 
 export default function BlockRenderer({ blocks }: BlockRendererProps) {
@@ -314,21 +315,27 @@ function CategoriesGridBlock({ data }: { data: CategoriesGridBlockData }) {
         )}
 
         {/* Categories Grid Placeholder */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+        <div className={`grid ${data.columns ? `grid-cols-1 sm:grid-cols-2 md:grid-cols-${Math.min(data.columns, 3)}` : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'} gap-6 mb-8`}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              className={`group relative overflow-hidden transition-all duration-300 ${
+                data.style === 'card'
+                  ? `bg-white ${data.shape === 'circle' ? 'rounded-full' : 'rounded-xl'} border border-gray-200 hover:border-gray-300 hover:shadow-lg`
+                  : data.style === 'minimal'
+                  ? 'hover:scale-105'
+                  : 'relative'
+              }`}
             >
               {/* Category Image Placeholder */}
-              <div className="relative aspect-square overflow-hidden bg-gray-200 flex items-center justify-center">
+              <div className={`relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 ${data.shape === 'circle' ? 'rounded-full' : 'rounded-lg'} flex items-center justify-center`}>
                 <span className="text-gray-400">Category {i}</span>
               </div>
 
               {/* Category Info Placeholder */}
               <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-300 rounded w-16"></div>
+                <div className={`h-4 bg-gray-200 rounded mb-2 ${data.shape === 'circle' ? 'text-center' : ''}`}></div>
+                <div className={`h-3 bg-gray-300 rounded w-16 ${data.shape === 'circle' ? 'mx-auto' : ''}`}></div>
               </div>
             </div>
           ))}

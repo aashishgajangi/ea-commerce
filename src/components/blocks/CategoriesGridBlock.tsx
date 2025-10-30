@@ -23,6 +23,7 @@ interface CategoriesGridBlockProps {
   showCount?: boolean;
   style?: 'card' | 'minimal' | 'overlay';
   columns?: number;
+  shape?: 'square' | 'circle';
 }
 
 export default function CategoriesGridBlock({
@@ -34,6 +35,7 @@ export default function CategoriesGridBlock({
   showCount = true,
   style = 'card',
   columns = 3,
+  shape = 'square',
 }: CategoriesGridBlockProps) {
 
   const getGridCols = () => {
@@ -83,7 +85,7 @@ export default function CategoriesGridBlock({
                 key={category.id}
                 className={`group relative overflow-hidden transition-all duration-300 ${
                   style === 'card'
-                    ? 'bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg'
+                    ? `bg-white ${shape === 'circle' ? 'rounded-full' : 'rounded-xl'} border border-gray-200 hover:border-gray-300 hover:shadow-lg`
                     : style === 'minimal'
                     ? 'hover:scale-105'
                     : 'relative'
@@ -91,14 +93,14 @@ export default function CategoriesGridBlock({
               >
                 {/* Category Image */}
                 <Link href={`/products?category=${category.slug}`} className="block">
-                  <div className={`relative ${style === 'overlay' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100`}>
+                  <div className={`relative ${style === 'overlay' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
                     {category.image ? (
                       <Image
                         src={category.image}
                         alt={category.name}
                         width={400}
                         height={400}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -110,7 +112,7 @@ export default function CategoriesGridBlock({
 
                     {/* Overlay for overlay style */}
                     {style === 'overlay' && (
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
                         <span className="text-white font-semibold text-lg">Shop Now</span>
                       </div>
                     )}
@@ -122,14 +124,14 @@ export default function CategoriesGridBlock({
                   <Link href={`/products?category=${category.slug}`}>
                     <h3 className={`font-semibold mb-2 line-clamp-2 hover:text-blue-600 transition-colors ${
                       style === 'overlay' ? 'text-white' : 'text-gray-900'
-                    }`}>
+                    } ${shape === 'circle' ? 'text-center' : ''}`}>
                       {category.name}
                     </h3>
                   </Link>
 
                   {/* Product Count */}
                   {showCount && category._count && (
-                    <p className={`text-sm ${style === 'overlay' ? 'text-white/80' : 'text-gray-600'}`}>
+                    <p className={`text-sm ${style === 'overlay' ? 'text-white/80' : 'text-gray-600'} ${shape === 'circle' ? 'text-center' : ''}`}>
                       {category._count.products} {category._count.products === 1 ? 'product' : 'products'}
                     </p>
                   )}

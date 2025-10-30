@@ -13,6 +13,7 @@ interface CategoriesGridBlockData {
   showCount?: boolean;
   style?: 'card' | 'minimal' | 'overlay';
   columns?: number;
+  shape?: 'square' | 'circle';
 }
 
 interface CategoriesGridBlockEditorProps {
@@ -95,6 +96,19 @@ export default function CategoriesGridBlockEditor({ data, onChange }: Categories
               <option value="card">Card Style</option>
               <option value="minimal">Minimal Style</option>
               <option value="overlay">Overlay Style</option>
+            </select>
+          </div>
+
+          <div>
+            <Label htmlFor="shape">Shape</Label>
+            <select
+              id="shape"
+              value={data.shape || 'square'}
+              onChange={(e) => updateField('shape', e.target.value as 'square' | 'circle')}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="square">Square</option>
+              <option value="circle">Circle</option>
             </select>
           </div>
 

@@ -169,6 +169,7 @@ export default async function ServerBlockRenderer({ blocks }: ServerBlockRendere
               showCount={data.showCount !== false}
               style={(data.style as 'card' | 'minimal' | 'overlay') || 'card'}
               columns={(data.columns as number) || 3}
+              shape={(data.shape as 'square' | 'circle') || 'square'}
             />
           );
         }
