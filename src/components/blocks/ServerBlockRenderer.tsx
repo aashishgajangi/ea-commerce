@@ -4,6 +4,75 @@ import BlockRenderer from './BlockRenderer';
 import ProductsGridBlock from './ProductsGridBlock';
 import CategoriesGridBlock from './CategoriesGridBlock';
 import { getGeneralSettings } from '@/lib/settings';
+import { unstable_cache } from 'next/cache';
+
+// Cached functions for better performance
+const getCachedCategories = unstable_cache(
+  async () => {
+    return db.category.findMany({
+      where: {
+        isActive: true,
+      },
+      take: 6,
+      orderBy: {
+        order: 'asc',
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        image: true,
+        _count: {
+          select: {
+            products: {
+              where: {
+                status: 'published',
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+  ['categories-grid'],
+  { revalidate: 300 } // Cache for 5 minutes
+);
+
+const getCachedProducts = unstable_cache(
+  async () => {
+    return db.product.findMany({
+      where: {
+        status: 'published',
+        isFeatured: true,
+      },
+      take: 8,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        compareAtPrice: true,
+        stockQuantity: true,
+        images: {
+          take: 1,
+          orderBy: {
+            isPrimary: 'desc',
+          },
+          select: {
+            url: true,
+            alt: true,
+          },
+        },
+      },
+    });
+  },
+  ['products-grid'],
+  { revalidate: 300 } // Cache for 5 minutes
+);
 
 interface ServerBlockRendererProps {
   blocks: BlockInstance[];
@@ -12,103 +81,67 @@ interface ServerBlockRendererProps {
 // Server Component that handles Products Grid with real data
 export default async function ServerBlockRenderer({ blocks }: ServerBlockRendererProps) {
   console.log('ServerBlockRenderer: Processing blocks:', blocks.map(b => ({ type: b.type, enabled: b.enabled })));
-  
+
   // Fetch currency once for all blocks
   const settings = await getGeneralSettings();
   const currency = settings.currency || 'USD';
+
+  // Check if we need to fetch data for any blocks
+  const needsProductsData = blocks.some(block => block.type === 'products_grid' && block.enabled);
+  const needsCategoriesData = blocks.some(block => block.type === 'categories_grid' && block.enabled);
   
-  // Process blocks and fetch data for Products Grid and Categories Grid blocks
-  const processedBlocks = await Promise.all(
-    blocks.map(async (block) => {
-      if (block.type === 'products_grid' && block.enabled) {
-        console.log('ServerBlockRenderer: Found products_grid block, fetching products...');
-        // Fetch real products for this block
-        const products = await db.product.findMany({
-          where: {
-            status: 'published',
-            isFeatured: true,
-          },
-          take: 8,
-          orderBy: {
-            createdAt: 'desc',
-          },
-          include: {
-            images: {
-              take: 1,
-              orderBy: {
-                isPrimary: 'desc',
-              },
-            },
-          },
-        });
+  // Fetch data in parallel if needed using cached functions
+  const [products, categories] = await Promise.all([
+    needsProductsData ? getCachedProducts() : Promise.resolve([]),
+    needsCategoriesData ? getCachedCategories() : Promise.resolve([]),
+  ]);
 
-        console.log('ServerBlockRenderer: Fetched products:', products.length);
+  console.log('ServerBlockRenderer: Fetched products:', products.length, 'categories:', categories.length);
 
-        // Return enhanced block with products data
-        return {
-          ...block,
-          data: {
-            ...block.data,
-            products: products.map((p) => ({
-              id: p.id,
-              name: p.name,
-              slug: p.slug,
-              price: Number(p.price),
-              compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-              stock: p.stockQuantity,
-              image: p.images[0]
-                ? {
-                    url: p.images[0].url,
-                    alt: p.images[0].alt || p.name,
-                  }
-                : null,
-            })),
-          },
-        };
-      }
+  // Process blocks and attach data
+  const processedBlocks = blocks.map((block) => {
+    if (block.type === 'products_grid' && block.enabled) {
+      return {
+        ...block,
+        data: {
+          ...block.data,
+          products: products.map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            price: Number(p.price),
+            compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+            stock: p.stockQuantity,
+            image: p.images[0]
+              ? {
+                  url: p.images[0].url,
+                  alt: p.images[0].alt || p.name,
+                }
+              : null,
+          })),
+        },
+      };
+    }
 
-      if (block.type === 'categories_grid' && block.enabled) {
-        console.log('ServerBlockRenderer: Found categories_grid block, fetching categories...');
-        // Fetch real categories for this block
-        const categories = await db.category.findMany({
-          where: {
-            isActive: true,
-          },
-          take: 6,
-          orderBy: {
-            order: 'asc',
-          },
-          include: {
-            _count: {
-              select: {
-                products: true,
-              },
-            },
-          },
-        });
+    if (block.type === 'categories_grid' && block.enabled) {
+      return {
+        ...block,
+        data: {
+          ...block.data,
+          categories: categories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            image: c.image,
+            _count: c._count,
+          })),
+        },
+      };
+    }
 
-        console.log('ServerBlockRenderer: Fetched categories:', categories.length);
-
-        // Return enhanced block with categories data
-        return {
-          ...block,
-          data: {
-            ...block.data,
-            categories: categories.map((c) => ({
-              id: c.id,
-              name: c.name,
-              slug: c.slug,
-              description: c.description,
-              image: c.image,
-              _count: c._count,
-            })),
-          },
-        };
-      }
-
-      return block;
-    })
-  );
+    return block;
+  });
 
   // Render blocks with enhanced data
   return (

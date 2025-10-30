@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { memo, Suspense, useState } from 'react';
+import CategorySkeleton from './CategorySkeleton';
 
 interface Category {
   id: string;
@@ -26,7 +28,7 @@ interface CategoriesGridBlockProps {
   shape?: 'square' | 'circle';
 }
 
-export default function CategoriesGridBlock({
+const CategoriesGridBlock = memo(function CategoriesGridBlock({
   title,
   subtitle,
   categories,
@@ -37,6 +39,16 @@ export default function CategoriesGridBlock({
   columns = 3,
   shape = 'square',
 }: CategoriesGridBlockProps) {
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+  const handleImageLoad = (categoryId: string) => {
+    setLoadedImages(prev => new Set(prev).add(categoryId));
+  };
+
+  const handleImageError = (categoryId: string) => {
+    setImageErrors(prev => new Set(prev).add(categoryId));
+  };
 
   const getGridCols = () => {
     switch (columns) {
@@ -60,7 +72,7 @@ export default function CategoriesGridBlock({
         {/* Title */}
         {title && (
           <h2
-            className="text-3xl md:text-4xl font-bold mb-8 text-center"
+            className="text-3xl md:text-4xl font-bold mb-8 text-center animate-in slide-in-from-top-4 duration-500"
             style={{ color: textColor }}
           >
             {title}
@@ -70,7 +82,7 @@ export default function CategoriesGridBlock({
         {/* Subtitle */}
         {subtitle && (
           <p
-            className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80"
+            className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80 animate-in slide-in-from-top-4 duration-500 delay-100"
             style={{ color: textColor }}
           >
             {subtitle}
@@ -78,83 +90,98 @@ export default function CategoriesGridBlock({
         )}
 
         {/* Categories Grid */}
-        {categories.length > 0 ? (
-          <div className={`grid ${getGridCols()} gap-6 mb-8`}>
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className={`group relative overflow-hidden transition-all duration-300 ${
-                  style === 'card'
-                    ? `bg-white ${shape === 'circle' ? 'rounded-full' : 'rounded-xl'} border border-gray-200 hover:border-gray-300 hover:shadow-lg`
-                    : style === 'minimal'
-                    ? 'hover:scale-105'
-                    : 'relative'
-                }`}
-              >
-                {/* Category Image */}
-                <Link href={`/products?category=${category.slug}`} className="block">
-                  <div className={`relative ${style === 'overlay' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
-                    {category.image ? (
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        width={400}
-                        height={400}
-                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                      </div>
-                    )}
+        <Suspense fallback={<CategorySkeleton columns={columns} />}>
+          {categories.length > 0 ? (
+            <div className={`grid ${getGridCols()} gap-6 mb-8 animate-in fade-in-0 duration-700`}>
+              {categories.map((category, index) => (
+                <div
+                  key={category.id}
+                  className={`group relative overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4 duration-500 ${
+                    style === 'card'
+                      ? `bg-white ${shape === 'circle' ? 'rounded-full' : 'rounded-xl'} border border-gray-200 hover:border-gray-300 hover:shadow-lg hover:shadow-xl hover:-translate-y-1`
+                      : style === 'minimal'
+                      ? 'hover:scale-105 hover:shadow-lg'
+                      : 'relative'
+                  }`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Category Image */}
+                  <Link href={`/products?category=${category.slug}`} className="block">
+                    <div className={`relative ${style === 'overlay' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'} transition-all duration-300`}>
+                      {category.image && !imageErrors.has(category.id) ? (
+                        <>
+                          <Image
+                            src={category.image}
+                            alt={category.name}
+                            width={400}
+                            height={400}
+                            loading="lazy"
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+                            className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-500 ease-out ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'} ${loadedImages.has(category.id) ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+                            onLoad={() => handleImageLoad(category.id)}
+                            onError={() => handleImageError(category.id)}
+                          />
+                          {!loadedImages.has(category.id) && (
+                            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                              <div className="w-8 h-8 bg-gray-300 rounded animate-in zoom-in-95 duration-200"></div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 animate-in fade-in-0 duration-300">
+                          <svg className="w-16 h-16 animate-in zoom-in-95 duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                          </svg>
+                        </div>
+                      )}
 
-                    {/* Overlay for overlay style */}
-                    {style === 'overlay' && (
-                      <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
-                        <span className="text-white font-semibold text-lg">Shop Now</span>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-
-                {/* Category Info */}
-                <div className={`p-4 ${style === 'overlay' ? 'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white' : ''}`}>
-                  <Link href={`/products?category=${category.slug}`}>
-                    <h3 className={`font-semibold mb-2 line-clamp-2 hover:text-blue-600 transition-colors ${
-                      style === 'overlay' ? 'text-white' : 'text-gray-900'
-                    } ${shape === 'circle' ? 'text-center' : ''}`}>
-                      {category.name}
-                    </h3>
+                      {/* Overlay for overlay style */}
+                      {style === 'overlay' && (
+                        <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out flex items-center justify-center ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'} group-hover:bg-black/50`}>
+                          <span className="text-white font-semibold text-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">Shop Now</span>
+                        </div>
+                      )}
+                    </div>
                   </Link>
 
-                  {/* Product Count */}
-                  {showCount && category._count && (
-                    <p className={`text-sm ${style === 'overlay' ? 'text-white/80' : 'text-gray-600'} ${shape === 'circle' ? 'text-center' : ''}`}>
-                      {category._count.products} {category._count.products === 1 ? 'product' : 'products'}
-                    </p>
-                  )}
+                  {/* Category Info */}
+                  <div className={`p-4 ${style === 'overlay' ? 'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white' : ''}`}>
+                    <Link href={`/products?category=${category.slug}`}>
+                      <h3 className={`font-semibold mb-2 line-clamp-2 hover:text-blue-600 transition-all duration-300 ease-out group-hover:scale-105 ${
+                        style === 'overlay' ? 'text-white' : 'text-gray-900'
+                      } ${shape === 'circle' ? 'text-center' : ''}`}>
+                        {category.name}
+                      </h3>
+                    </Link>
 
-                  {/* Description for minimal style */}
-                  {style === 'minimal' && category.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                      {category.description}
-                    </p>
-                  )}
+                    {/* Product Count */}
+                    {showCount && category._count && (
+                      <p className={`text-sm ${style === 'overlay' ? 'text-white/80' : 'text-gray-600'} ${shape === 'circle' ? 'text-center' : ''}`}>
+                        {category._count.products} {category._count.products === 1 ? 'product' : 'products'}
+                      </p>
+                    )}
+
+                    {/* Description for minimal style */}
+                    {style === 'minimal' && category.description && (
+                      <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                        {category.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 mb-8">No categories available</p>
-        )}
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 mb-8">No categories available</p>
+          )}
+        </Suspense>
 
         {/* View All Button */}
-        <div className="text-center">
+        <div className="text-center animate-in fade-in-0 duration-700 delay-300">
           <Link
             href="/products"
-            className="inline-block px-8 py-3 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-block px-8 py-3 font-semibold rounded-lg transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 active:scale-95"
             style={{
               backgroundColor: 'var(--theme-primary, #0070f3)',
               color: '#ffffff',
@@ -166,4 +193,8 @@ export default function CategoriesGridBlock({
       </div>
     </section>
   );
-}
+});
+
+CategoriesGridBlock.displayName = 'CategoriesGridBlock';
+
+export default CategoriesGridBlock;

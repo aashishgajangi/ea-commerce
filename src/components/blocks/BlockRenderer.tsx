@@ -91,7 +91,7 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
 function HeroBlock({ data }: { data: HeroBlockData }) {
   return (
     <section
-      className="relative min-h-[60vh] flex items-center justify-center overflow-hidden"
+      className="relative min-h-[60vh] flex items-center justify-center overflow-hidden animate-in fade-in-0 duration-1000"
       style={{
         backgroundColor: data.backgroundColor || 'var(--theme-primary, #0070f3)',
       }}
@@ -105,7 +105,8 @@ function HeroBlock({ data }: { data: HeroBlockData }) {
             fill
             className="object-cover opacity-40"
             priority
-            unoptimized
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
           />
         </div>
       )}
@@ -117,7 +118,7 @@ function HeroBlock({ data }: { data: HeroBlockData }) {
       <div className="relative z-10 container mx-auto px-4 py-20 text-center">
         {data.title && (
           <h1
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in"
+            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-in slide-in-from-bottom-4 duration-700 delay-200"
             style={{ color: data.textColor || '#ffffff' }}
           >
             {data.title}
@@ -126,7 +127,7 @@ function HeroBlock({ data }: { data: HeroBlockData }) {
 
         {data.subtitle && (
           <p
-            className="text-xl md:text-2xl lg:text-3xl mb-8 max-w-3xl mx-auto opacity-90"
+            className="text-xl md:text-2xl lg:text-3xl mb-8 max-w-3xl mx-auto opacity-90 animate-in slide-in-from-bottom-4 duration-700 delay-400"
             style={{ color: data.textColor || '#ffffff' }}
           >
             {data.subtitle}
@@ -136,7 +137,7 @@ function HeroBlock({ data }: { data: HeroBlockData }) {
         {data.buttonText && data.buttonLink && (
           <Link
             href={data.buttonLink}
-            className="inline-block px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-block px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 active:scale-95 animate-in slide-in-from-bottom-4 duration-700 delay-600"
             style={{
               backgroundColor: data.buttonColor || 'var(--theme-accent, #ff6b35)',
               color: '#ffffff',
@@ -154,7 +155,7 @@ function HeroBlock({ data }: { data: HeroBlockData }) {
 function ContentBlock({ data }: { data: ContentBlockData }) {
   // Use 'html' field (from editor) or fallback to 'content' for backward compatibility
   const htmlContent = data.html || data.content;
-  
+
   // Don't render if no content
   if (!htmlContent) {
     return null;
@@ -162,7 +163,7 @@ function ContentBlock({ data }: { data: ContentBlockData }) {
 
   return (
     <section
-      className="py-16"
+      className="py-16 animate-in fade-in-0 duration-700"
       style={{
         backgroundColor: data.backgroundColor || 'transparent',
       }}
@@ -170,7 +171,7 @@ function ContentBlock({ data }: { data: ContentBlockData }) {
       <div className="container mx-auto px-4 max-w-4xl">
         {data.title && (
           <h2
-            className="text-3xl md:text-4xl font-bold mb-6"
+            className="text-3xl md:text-4xl font-bold mb-6 animate-in slide-in-from-left-4 duration-500"
             style={{
               color: data.textColor || 'var(--theme-text, #1a1a1a)',
             }}
@@ -214,7 +215,7 @@ function ContentBlock({ data }: { data: ContentBlockData }) {
 function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
   return (
     <section
-      className="py-16"
+      className="py-16 animate-in fade-in-0 duration-700"
       style={{
         backgroundColor: data.backgroundColor || 'var(--theme-background, #f9fafb)',
       }}
@@ -222,7 +223,7 @@ function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
       <div className="container mx-auto px-4">
         {data.title && (
           <h2
-            className="text-3xl md:text-4xl font-bold mb-8 text-center"
+            className="text-3xl md:text-4xl font-bold mb-8 text-center animate-in slide-in-from-top-4 duration-500"
             style={{
               color: data.textColor || 'var(--theme-text, #1a1a1a)',
             }}
@@ -233,7 +234,7 @@ function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
 
         {data.subtitle && (
           <p
-            className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80"
+            className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80 animate-in slide-in-from-top-4 duration-500 delay-100"
             style={{
               color: data.textColor || 'var(--theme-text, #1a1a1a)',
             }}
@@ -243,11 +244,12 @@ function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
         )}
 
         {/* Products Grid Placeholder */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8 animate-in fade-in-0 duration-700 delay-200">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              className="bg-white rounded-lg shadow-md overflow-hidden animate-in slide-in-from-bottom-4 duration-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
               {/* Product Image Placeholder */}
               <div className="relative aspect-square overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -264,10 +266,10 @@ function ProductsGridBlock({ data }: { data: ProductsGridBlockData }) {
         </div>
 
         {/* View All Button */}
-        <div className="text-center">
+        <div className="text-center animate-in fade-in-0 duration-700 delay-500">
           <Link
             href="/products"
-            className="inline-block px-8 py-3 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-block px-8 py-3 font-semibold rounded-lg transition-all duration-300 ease-out shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 active:scale-95"
             style={{
               backgroundColor: 'var(--theme-primary, #0070f3)',
               color: '#ffffff',
@@ -363,7 +365,7 @@ function CategoriesGridBlock({ data }: { data: CategoriesGridBlockData }) {
 function NewsletterBlock({ data }: { data: NewsletterBlockData }) {
   return (
     <section
-      className="py-16"
+      className="py-16 animate-in fade-in-0 duration-700"
       style={{
         backgroundColor: data.backgroundColor || 'var(--theme-primary, #0070f3)',
       }}
@@ -371,7 +373,7 @@ function NewsletterBlock({ data }: { data: NewsletterBlockData }) {
       <div className="container mx-auto px-4 max-w-2xl text-center">
         {data.title && (
           <h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4 animate-in slide-in-from-top-4 duration-500"
             style={{
               color: data.textColor || '#ffffff',
             }}
@@ -382,7 +384,7 @@ function NewsletterBlock({ data }: { data: NewsletterBlockData }) {
 
         {data.subtitle && (
           <p
-            className="text-lg md:text-xl mb-8 opacity-90"
+            className="text-lg md:text-xl mb-8 opacity-90 animate-in slide-in-from-top-4 duration-500 delay-100"
             style={{
               color: data.textColor || '#ffffff',
             }}
@@ -391,11 +393,11 @@ function NewsletterBlock({ data }: { data: NewsletterBlockData }) {
           </p>
         )}
 
-        <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+        <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto animate-in slide-in-from-bottom-4 duration-500 delay-200">
           <input
             type="email"
             placeholder={data.placeholder || 'Enter your email'}
-            className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-offset-2"
+            className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-offset-2 transition-all duration-300 focus:scale-105"
             style={{
               backgroundColor: '#ffffff',
               color: '#1a1a1a',
@@ -403,7 +405,7 @@ function NewsletterBlock({ data }: { data: NewsletterBlockData }) {
           />
           <button
             type="submit"
-            className="px-6 py-3 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
+            className="px-6 py-3 font-semibold rounded-lg transition-all duration-300 ease-out shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
             style={{
               backgroundColor: data.buttonColor || 'var(--theme-accent, #ff6b35)',
               color: '#ffffff',
