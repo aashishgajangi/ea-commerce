@@ -328,8 +328,7 @@ export default function MediaHeroBlock({ data }: MediaHeroBlockProps) {
                 data.contentMaxWidth === 'xl' ? 'max-w-xl' :
                 data.contentMaxWidth === 'full' ? 'max-w-full' :
                 'max-w-4xl'
-              } ${data.animateContent ? 'animate-fade-in' : ''}`}
-              style={{ animationDelay: `${data.animationDelay}ms` }}
+              }`}
             >
               {/* Title */}
               {(data.showTitle !== false) && data.title && (
@@ -381,8 +380,7 @@ export default function MediaHeroBlock({ data }: MediaHeroBlockProps) {
                 data.contentMaxWidth === 'xl' ? 'max-w-xl' :
                 data.contentMaxWidth === 'full' ? 'max-w-full' :
                 'max-w-4xl'
-              } ${data.animateContent ? 'animate-fade-in' : ''}`}
-              style={{ animationDelay: `${data.animationDelay}ms` }}
+              }`}
             >
             {/* Title */}
             {(data.showTitle !== false) && data.title && (
