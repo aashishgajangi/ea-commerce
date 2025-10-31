@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
@@ -44,6 +44,16 @@ export default function ProductsGridBlock({
 }: ProductsGridBlockProps) {
   const [currency] = useState(initialCurrency);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const handleImageLoad = (productId: string) => {
+    setLoadedImages(prev => new Set(prev).add(productId));
+  };
 
   // Format price with dynamic currency
   const formatPrice = (price: number) => {
@@ -101,7 +111,7 @@ export default function ProductsGridBlock({
   return (
     <>
       <section
-        className="py-16"
+        className={`py-16 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
         style={{
           backgroundColor,
         }}
@@ -110,8 +120,11 @@ export default function ProductsGridBlock({
           {/* Title */}
           {title && (
             <h2
-              className="text-3xl md:text-4xl font-bold mb-8 text-center"
-              style={{ color: textColor }}
+              className={`text-3xl md:text-4xl font-bold mb-8 text-center ${isVisible ? 'animate-slide-in-bottom' : 'opacity-0'}`}
+              style={{
+                color: textColor,
+                animationDelay: '0.1s'
+              }}
             >
               {title}
             </h2>
@@ -120,8 +133,11 @@ export default function ProductsGridBlock({
           {/* Subtitle */}
           {subtitle && (
             <p
-              className="text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80"
-              style={{ color: textColor }}
+              className={`text-lg md:text-xl mb-12 text-center max-w-2xl mx-auto opacity-80 ${isVisible ? 'animate-slide-in-bottom' : 'opacity-0'}`}
+              style={{
+                color: textColor,
+                animationDelay: '0.2s'
+              }}
             >
               {subtitle}
             </p>
@@ -130,10 +146,13 @@ export default function ProductsGridBlock({
           {/* Products Grid */}
           {products.length > 0 ? (
             <div className={`grid grid-cols-${columnsMobile} sm:grid-cols-${columnsTablet} md:grid-cols-${columnsDesktop} gap-6 mb-8`}>
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                  className={`group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col ${isVisible ? 'animate-stagger-fade-in' : 'opacity-0'}`}
+                  style={{
+                    animationDelay: `${0.3 + index * 0.1}s`
+                  }}
                 >
                   {/* Out of Stock Badge */}
                   {product.stock <= 0 && (
@@ -153,13 +172,26 @@ export default function ProductsGridBlock({
                   <Link href={`/products/${product.slug}`} className="relative">
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                       {product.image ? (
-                        <Image
-                          src={product.image.url}
-                          alt={product.image.alt}
-                          width={400}
-                          height={400}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                        <>
+                          {/* Loading skeleton */}
+                          {!loadedImages.has(product.id) && (
+                            <div className="absolute inset-0 loading-shimmer rounded-lg"></div>
+                          )}
+                          <Image
+                            src={product.image.url}
+                            alt={product.image.alt}
+                            width={400}
+                            height={400}
+                            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
+                              loadedImages.has(product.id) ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onLoad={() => handleImageLoad(product.id)}
+                            loading="lazy"
+                            quality={85}
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+                          />
+                        </>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">

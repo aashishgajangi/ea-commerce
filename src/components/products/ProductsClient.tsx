@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +36,16 @@ interface ProductsClientProps {
 export default function ProductsClient({ initialProducts, currency }: ProductsClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const handleImageLoad = (productId: string) => {
+    setLoadedImages(prev => new Set(prev).add(productId));
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -68,7 +78,7 @@ export default function ProductsClient({ initialProducts, currency }: ProductsCl
   }, [initialProducts, searchTerm, sortBy]);
 
   return (
-    <div className="min-h-screen"
+    <div className={`min-h-screen ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
       style={{
         backgroundColor: 'var(--theme-background, #ffffff)',
         color: 'var(--theme-text, #1a1a1a)',
@@ -76,7 +86,7 @@ export default function ProductsClient({ initialProducts, currency }: ProductsCl
     >
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className={`mb-8 ${isVisible ? 'animate-slide-in-bottom' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <h1 className="text-3xl md:text-4xl font-bold mb-2"
             style={{ color: 'var(--theme-text, #1a1a1a)' }}
           >
@@ -88,7 +98,7 @@ export default function ProductsClient({ initialProducts, currency }: ProductsCl
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4">
+        <div className={`mb-8 flex flex-col md:flex-row gap-4 ${isVisible ? 'animate-slide-in-bottom' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           {/* Search */}
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40" />
@@ -147,28 +157,40 @@ export default function ProductsClient({ initialProducts, currency }: ProductsCl
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => {
+              {filteredProducts.map((product, index) => {
                 const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
                 const discount = calculateDiscount(product.price, product.compareAtPrice);
 
                 return (
                   <Link key={product.id} href={`/products/${product.slug}`}>
-                    <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full">
+                    <Card className={`group cursor-pointer hover:shadow-lg transition-all duration-300 h-full ${isVisible ? 'animate-stagger-fade-in' : 'opacity-0'}`}
+                          style={{ animationDelay: `${0.3 + index * 0.05}s` }}>
                       <CardContent className="p-4">
                         {/* Image */}
                         <div className="relative aspect-square mb-4 rounded-lg overflow-hidden"
                           style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
                         >
                           {primaryImage ? (
-                            <Image
-                              src={primaryImage.url}
-                              alt={primaryImage.alt || product.name}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                              loading="lazy"
-                              quality={85}
-                            />
+                            <>
+                              {/* Loading skeleton */}
+                              {!loadedImages.has(product.id) && (
+                                <div className="absolute inset-0 loading-shimmer rounded-lg"></div>
+                              )}
+                              <Image
+                                src={primaryImage.url}
+                                alt={primaryImage.alt || product.name}
+                                fill
+                                className={`object-cover group-hover:scale-105 transition-all duration-300 ${
+                                  loadedImages.has(product.id) ? 'opacity-100' : 'opacity-0'
+                                }`}
+                                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                loading="lazy"
+                                quality={85}
+                                onLoad={() => handleImageLoad(product.id)}
+                                placeholder="blur"
+                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+                              />
+                            </>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Package className="w-16 h-16 opacity-20" />
