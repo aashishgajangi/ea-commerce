@@ -10,6 +10,7 @@ import InstallButton from '@/components/pwa/InstallButton';
 import PWARegister from '@/components/pwa/PWARegister';
 import { Toaster } from '@/components/ui/toaster';
 import { getThemeSettings, getAppearanceSettings, getPWASettings, getGeneralSettings } from "@/lib/settings";
+import "@/lib/startup"; // Initialize Redis and other services
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

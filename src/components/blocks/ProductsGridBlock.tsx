@@ -44,6 +44,11 @@ export default function ProductsGridBlock({
 }: ProductsGridBlockProps) {
   const [currency] = useState(initialCurrency);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Format price with dynamic currency
   const formatPrice = (price: number) => {
@@ -134,7 +139,7 @@ export default function ProductsGridBlock({
           {/* Products Grid */}
           {products.length > 0 ? (
             <div className={`grid grid-cols-${columnsMobile} sm:grid-cols-${columnsTablet} md:grid-cols-${columnsDesktop} gap-6 mb-8`}>
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <div
                   key={product.id}
                   className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
@@ -162,20 +167,20 @@ export default function ProductsGridBlock({
                           alt={product.image.alt}
                           width={400}
                           height={400}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                           quality={85}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
                       )}
                     </div>
                   </Link>
-
+                  <div className="sr-only">{product.name}</div>
                   {/* Product Info */}
                   <div className="p-4 flex flex-col flex-grow">
                     <Link href={`/products/${product.slug}`}>

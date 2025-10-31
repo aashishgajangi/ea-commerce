@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Palette, MessageCircle, TrendingUp, Smartphone, ShoppingCart } from 'lucide-react';
+import { CheckCircle2, Image, FileText, Menu, Settings, ArrowRight, Package, FolderTree, Warehouse, Star, Users, LogOut, ExternalLink, Palette, MessageCircle, TrendingUp, Smartphone, ShoppingCart, Database } from 'lucide-react';
 
 export default function AdminDashboard() {
   return (
@@ -206,6 +206,25 @@ export default function AdminDashboard() {
                     </p>
                     <Button variant="ghost" size="sm" className="w-full">
                       Configure PWA <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/admin/cache" aria-label="Cache Management">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5 text-red-600" role="img" aria-label="Cache icon" />
+                      Cache Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Manage Redis cache and performance
+                    </p>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Manage Cache <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>

@@ -20,19 +20,32 @@ export async function initRedis(): Promise<void> {
   try {
     redisClient = createClient({
       url: env.REDIS_URL,
+      socket: {
+        connectTimeout: 5000, // 5 second timeout
+        reconnectStrategy: false, // Disable automatic reconnection
+      },
     });
 
     redisClient.on('error', (err) => {
       console.error('❌ Redis Client Error:', err);
+      // Set client to null on error to prevent further attempts
+      redisClient = null;
     });
 
     redisClient.on('connect', () => {
       console.log('✅ Redis connected successfully');
     });
 
-    await redisClient.connect();
+    // Try to connect with timeout
+    const connectPromise = redisClient.connect();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Redis connection timeout')), 5000);
+    });
+
+    await Promise.race([connectPromise, timeoutPromise]);
   } catch (error) {
     console.error('❌ Failed to connect to Redis:', error);
+    console.log('ℹ️  Continuing without Redis - caching disabled');
     redisClient = null;
   }
 }
@@ -68,6 +81,8 @@ export const cache = {
       return value ? JSON.parse(value) : null;
     } catch (error) {
       console.error(`Failed to get cache key ${key}:`, error);
+      // Set client to null on error to prevent further attempts
+      redisClient = null;
       return null;
     }
   },
@@ -83,6 +98,7 @@ export const cache = {
       await redisClient!.setEx(key, ttl, JSON.stringify(value));
     } catch (error) {
       console.error(`Failed to set cache key ${key}:`, error);
+      redisClient = null;
     }
   },
 
@@ -96,6 +112,7 @@ export const cache = {
       await redisClient!.del(key);
     } catch (error) {
       console.error(`Failed to delete cache key ${key}:`, error);
+      redisClient = null;
     }
   },
 
@@ -112,6 +129,7 @@ export const cache = {
       }
     } catch (error) {
       console.error(`Failed to delete cache pattern ${pattern}:`, error);
+      redisClient = null;
     }
   },
 
@@ -125,6 +143,7 @@ export const cache = {
       await redisClient!.flushDb();
     } catch (error) {
       console.error('Failed to clear cache:', error);
+      redisClient = null;
     }
   },
 
@@ -139,6 +158,7 @@ export const cache = {
       return exists === 1;
     } catch (error) {
       console.error(`Failed to check if cache key ${key} exists:`, error);
+      redisClient = null;
       return false;
     }
   },
