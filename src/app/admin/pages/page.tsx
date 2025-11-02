@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic'; // Disable caching for admin pages
+
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -252,7 +254,7 @@ export default function PagesPage() {
                           </Button>
                         </Link>
                       )}
-                      <Link href={`/admin/pages/${page.id}/edit`}>
+                      <Link href={`/admin/pages/${page.slug || 'home'}/edit`}>
                         <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>

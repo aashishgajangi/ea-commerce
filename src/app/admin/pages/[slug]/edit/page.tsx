@@ -1,56 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic'; // Disable caching for admin pages
+
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Link from 'next/link';
+import PagePreviewModal from '@/components/pages/PagePreviewModal';
 import BlockManager from '@/components/blocks/BlockManager';
 import SEOSidebar from '@/components/seo/SEOSidebar';
 import { BlockInstance } from '@/lib/blocks/block-types';
 import { SEOData } from '@/lib/seo/types';
 import { ArrowLeft, Save, Eye, FileText, Settings } from 'lucide-react';
-import Link from 'next/link';
-import PagePreviewModal from '@/components/pages/PagePreviewModal';
-
-interface Page {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string | null;
-  status: 'draft' | 'published';
-  pageType: string | null;
-  // SEO fields
-  metaTitle: string | null;
-  metaDescription: string | null;
-  metaKeywords: string | null;
-  canonicalUrl: string | null;
-  ogTitle: string | null;
-  ogDescription: string | null;
-  ogImageId: string | null;
-  twitterTitle: string | null;
-  twitterDescription: string | null;
-  twitterImageId: string | null;
-  featuredImageId: string | null;
-  // Phase 3: Advanced SEO
-  focusKeyphrase: string | null;
-  focusKeyphrases: string | null;
-  robots: string | null;
-  schemaType: string | null;
-  schemaData: string | null;
-  // Phase 4: Blocks
-  blocks: string | null;
-}
 
 interface PageEditorProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ slug: string }>;
 }
 
-export default function PageEditorNew({ params }: PageEditorProps) {
+export default function PageEditor({ params }: PageEditorProps) {
   const router = useRouter();
   const [pageId, setPageId] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -61,6 +31,7 @@ export default function PageEditorNew({ params }: PageEditorProps) {
   // Form fields
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const originalSlugRef = useRef<string>(''); // Store original slug from DB (never changes)
   const [excerpt, setExcerpt] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [pageType, setPageType] = useState<string>('custom');
@@ -69,62 +40,148 @@ export default function PageEditorNew({ params }: PageEditorProps) {
   const [blocks, setBlocks] = useState<BlockInstance[]>([]);
   
   // SEO data
-  const [seoData, setSeoData] = useState<SEOData>({});
-
+  const [seoData, setSeoData] = useState<SEOData>({} as SEOData);
+  
   useEffect(() => {
     async function loadPage() {
       const resolvedParams = await params;
-      setPageId(resolvedParams.id);
+      const isHomepage = resolvedParams.slug === 'home';
+      const pageSlug = isHomepage ? 'home' : resolvedParams.slug;
 
       try {
-        const response = await fetch(`/api/admin/pages/${resolvedParams.id}`);
-        if (!response.ok) throw new Error('Failed to fetch page');
-
-        const page: Page = await response.json();
-        setTitle(page.title);
-        setSlug(page.slug);
-        setExcerpt(page.excerpt || '');
-        setStatus(page.status);
-        setPageType(page.pageType || 'custom');
-        
-        // Parse blocks if exists
-        if (page.blocks) {
-          try {
-            setBlocks(JSON.parse(page.blocks));
-          } catch (e) {
-            console.error('Failed to parse blocks:', e);
+        const response = await fetch(`/api/admin/pages/by-slug/${encodeURIComponent(pageSlug)}`);
+        if (!response.ok) {
+          // If homepage not found, try to create it
+          if (isHomepage) {
+            console.log('Homepage not found, creating...');
+            const createResponse = await fetch('/api/admin/pages', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                title: 'Home',
+                slug: '',
+                status: 'published',
+                content: 'Welcome to our homepage!',
+              }),
+            });
+            if (!createResponse.ok) {
+              throw new Error('Failed to create homepage');
+            }
+            const retryResponse = await fetch(`/api/admin/pages/by-slug/${encodeURIComponent(pageSlug)}`);
+            if (!retryResponse.ok) {
+              throw new Error('Failed to load homepage after creation');
+            }
+            const page = await retryResponse.json();
+            setPageId(page.id);
+            setTitle(page.title);
+            originalSlugRef.current = page.slug;
+            setExcerpt(page.excerpt || '');
+            setStatus(page.status);
+            setPageType(page.pageType || 'custom');
+            
+            // Parse blocks if exists
+            if (page.blocks) {
+              try {
+                setBlocks(JSON.parse(page.blocks));
+              } catch (e) {
+                console.error('Failed to parse blocks:', e);
+              }
+            }
+            
+            // Parse SEO data
+            if (page.seoData) {
+              try {
+                const seo: SEOData = {
+                  metaTitle: page.metaTitle || undefined,
+                  metaDescription: page.metaDescription || undefined,
+                  metaKeywords: page.metaKeywords || undefined,
+                  canonicalUrl: page.canonicalUrl || undefined,
+                  ogTitle: page.ogTitle || undefined,
+                  ogDescription: page.ogDescription || undefined,
+                  ogImageId: page.ogImageId || undefined,
+                  twitterTitle: page.twitterTitle || undefined,
+                  twitterDescription: page.twitterDescription || undefined,
+                  twitterImageId: page.twitterImageId || undefined,
+                  focusKeyphrase: page.focusKeyphrase || undefined,
+                  focusKeyphrases: page.focusKeyphrases ? JSON.parse(page.focusKeyphrases) : undefined,
+                  robots: page.robots || undefined,
+                  schemaType: page.schemaType as SEOData['schemaType'],
+                  schemaData: page.schemaData ? JSON.parse(page.schemaData) : undefined,
+                };
+                setSeoData(seo);
+              } catch (e) {
+                console.error('Failed to parse SEO data:', e);
+              }
+            }
+          } else {
+            const errorData = await response.json();
+            throw new Error(errorData.message || errorData.error || 'Failed to fetch page');
+          }
+        } else {
+          const page = await response.json();
+          setPageId(page.id);
+          setTitle(page.title);
+          originalSlugRef.current = page.slug;
+          setExcerpt(page.excerpt || '');
+          setStatus(page.status);
+          setPageType(page.pageType || 'custom');
+          
+          // Parse blocks if exists
+          if (page.blocks) {
+            try {
+              setBlocks(JSON.parse(page.blocks));
+            } catch (e) {
+              console.error('Failed to parse blocks:', e);
+            }
+          }
+          
+          // Parse SEO data
+          if (page.seoData) {
+            try {
+              const seo: SEOData = {
+                metaTitle: page.metaTitle || undefined,
+                metaDescription: page.metaDescription || undefined,
+                metaKeywords: page.metaKeywords || undefined,
+                canonicalUrl: page.canonicalUrl || undefined,
+                ogTitle: page.ogTitle || undefined,
+                ogDescription: page.ogDescription || undefined,
+                ogImageId: page.ogImageId || undefined,
+                twitterTitle: page.twitterTitle || undefined,
+                twitterDescription: page.twitterDescription || undefined,
+                twitterImageId: page.twitterImageId || undefined,
+                focusKeyphrase: page.focusKeyphrase || undefined,
+                focusKeyphrases: page.focusKeyphrases ? JSON.parse(page.focusKeyphrases) : undefined,
+                robots: page.robots || undefined,
+                schemaType: page.schemaType as SEOData['schemaType'],
+                schemaData: page.schemaData ? JSON.parse(page.schemaData) : undefined,
+              };
+              setSeoData(seo);
+            } catch (e) {
+              console.error('Failed to parse SEO data:', e);
+            }
           }
         }
-        
-        // Load SEO data
-        const seo: SEOData = {
-          metaTitle: page.metaTitle || undefined,
-          metaDescription: page.metaDescription || undefined,
-          metaKeywords: page.metaKeywords || undefined,
-          canonicalUrl: page.canonicalUrl || undefined,
-          ogTitle: page.ogTitle || undefined,
-          ogDescription: page.ogDescription || undefined,
-          ogImageId: page.ogImageId || undefined,
-          twitterTitle: page.twitterTitle || undefined,
-          twitterDescription: page.twitterDescription || undefined,
-          twitterImageId: page.twitterImageId || undefined,
-          focusKeyphrase: page.focusKeyphrase || undefined,
-          focusKeyphrases: page.focusKeyphrases ? JSON.parse(page.focusKeyphrases) : undefined,
-          robots: page.robots || undefined,
-          schemaType: page.schemaType as SEOData['schemaType'],
-          schemaData: page.schemaData ? JSON.parse(page.schemaData) : undefined,
-        };
-        setSeoData(seo);
       } catch (error) {
-        console.error('Error loading page:', error);
-        alert('Failed to load page');
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading page:', error);
+        }
+        const message = error instanceof Error ? error.message : 'Failed to load page';
+        if (message.toLowerCase().includes('not found') || message.toLowerCase().includes('no page exists')) {
+          alert(message);
+          router.push('/admin/pages');
+        } else {
+          alert(message);
+        }
       } finally {
         setLoading(false);
       }
     }
 
     loadPage();
-  }, [params]);
+  }, [params, router]);
 
   const generateSlug = (text: string) => {
     return text
@@ -151,6 +208,8 @@ export default function PageEditorNew({ params }: PageEditorProps) {
     }
 
     setSaving(true);
+    const originalSlug = originalSlugRef.current; // Store for comparison
+    
     try {
       const response = await fetch(`/api/admin/pages/${pageId}`, {
         method: 'PATCH',
@@ -189,8 +248,19 @@ export default function PageEditorNew({ params }: PageEditorProps) {
         throw new Error(error.error || 'Failed to save page');
       }
 
-      alert('Page saved successfully!');
-      router.push('/admin/pages');
+      const updatedPage = await response.json();
+      
+      // Check if slug changed
+      if (updatedPage.slug !== originalSlug) {
+        // Slug changed - redirect to new URL
+        alert('Page saved! Redirecting to new URL...');
+        setTimeout(() => {
+          window.location.href = `/admin/pages/${updatedPage.slug || 'home'}/edit`;
+        }, 500);
+      } else {
+        // Slug didn't change
+        alert('Page saved successfully!');
+      }
     } catch (error) {
       console.error('Error saving page:', error);
       alert(error instanceof Error ? error.message : 'Failed to save page');

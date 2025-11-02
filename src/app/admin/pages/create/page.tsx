@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic'; // Disable caching for admin pages
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -133,7 +135,7 @@ export default function CreatePage() {
 
       const page = await response.json();
       alert('Page created successfully!');
-      router.push(`/admin/pages/${page.id}/edit`);
+      router.push(`/admin/pages/${page.slug || 'home'}/edit`);
     } catch (error) {
       console.error('Error creating page:', error);
       alert(error instanceof Error ? error.message : 'Failed to create page');

@@ -142,6 +142,10 @@ export async function PATCH(
       featuredImageId: data.featuredImageId === null ? undefined : data.featuredImageId,
     };
 
+    // Get old page data before update (for slug comparison)
+    const oldPage = await getPage(id);
+    const oldSlug = oldPage?.slug;
+    
     // Update the page
     const page = await updatePage(id, updateData);
 
@@ -152,11 +156,19 @@ export async function PATCH(
       // Revalidate the specific page
       if (page.slug) {
         revalidatePath(`/${page.slug}`);
+        // Revalidate admin edit route with new slug
+        revalidatePath(`/admin/pages/${page.slug}/edit`);
+      }
+      
+      // If slug changed, revalidate old admin route too
+      if (oldSlug && oldSlug !== page.slug) {
+        revalidatePath(`/admin/pages/${oldSlug}/edit`);
       }
       
       // If it's the homepage, revalidate root path
       if (page.isHomepage || page.slug === '' || page.pageType === 'homepage') {
         revalidatePath('/');
+        revalidatePath('/admin/pages/home/edit');
       }
     } catch (revalidateError) {
       console.error('Error revalidating path:', revalidateError);
