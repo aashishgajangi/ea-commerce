@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ export default function CacheManagementPage() {
   const [clearing, setClearing] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchCacheStatus = async () => {
+  const fetchCacheStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/cache');
       if (response.ok) {
@@ -48,7 +48,7 @@ export default function CacheManagementPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const clearCache = async (pattern?: string) => {
     const clearKey = pattern || 'all';

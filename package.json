@@ -26,6 +26,7 @@
     "perf:check": "tsx scripts/check-performance.ts",
     "currency:check": "tsx scripts/check-currency-setting.ts",
     "currency:inr": "tsx scripts/set-currency-inr.ts",
+    "test:redis": "tsx scripts/test-multi-site-redis.ts",
     "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {

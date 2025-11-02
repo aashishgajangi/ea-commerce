@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
@@ -44,11 +44,6 @@ export default function ProductsGridBlock({
 }: ProductsGridBlockProps) {
   const [currency] = useState(initialCurrency);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Format price with dynamic currency
   const formatPrice = (price: number) => {
@@ -142,7 +137,7 @@ export default function ProductsGridBlock({
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                  className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col relative"
                 >
                   {/* Out of Stock Badge */}
                   {product.stock <= 0 && (
@@ -180,7 +175,6 @@ export default function ProductsGridBlock({
                       )}
                     </div>
                   </Link>
-                  <div className="sr-only">{product.name}</div>
                   {/* Product Info */}
                   <div className="p-4 flex flex-col flex-grow">
                     <Link href={`/products/${product.slug}`}>

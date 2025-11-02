@@ -15,6 +15,8 @@ const envSchema = z.object({
   
   // Redis (optional)
   REDIS_URL: z.string().url().optional(),
+  REDIS_DB: z.string().optional(), // Redis database number (0-15)
+  CACHE_PREFIX: z.string().optional(), // Cache key prefix for multi-site
   
   // Email (optional)
   SMTP_HOST: z.string().optional(),

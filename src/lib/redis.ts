@@ -2,6 +2,45 @@ import { createClient, RedisClientType } from 'redis';
 import { env, isFeatureEnabled } from './env';
 
 /**
+ * Cache key prefix for multi-site isolation
+ * Automatically determined from environment
+ */
+let cachePrefix: string = '';
+
+/**
+ * Get cache prefix for this site
+ */
+function getCachePrefix(): string {
+  if (cachePrefix) return cachePrefix;
+  
+  // Priority: CACHE_PREFIX > APP_NAME > domain from APP_URL
+  if (env.CACHE_PREFIX) {
+    cachePrefix = `${env.CACHE_PREFIX}:`;
+  } else if (env.APP_NAME && env.APP_NAME !== 'My Store') {
+    cachePrefix = `${env.APP_NAME.toLowerCase().replace(/[^a-z0-9]/g, '_')}:`;
+  } else {
+    // Extract domain from APP_URL as fallback
+    try {
+      const url = new URL(env.APP_URL);
+      const domain = url.hostname.replace(/[^a-z0-9]/g, '_');
+      cachePrefix = `${domain}:`;
+    } catch {
+      cachePrefix = 'site:';
+    }
+  }
+  
+  console.log(`🔧 Redis cache prefix: ${cachePrefix}`);
+  return cachePrefix;
+}
+
+/**
+ * Add prefix to cache key
+ */
+function prefixKey(key: string): string {
+  return `${getCachePrefix()}${key}`;
+}
+
+/**
  * Redis client instance
  * Null if Redis is not configured
  */
@@ -18,8 +57,19 @@ export async function initRedis(): Promise<void> {
   }
 
   try {
+    // Parse Redis URL and add database selection if specified
+    let redisUrl = env.REDIS_URL;
+    
+    // If REDIS_DB is specified, modify the URL to include database selection
+    if (env.REDIS_DB && redisUrl) {
+      const url = new URL(redisUrl);
+      url.pathname = `/${env.REDIS_DB}`;
+      redisUrl = url.toString();
+      console.log(`🔧 Redis database: ${env.REDIS_DB}`);
+    }
+    
     redisClient = createClient({
-      url: env.REDIS_URL,
+      url: redisUrl,
       socket: {
         connectTimeout: 5000, // 5 second timeout
         reconnectStrategy: false, // Disable automatic reconnection
@@ -77,7 +127,8 @@ export const cache = {
     if (!isRedisAvailable()) return null;
 
     try {
-      const value = await redisClient!.get(key);
+      const prefixedKey = prefixKey(key);
+      const value = await redisClient!.get(prefixedKey);
       return value ? JSON.parse(value) : null;
     } catch (error) {
       console.error(`Failed to get cache key ${key}:`, error);
@@ -95,7 +146,8 @@ export const cache = {
     if (!isRedisAvailable()) return;
 
     try {
-      await redisClient!.setEx(key, ttl, JSON.stringify(value));
+      const prefixedKey = prefixKey(key);
+      await redisClient!.setEx(prefixedKey, ttl, JSON.stringify(value));
     } catch (error) {
       console.error(`Failed to set cache key ${key}:`, error);
       redisClient = null;
@@ -109,7 +161,8 @@ export const cache = {
     if (!isRedisAvailable()) return;
 
     try {
-      await redisClient!.del(key);
+      const prefixedKey = prefixKey(key);
+      await redisClient!.del(prefixedKey);
     } catch (error) {
       console.error(`Failed to delete cache key ${key}:`, error);
       redisClient = null;
@@ -123,7 +176,8 @@ export const cache = {
     if (!isRedisAvailable()) return;
 
     try {
-      const keys = await redisClient!.keys(pattern);
+      const prefixedPattern = prefixKey(pattern);
+      const keys = await redisClient!.keys(prefixedPattern);
       if (keys.length > 0) {
         await redisClient!.del(keys);
       }
@@ -140,7 +194,13 @@ export const cache = {
     if (!isRedisAvailable()) return;
 
     try {
-      await redisClient!.flushDb();
+      // Only clear keys with our prefix to avoid affecting other sites
+      const prefixedPattern = prefixKey('*');
+      const keys = await redisClient!.keys(prefixedPattern);
+      if (keys.length > 0) {
+        await redisClient!.del(keys);
+        console.log(`🗑️  Cleared ${keys.length} cache keys with prefix: ${getCachePrefix()}`);
+      }
     } catch (error) {
       console.error('Failed to clear cache:', error);
       redisClient = null;
@@ -154,12 +214,33 @@ export const cache = {
     if (!isRedisAvailable()) return false;
 
     try {
-      const exists = await redisClient!.exists(key);
+      const prefixedKey = prefixKey(key);
+      const exists = await redisClient!.exists(prefixedKey);
       return exists === 1;
     } catch (error) {
       console.error(`Failed to check if cache key ${key} exists:`, error);
       redisClient = null;
       return false;
+    }
+  },
+
+  /**
+   * Get cache statistics for this site
+   */
+  async getStats(): Promise<{ keys: number; prefix: string; database: string | undefined }> {
+    if (!isRedisAvailable()) return { keys: 0, prefix: getCachePrefix(), database: env.REDIS_DB };
+
+    try {
+      const prefixedPattern = prefixKey('*');
+      const keys = await redisClient!.keys(prefixedPattern);
+      return {
+        keys: keys.length,
+        prefix: getCachePrefix(),
+        database: env.REDIS_DB || '0'
+      };
+    } catch (error) {
+      console.error('Failed to get cache stats:', error);
+      return { keys: 0, prefix: getCachePrefix(), database: env.REDIS_DB };
     }
   },
 };
