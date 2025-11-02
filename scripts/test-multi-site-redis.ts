@@ -26,7 +26,7 @@ const testEnv = {
 interface CacheTestResult {
   success: boolean;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 class MultiSiteRedisTester {
@@ -35,7 +35,7 @@ class MultiSiteRedisTester {
   /**
    * Add test result
    */
-  private addResult(success: boolean, message: string, details?: any) {
+  private addResult(success: boolean, message: string, details?: unknown) {
     this.testResults.push({ success, message, details });
     const icon = success ? '✅' : '❌';
     console.log(`${icon} ${message}`);
@@ -115,8 +115,10 @@ class MultiSiteRedisTester {
       await cache.del(testKey);
       this.addResult(true, 'Cache DELETE operation successful');
 
-    } catch (error: any) {
-      this.addResult(false, 'Cache connection failed', { error: error.message });
+    } catch (error: unknown) {
+      this.addResult(false, 'Cache connection failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   }
 
@@ -161,8 +163,10 @@ class MultiSiteRedisTester {
         await cache.del(key);
       }
 
-    } catch (error: any) {
-      this.addResult(false, 'Cache prefix isolation test failed', { error: error.message });
+    } catch (error: unknown) {
+      this.addResult(false, 'Cache prefix isolation test failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   }
 
@@ -220,8 +224,10 @@ class MultiSiteRedisTester {
         await cache.del(`${testKey}:${i}`);
       }
 
-    } catch (error: any) {
-      this.addResult(false, 'Cache performance test failed', { error: error.message });
+    } catch (error: unknown) {
+      this.addResult(false, 'Cache performance test failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   }
 
@@ -272,8 +278,10 @@ class MultiSiteRedisTester {
         await cache.del(`simulation:${site.prefix}:settings`);
       }
 
-    } catch (error: any) {
-      this.addResult(false, 'Multi-site simulation test failed', { error: error.message });
+    } catch (error: unknown) {
+      this.addResult(false, 'Multi-site simulation test failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   }
 
@@ -331,8 +339,10 @@ class MultiSiteRedisTester {
 
       await directClient.quit();
 
-    } catch (error: any) {
-      this.addResult(false, 'Could not check real-world isolation', { error: error.message });
+    } catch (error: unknown) {
+      this.addResult(false, 'Could not check real-world isolation', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   }
 
