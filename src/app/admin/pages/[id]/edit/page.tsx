@@ -56,7 +56,7 @@ export default function PageEditorNew({ params }: PageEditorProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'seo'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
 
   // Form fields
   const [title, setTitle] = useState('');

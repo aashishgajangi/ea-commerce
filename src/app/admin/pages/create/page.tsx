@@ -19,7 +19,7 @@ export default function CreatePage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'seo'>('settings');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings'>('settings');
   const [showTemplates, setShowTemplates] = useState(true);
 
   // Form fields
