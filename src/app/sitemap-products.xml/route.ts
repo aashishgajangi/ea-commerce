@@ -77,9 +77,15 @@ export async function GET() {
       const imageTags = product.images
         .map((img) => {
           if (!img.url) return '';
+          
+          // Convert relative URLs to absolute URLs
+          const imageUrl = img.url.startsWith('http') 
+            ? img.url 
+            : `${siteUrl}${img.url.startsWith('/') ? '' : '/'}${img.url}`;
+          
           return `
     <image:image>
-      <image:loc>${img.url}</image:loc>${img.alt ? `
+      <image:loc>${imageUrl}</image:loc>${img.alt ? `
       <image:title>${escapeXml(img.alt)}</image:title>` : ''}
     </image:image>`;
         })

@@ -53,11 +53,18 @@ export async function GET() {
       if (category._count.products > 20) priority = '0.9';
       else if (category._count.products > 10) priority = '0.8';
       
-      // Image tag if available
-      const imageTag = category.image ? `
+      // Image tag if available (convert relative URLs to absolute)
+      let imageTag = '';
+      if (category.image) {
+        const imageUrl = category.image.startsWith('http') 
+          ? category.image 
+          : `${siteUrl}${category.image.startsWith('/') ? '' : '/'}${category.image}`;
+        
+        imageTag = `
     <image:image>
-      <image:loc>${category.image}</image:loc>
-    </image:image>` : '';
+      <image:loc>${imageUrl}</image:loc>
+    </image:image>`;
+      }
       
       return `
   <url>
