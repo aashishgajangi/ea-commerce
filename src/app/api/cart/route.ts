@@ -37,12 +37,12 @@ export async function GET(request: NextRequest) {
 
     // Fetch currency setting (cached separately)
     const { config: configLib, ConfigKeys } = await import('@/lib/config');
-    const currency = await configLib.get(ConfigKeys.CURRENCY).catch(() => 'USD');
+    const currency = await configLib.get(ConfigKeys.CURRENCY).catch(() => 'INR');
 
     const response = {
       cart,
       summary,
-      currency: currency || 'USD',
+      currency: currency || 'INR',
     };
 
     // Cache for 30 seconds (short TTL since cart changes frequently)

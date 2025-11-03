@@ -15,6 +15,7 @@ interface SEOSidebarProps {
   pageTitle?: string;
   pageContent?: string;
   pageUrl?: string;
+  onGenerateSchema?: () => Promise<Record<string, unknown> | null>;
 }
 
 export default function SEOSidebar({ 
@@ -23,10 +24,28 @@ export default function SEOSidebar({
   pageTitle = '',
   pageContent = '',
   pageUrl = '',
+  onGenerateSchema,
 }: SEOSidebarProps) {
   const [activeTab, setActiveTab] = useState<'basic' | 'social' | 'advanced' | 'schema'>('basic');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['og', 'twitter']));
   const [seoAnalysis, setSeoAnalysis] = useState({ score: 0, issues: [] as string[], suggestions: [] as string[] });
+  const [currency, setCurrency] = useState('INR');
+
+  // Fetch currency setting
+  useEffect(() => {
+    const fetchCurrency = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/general');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrency(data.currency || 'INR');
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency:', error);
+      }
+    };
+    fetchCurrency();
+  }, []);
 
   useEffect(() => {
     const analysis = calculateSEOScore(data);
@@ -75,9 +94,20 @@ export default function SEOSidebar({
     updateData(updates);
   };
 
-  const handleGenerateSchema = () => {
+  const handleGenerateSchema = async () => {
     if (!data.schemaType) return;
-    const schemaData = generateSchemaData(data.schemaType, data, pageTitle, pageUrl);
+    
+    // Use custom schema generator if provided (e.g., for products with real data)
+    if (onGenerateSchema) {
+      const schemaData = await onGenerateSchema();
+      if (schemaData) {
+        updateData({ schemaData });
+      }
+      return;
+    }
+    
+    // Otherwise use default generator (for pages/categories)
+    const schemaData = generateSchemaData(data.schemaType, data, pageTitle, currency, pageUrl);
     if (schemaData) {
       updateData({ schemaData });
     }

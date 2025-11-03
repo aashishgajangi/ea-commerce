@@ -21,6 +21,7 @@ import {
 import { generateSEOSlug } from '@/lib/slug-utils';
 import SEOSidebar from '@/components/seo/SEOSidebar';
 import { SEOData } from '@/lib/seo/types';
+import { generateProductSchema } from '@/lib/generate-schema';
 
 interface Product {
   id: string;
@@ -201,6 +202,37 @@ export default function ProductEditPage() {
     fetchProduct();
     fetchCategories();
   }, [fetchProduct, fetchCategories]);
+
+  // Custom schema generator with real product data
+  const handleGenerateProductSchema = useCallback(async () => {
+    if (!product) return null;
+    
+    // Fetch currency setting
+    const currencyResponse = await fetch('/api/admin/settings/general');
+    const currencyData = await currencyResponse.json();
+    const currency = currencyData.currency || 'INR';
+    
+    // Generate schema with real data
+    return generateProductSchema(
+      {
+        name: product.name,
+        description: product.description,
+        slug: product.slug,
+        price: product.price,
+        compareAtPrice: product.compareAtPrice,
+        images: product.images.map((img: ProductImage) => ({
+          url: img.url,
+          alt: img.alt,
+          isPrimary: img.isPrimary
+        })),
+        category: product.category || null,
+        stockQuantity: product.stockQuantity,
+        sku: product.sku,
+        weight: product.weight,
+      },
+      currency
+    );
+  }, [product]);
 
   // Handle category change and auto-update slug
   const handleCategoryChange = (categoryId: string) => {
@@ -1225,6 +1257,7 @@ export default function ProductEditPage() {
               pageTitle={product.name}
               pageContent={product.description || ''}
               pageUrl={`/products/${product.slug}`}
+              onGenerateSchema={handleGenerateProductSchema}
             />
           </div>
         </div>

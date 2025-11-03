@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Validate currency
     const validCurrencies = ['USD', 'EUR', 'GBP', 'INR'];
-    const finalCurrency = currency || 'USD';
+    const finalCurrency = currency || 'INR';
     if (!validCurrencies.includes(finalCurrency)) {
       return NextResponse.json(
         { error: `Currency must be one of: ${validCurrencies.join(', ')}` },

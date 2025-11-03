@@ -50,7 +50,7 @@ export default function CartClient() {
   const [summary, setSummary] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<string>('USD');
+  const [currency, setCurrency] = useState<string>('INR');
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
   const updateQueueRef = useRef<Map<string, Array<{ quantity: number; timestamp: number }>>>(new Map());
   const processingRef = useRef<Set<string>>(new Set());

@@ -6,6 +6,7 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import { Metadata } from 'next';
 import ProductClient from './ProductClient';
 import { db } from '@/lib/db';
+import { generateProductSchema } from '@/lib/generate-schema';
 
 interface PageProps {
   params: Promise<{
@@ -78,17 +79,32 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
+  // Generate proper schema with actual product data
+  const productSchema = generateProductSchema(
+    {
+      name: product.name,
+      description: product.description,
+      slug: product.slug,
+      price: product.price,
+      compareAtPrice: product.compareAtPrice,
+      images: product.images,
+      category: product.category,
+      stockQuantity: product.stockQuantity,
+      sku: product.sku,
+      weight: product.weight,
+    },
+    generalSettings.currency || 'INR'
+  );
+
   return (
     <PublicLayout>
       {/* JSON-LD Structured Data */}
-      {product.schemaData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(product.schemaData),
-          }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema),
+        }}
+      />
       
       <Suspense
         fallback={

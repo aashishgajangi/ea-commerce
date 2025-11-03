@@ -21,7 +21,7 @@ export async function GET() {
       tagline: tagline || "",
       description: description || "",
       timezone: timezone || "UTC",
-      currency: currency || "USD",
+      currency: currency || "INR",
       language: language || "en",
     });
   } catch (error) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     await config.setMany({
       [ConfigKeys.SITE_NAME]: siteName || "My Store",
       [ConfigKeys.SITE_DESCRIPTION]: description || "",
-      [ConfigKeys.CURRENCY]: currency || "USD",
+      [ConfigKeys.CURRENCY]: currency || "INR",
       timezone: timezone || "UTC",
       language: language || "en",
       tagline: tagline || "",

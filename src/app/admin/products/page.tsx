@@ -48,7 +48,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'draft' | 'published' | 'archived'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('INR');
   const [deleting, setDeleting] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
 
@@ -81,7 +81,7 @@ export default function ProductsPage() {
         const response = await fetch('/api/admin/settings/general');
         if (response.ok) {
           const data = await response.json();
-          setCurrency(data.currency || 'USD');
+          setCurrency(data.currency || 'INR');
         }
       } catch (error) {
         console.error('Failed to fetch currency:', error);

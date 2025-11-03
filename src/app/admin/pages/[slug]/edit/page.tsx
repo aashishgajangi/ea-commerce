@@ -14,6 +14,7 @@ import BlockManager from '@/components/blocks/BlockManager';
 import SEOSidebar from '@/components/seo/SEOSidebar';
 import { BlockInstance } from '@/lib/blocks/block-types';
 import { SEOData } from '@/lib/seo/types';
+import { generatePageSchema } from '@/lib/generate-schema';
 import { ArrowLeft, Save, Eye, FileText, Settings } from 'lucide-react';
 
 interface PageEditorProps {
@@ -180,6 +181,17 @@ export default function PageEditor({ params }: PageEditorProps) {
 
     loadPage();
   }, [params, router]);
+
+  // Custom schema generator with real page data
+  const handleGeneratePageSchema = async () => {
+    return generatePageSchema({
+      title: title,
+      content: JSON.stringify(blocks),
+      excerpt: excerpt,
+      slug: slug,
+      publishedAt: status === 'published' ? new Date() : undefined,
+    });
+  };
 
   const generateSlug = (text: string) => {
     return text
@@ -457,6 +469,7 @@ export default function PageEditor({ params }: PageEditorProps) {
                 pageTitle={title}
                 pageContent={blocks.map(b => JSON.stringify(b.data)).join(' ')}
                 pageUrl={slug}
+                onGenerateSchema={handleGeneratePageSchema}
               />
             </div>
           </div>

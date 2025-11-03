@@ -22,7 +22,7 @@ export default function SearchBar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [currency, setCurrency] = useState<string>('USD');
+  const [currency, setCurrency] = useState<string>('INR');
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -33,7 +33,7 @@ export default function SearchBar() {
         const response = await fetch('/api/admin/settings/general');
         if (response.ok) {
           const data = await response.json();
-          setCurrency(data.currency || 'USD');
+          setCurrency(data.currency || 'INR');
         }
       } catch (error) {
         console.error('Failed to fetch currency:', error);

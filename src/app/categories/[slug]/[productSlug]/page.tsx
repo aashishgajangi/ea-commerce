@@ -1,10 +1,11 @@
-import { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import { notFound, redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { getGeneralSettings } from '@/lib/settings';
 import PublicLayout from '@/components/layout/PublicLayout';
+import { Metadata } from 'next';
 import ProductClient from '@/app/products/[slug]/ProductClient';
+import { generateProductSchema } from '@/lib/generate-schema';
 
 interface ProductPageProps {
   params: Promise<{
@@ -143,18 +144,33 @@ export default async function CategoryProductPage({ params }: ProductPageProps) 
   // Fetch currency settings
   const generalSettings = await getGeneralSettings();
 
+  // Generate proper schema with actual product data
+  const productSchema = generateProductSchema(
+    {
+      name: product.name,
+      description: product.description,
+      slug: product.slug,
+      price: product.price,
+      compareAtPrice: product.compareAtPrice,
+      images: product.images,
+      category: product.category ? { name: product.category.name, slug: product.category.slug } : null,
+      stockQuantity: product.stockQuantity,
+      sku: product.sku,
+      weight: product.weight,
+    },
+    generalSettings.currency || 'INR'
+  );
+
   // Render the product page using existing ProductClient component
   return (
     <PublicLayout>
       {/* JSON-LD Structured Data */}
-      {product.schemaData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(product.schemaData),
-          }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema),
+        }}
+      />
       
       <Suspense
         fallback={

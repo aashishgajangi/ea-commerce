@@ -37,7 +37,7 @@ export async function GET() {
         tagline: tagline || "",
         description: description || "",
         timezone: timezone || "UTC",
-        currency: currency || "USD",
+        currency: currency || "INR",
         language: language || "en",
       },
       appearance,

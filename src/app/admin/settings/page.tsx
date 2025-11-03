@@ -43,7 +43,7 @@ export default function SettingsPage() {
     tagline: "",
     description: "",
     timezone: "UTC",
-    currency: "USD",
+    currency: "INR",
     language: "en",
   });
 

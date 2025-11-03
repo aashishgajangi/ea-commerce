@@ -16,6 +16,7 @@ import SEOSidebar from '@/components/seo/SEOSidebar';
 import { SEOData } from '@/lib/seo/types';
 import BlockManager from '@/components/blocks/BlockManager';
 import { BlockInstance } from '@/lib/blocks/block-types';
+import { generateCategorySchema } from '@/lib/generate-schema';
 
 interface CategoryEditorProps {
   params: Promise<{ slug: string }>;
@@ -168,6 +169,16 @@ export default function CategoryEditor({ params }: CategoryEditorProps) {
 
     loadCategory();
   }, [params, router]);
+
+  // Custom schema generator with real category data
+  const handleGenerateCategorySchema = async () => {
+    return generateCategorySchema({
+      name: name,
+      description: description,
+      slug: slug,
+      image: image,
+    });
+  };
 
   const generateSlug = (text: string) => {
     return text
@@ -461,6 +472,7 @@ export default function CategoryEditor({ params }: CategoryEditorProps) {
               onChange={setSeoData}
               pageTitle={name}
               pageContent={description}
+              onGenerateSchema={handleGenerateCategorySchema}
               pageUrl={slug ? `/categories/${slug}` : ''}
             />
           </div>

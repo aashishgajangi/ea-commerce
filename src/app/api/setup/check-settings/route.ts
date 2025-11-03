@@ -16,7 +16,7 @@ export async function GET() {
       settings: exists ? {
         siteName,
         siteDescription: siteDescription || '',
-        currency: currency || 'USD',
+        currency: currency || 'INR',
         timezone: timezone || 'UTC',
       } : null,
     });

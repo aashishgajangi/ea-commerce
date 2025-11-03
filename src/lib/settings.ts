@@ -164,7 +164,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   tagline: "Your tagline here",
   description: "An e-commerce platform",
   timezone: "UTC",
-  currency: "USD",
+  currency: "INR",
   language: "en",
 };
 

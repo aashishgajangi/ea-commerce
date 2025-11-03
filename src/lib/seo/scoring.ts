@@ -157,6 +157,7 @@ export function generateSchemaData(
   schemaType: string,
   data: SEOData,
   pageTitle?: string,
+  currency?: string,
   pageUrl?: string
 ): Record<string, unknown> | null {
   const baseSchema = {
@@ -200,7 +201,7 @@ export function generateSchemaData(
         offers: {
           '@type': 'Offer',
           price: '0.00',
-          priceCurrency: 'USD',
+          priceCurrency: currency || 'INR',
           availability: 'https://schema.org/InStock',
         },
       };

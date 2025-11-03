@@ -5,7 +5,8 @@ import { getProducts } from '@/lib/products';
 import { getGeneralSettings } from '@/lib/settings';
 import PublicLayout from '@/components/layout/PublicLayout';
 import CategoryClient from './CategoryClient';
-import type { BlockInstance } from '@/lib/blocks/block-types';
+import { BlockInstance } from '@/lib/blocks/block-types';
+import { generateCategorySchema } from '@/lib/generate-schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,29 +94,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     }
   }
 
-  // Parse schema data if available
-  let schemaDataToRender = null;
-  if ('schemaData' in category && category.schemaData) {
-    try {
-      schemaDataToRender = typeof category.schemaData === 'string' 
-        ? category.schemaData 
-        : JSON.stringify(category.schemaData);
-    } catch (error) {
-      console.error('Error parsing category schema data:', error);
-    }
-  }
+  // Generate proper schema with actual category data
+  const categorySchema = generateCategorySchema({
+    name: category.name,
+    description: category.description,
+    slug: category.slug,
+    image: category.image,
+  });
 
   return (
     <PublicLayout>
       {/* JSON-LD Structured Data */}
-      {schemaDataToRender && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: schemaDataToRender,
-          }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(categorySchema),
+        }}
+      />
       
       <CategoryClient
         category={category}
