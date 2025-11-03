@@ -80,6 +80,16 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <PublicLayout>
+      {/* JSON-LD Structured Data */}
+      {product.schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(product.schemaData),
+          }}
+        />
+      )}
+      
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">

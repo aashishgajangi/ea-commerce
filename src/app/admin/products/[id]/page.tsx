@@ -19,10 +19,8 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { generateSEOSlug } from '@/lib/slug-utils';
-import GoogleSearchPreview from '@/components/seo/GoogleSearchPreview';
-import FacebookSharePreview from '@/components/seo/FacebookSharePreview';
-import TwitterCardPreview from '@/components/seo/TwitterCardPreview';
-import SEOScorePanel from '@/components/seo/SEOScorePanel';
+import SEOSidebar from '@/components/seo/SEOSidebar';
+import { SEOData } from '@/lib/seo/types';
 
 interface Product {
   id: string;
@@ -117,6 +115,9 @@ export default function ProductEditPage() {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeTab, setActiveTab] = useState<'details' | 'images' | 'variants' | 'seo'>('details');
+  
+  // SEO data state (separate from product state)
+  const [seoData, setSeoData] = useState<SEOData>({} as SEOData);
 
   // Image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -143,6 +144,27 @@ export default function ProductEditPage() {
       if (!response.ok) throw new Error('Failed to fetch product');
       const data = await response.json();
       setProduct(data);
+      
+      // Populate SEO data state from product
+      const seo: SEOData = {
+        metaTitle: data.metaTitle || undefined,
+        metaDescription: data.metaDescription || undefined,
+        metaKeywords: data.metaKeywords || undefined,
+        canonicalUrl: data.canonicalUrl || undefined,
+        ogTitle: data.ogTitle || undefined,
+        ogDescription: data.ogDescription || undefined,
+        ogImageId: data.ogImageId || undefined,
+        twitterTitle: data.twitterTitle || undefined,
+        twitterDescription: data.twitterDescription || undefined,
+        twitterImageId: data.twitterImageId || undefined,
+        focusKeyphrase: data.focusKeyphrase || undefined,
+        focusKeyphrases: data.focusKeyphrases || undefined,
+        robots: data.robots || undefined,
+        schemaType: data.schemaType as SEOData['schemaType'],
+        schemaData: data.schemaData || undefined,
+      };
+      console.log('📥 Loaded product SEO data:', seo);
+      setSeoData(seo);
     } catch (error) {
       console.error('Error fetching product:', error);
       alert('Failed to load product');
@@ -260,29 +282,25 @@ export default function ProductEditPage() {
         width: product.width !== null && product.width !== undefined ? Number(product.width) : null,
         height: product.height !== null && product.height !== undefined ? Number(product.height) : null,
         
-        // SEO - Basic
-        metaTitle: product.metaTitle?.trim() || null,
-        metaDescription: product.metaDescription?.trim() || null,
-        metaKeywords: product.metaKeywords?.trim() || null,
-        canonicalUrl: product.canonicalUrl?.trim() || null,
-        
-        // SEO - Open Graph
-        ogTitle: product.ogTitle?.trim() || null,
-        ogDescription: product.ogDescription?.trim() || null,
-        ogImageId: product.ogImageId || null,
-        
-        // SEO - Twitter Card
-        twitterTitle: product.twitterTitle?.trim() || null,
-        twitterDescription: product.twitterDescription?.trim() || null,
-        twitterImageId: product.twitterImageId || null,
-        
-        // SEO - Advanced
-        focusKeyphrase: product.focusKeyphrase?.trim() || null,
-        focusKeyphrases: product.focusKeyphrases || null,
-        robots: product.robots || 'index,follow',
-        schemaType: product.schemaType || 'Product',
-        schemaData: product.schemaData || null,
+        // SEO - Use seoData state (from SEOSidebar)
+        metaTitle: seoData.metaTitle || undefined,
+        metaDescription: seoData.metaDescription || undefined,
+        metaKeywords: seoData.metaKeywords || undefined,
+        canonicalUrl: seoData.canonicalUrl || undefined,
+        ogTitle: seoData.ogTitle || undefined,
+        ogDescription: seoData.ogDescription || undefined,
+        ogImageId: seoData.ogImageId || undefined,
+        twitterTitle: seoData.twitterTitle || undefined,
+        twitterDescription: seoData.twitterDescription || undefined,
+        twitterImageId: seoData.twitterImageId || undefined,
+        focusKeyphrase: seoData.focusKeyphrase || undefined,
+        focusKeyphrases: seoData.focusKeyphrases && seoData.focusKeyphrases.length > 0 ? seoData.focusKeyphrases : undefined,
+        robots: seoData.robots || undefined,
+        schemaType: seoData.schemaType || undefined,
+        schemaData: seoData.schemaData || undefined,
       };
+      
+      console.log('💾 Saving product with SEO data:', seoData);
       
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
@@ -1200,215 +1218,14 @@ export default function ProductEditPage() {
         
         {/* Right: SEO Sidebar (1/3 width) - Always Visible */}
         <div className="lg:col-span-1">
-          <div className="sticky top-20 space-y-6 max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {/* Basic SEO */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic SEO</CardTitle>
-                <CardDescription>Essential fields for search engines</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="metaTitle">Meta Title *</Label>
-                  <Input
-                    id="metaTitle"
-                    value={product.metaTitle || ''}
-                    onChange={(e) => setProduct({ ...product, metaTitle: e.target.value })}
-                    placeholder="Product title for search engines (50-60 characters)"
-                  />
-                  <p className="text-sm text-gray-500">
-                    {product.metaTitle?.length || 0}/60 characters
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="metaDescription">Meta Description *</Label>
-                  <textarea
-                    id="metaDescription"
-                    value={product.metaDescription || ''}
-                    onChange={(e) => setProduct({ ...product, metaDescription: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md min-h-[100px]"
-                    placeholder="Product description for search engines (120-160 characters)"
-                  />
-                  <p className="text-sm text-gray-500">
-                    {product.metaDescription?.length || 0}/160 characters
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="focusKeyphrase">Focus Keyphrase</Label>
-                  <Input
-                    id="focusKeyphrase"
-                    value={product.focusKeyphrase || ''}
-                    onChange={(e) => setProduct({ ...product, focusKeyphrase: e.target.value })}
-                    placeholder="Main keyword (e.g., 'organic tomatoes')"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="metaKeywords">Keywords</Label>
-                  <Input
-                    id="metaKeywords"
-                    value={product.metaKeywords || ''}
-                    onChange={(e) => setProduct({ ...product, metaKeywords: e.target.value })}
-                    placeholder="Comma-separated keywords"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="canonicalUrl">Canonical URL</Label>
-                  <Input
-                    id="canonicalUrl"
-                    value={product.canonicalUrl || ''}
-                    onChange={(e) => setProduct({ ...product, canonicalUrl: e.target.value })}
-                    placeholder={`/products/${product.slug}`}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Open Graph */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Open Graph (Facebook)</CardTitle>
-                <CardDescription>How your product appears on Facebook</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ogTitle">OG Title</Label>
-                  <Input
-                    id="ogTitle"
-                    value={product.ogTitle || ''}
-                    onChange={(e) => setProduct({ ...product, ogTitle: e.target.value })}
-                    placeholder="Title for social sharing"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ogDescription">OG Description</Label>
-                  <textarea
-                    id="ogDescription"
-                    value={product.ogDescription || ''}
-                    onChange={(e) => setProduct({ ...product, ogDescription: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md min-h-[80px]"
-                    placeholder="Description for social sharing"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Twitter Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Twitter Card</CardTitle>
-                <CardDescription>How your product appears on Twitter</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="twitterTitle">Twitter Title</Label>
-                  <Input
-                    id="twitterTitle"
-                    value={product.twitterTitle || ''}
-                    onChange={(e) => setProduct({ ...product, twitterTitle: e.target.value })}
-                    placeholder="Title for Twitter"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="twitterDescription">Twitter Description</Label>
-                  <textarea
-                    id="twitterDescription"
-                    value={product.twitterDescription || ''}
-                    onChange={(e) => setProduct({ ...product, twitterDescription: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md min-h-[80px]"
-                    placeholder="Description for Twitter"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Advanced SEO */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Advanced SEO</CardTitle>
-                <CardDescription>Additional SEO settings</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="robots">Robots Meta Tag</Label>
-                  <select
-                    id="robots"
-                    value={product.robots || 'index,follow'}
-                    onChange={(e) => setProduct({ ...product, robots: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="index,follow">Index, Follow (Default)</option>
-                    <option value="noindex,follow">No Index, Follow</option>
-                    <option value="index,nofollow">Index, No Follow</option>
-                    <option value="noindex,nofollow">No Index, No Follow</option>
-                  </select>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* SEO Score */}
-            <SEOScorePanel
-              title={product.metaTitle || product.name}
-              metaDescription={product.metaDescription || product.description || ''}
-              metaKeywords={product.metaKeywords || ''}
-              content={product.description || ''}
-              slug={product.slug}
-              ogTitle={product.ogTitle || ''}
-              ogDescription={product.ogDescription || ''}
-              twitterTitle={product.twitterTitle || ''}
-              twitterDescription={product.twitterDescription || ''}
+          <div className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <SEOSidebar
+              data={seoData}
+              onChange={setSeoData}
+              pageTitle={product.name}
+              pageContent={product.description || ''}
+              pageUrl={`/products/${product.slug}`}
             />
-
-            {/* Google Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Google Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GoogleSearchPreview
-                  title={product.metaTitle || product.name}
-                  slug={product.slug}
-                  metaDescription={product.metaDescription || product.description || ''}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Facebook Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Facebook Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FacebookSharePreview
-                  title={product.metaTitle || product.name}
-                  ogTitle={product.ogTitle || ''}
-                  ogDescription={product.ogDescription || product.metaDescription || ''}
-                  ogImage={product.images?.[0]?.url}
-                  siteUrl={`/products/${product.slug}`}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Twitter Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Twitter Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TwitterCardPreview
-                  title={product.metaTitle || product.name}
-                  twitterTitle={product.twitterTitle || ''}
-                  twitterDescription={product.twitterDescription || product.metaDescription || ''}
-                  twitterImage={product.images?.[0]?.url}
-                  siteUrl={`/products/${product.slug}`}
-                />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

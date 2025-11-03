@@ -30,14 +30,26 @@ interface Category {
   parentId: string | null;
   order: number;
   isActive: boolean;
+  // SEO - Basic
   metaTitle: string | null;
   metaDescription: string | null;
   metaKeywords: string | null;
   canonicalUrl: string | null;
+  // SEO - Open Graph
   ogTitle: string | null;
   ogDescription: string | null;
+  ogImageId: string | null;
+  // SEO - Twitter Card
   twitterTitle: string | null;
   twitterDescription: string | null;
+  twitterImageId: string | null;
+  // SEO - Advanced
+  focusKeyphrase: string | null;
+  focusKeyphrases: string | null; // JSON string
+  robots: string | null;
+  schemaType: string | null;
+  schemaData: string | null; // JSON string
+  // Blocks
   blocks: string | null;
   parent: { id: string; name: string } | null;
   _count: {
@@ -98,7 +110,7 @@ export default function CategoryEditor({ params }: CategoryEditorProps) {
         setOrder(category.order);
         setIsActive(category.isActive);
         
-        // Parse SEO data
+        // Parse SEO data (including advanced fields)
         const seo: SEOData = {
           metaTitle: category.metaTitle || undefined,
           metaDescription: category.metaDescription || undefined,
@@ -106,9 +118,25 @@ export default function CategoryEditor({ params }: CategoryEditorProps) {
           canonicalUrl: category.canonicalUrl || undefined,
           ogTitle: category.ogTitle || undefined,
           ogDescription: category.ogDescription || undefined,
+          ogImageId: category.ogImageId || undefined,
           twitterTitle: category.twitterTitle || undefined,
           twitterDescription: category.twitterDescription || undefined,
+          twitterImageId: category.twitterImageId || undefined,
+          focusKeyphrase: category.focusKeyphrase || undefined,
+          focusKeyphrases: category.focusKeyphrases 
+            ? (typeof category.focusKeyphrases === 'string' 
+                ? JSON.parse(category.focusKeyphrases) 
+                : category.focusKeyphrases)
+            : undefined,
+          robots: category.robots || undefined,
+          schemaType: category.schemaType as SEOData['schemaType'],
+          schemaData: category.schemaData 
+            ? (typeof category.schemaData === 'string' 
+                ? JSON.parse(category.schemaData) 
+                : category.schemaData)
+            : undefined,
         };
+        console.log('📥 Loaded category SEO data:', seo);
         setSeoData(seo);
 
         // Parse blocks
@@ -182,14 +210,26 @@ export default function CategoryEditor({ params }: CategoryEditorProps) {
           parentId: parentId || undefined,
           order,
           isActive,
+          // SEO - Basic
           metaTitle: seoData.metaTitle || undefined,
           metaDescription: seoData.metaDescription || undefined,
           metaKeywords: seoData.metaKeywords || undefined,
           canonicalUrl: seoData.canonicalUrl || undefined,
+          // SEO - Open Graph
           ogTitle: seoData.ogTitle || undefined,
           ogDescription: seoData.ogDescription || undefined,
+          ogImageId: seoData.ogImageId || undefined,
+          // SEO - Twitter Card
           twitterTitle: seoData.twitterTitle || undefined,
           twitterDescription: seoData.twitterDescription || undefined,
+          twitterImageId: seoData.twitterImageId || undefined,
+          // SEO - Advanced
+          focusKeyphrase: seoData.focusKeyphrase || undefined,
+          focusKeyphrases: seoData.focusKeyphrases && seoData.focusKeyphrases.length > 0 ? seoData.focusKeyphrases : undefined,
+          robots: seoData.robots || undefined,
+          schemaType: seoData.schemaType || undefined,
+          schemaData: seoData.schemaData || undefined,
+          // Blocks
           blocks: blocks.length > 0 ? JSON.stringify(blocks) : undefined,
         }),
       });

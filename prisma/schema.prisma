@@ -234,15 +234,28 @@ model Category {
   parentId    String?
   order       Int         @default(0)
   
-  // SEO
+  // SEO - Basic
   metaTitle       String?
   metaDescription String?  @db.Text
   metaKeywords    String?  @db.Text
   canonicalUrl    String?
+  
+  // SEO - Open Graph
   ogTitle         String?
   ogDescription   String?  @db.Text
+  ogImageId       String?
+  
+  // SEO - Twitter Card
   twitterTitle    String?
   twitterDescription String? @db.Text
+  twitterImageId  String?
+  
+  // SEO - Advanced
+  focusKeyphrase  String?
+  focusKeyphrases String?  @db.Text // JSON array
+  robots          String?  @default("index,follow")
+  schemaType      String?  @default("LocalBusiness")
+  schemaData      String?  @db.Text // JSON
   
   // Block-based content
   blocks          String?   @db.Text // JSON array of block instances

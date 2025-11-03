@@ -44,7 +44,9 @@ export default function SEOSidebar({
   };
 
   const updateData = (updates: Partial<SEOData>) => {
-    onChange({ ...data, ...updates });
+    const newData = { ...data, ...updates };
+    console.log('🔄 SEOSidebar updateData called:', { updates, newData });
+    onChange(newData);
   };
 
   const autoFillBasic = () => {

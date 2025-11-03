@@ -27,6 +27,8 @@
     "currency:check": "tsx scripts/check-currency-setting.ts",
     "currency:inr": "tsx scripts/set-currency-inr.ts",
     "test:redis": "tsx scripts/test-multi-site-redis.ts",
+    "test:sitemaps": "tsx scripts/verify-sitemaps.ts",
+    "test:structured-data": "tsx scripts/verify-structured-data.ts",
     "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
@@ -81,6 +83,7 @@
     "@types/nodemailer": "^7.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "jest": "^29.7.0",

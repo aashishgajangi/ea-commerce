@@ -208,15 +208,25 @@ export async function updateCategory(
     parentId?: string | null;
     order?: number;
     isActive?: boolean;
-    // SEO fields
-    metaTitle?: string;
-    metaDescription?: string;
-    metaKeywords?: string;
-    canonicalUrl?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    twitterTitle?: string;
-    twitterDescription?: string;
+    // SEO - Basic
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    metaKeywords?: string | null;
+    canonicalUrl?: string | null;
+    // SEO - Open Graph
+    ogTitle?: string | null;
+    ogDescription?: string | null;
+    ogImageId?: string | null;
+    // SEO - Twitter Card
+    twitterTitle?: string | null;
+    twitterDescription?: string | null;
+    twitterImageId?: string | null;
+    // SEO - Advanced
+    focusKeyphrase?: string | null;
+    focusKeyphrases?: string[] | null;
+    robots?: string | null;
+    schemaType?: string | null;
+    schemaData?: Record<string, unknown> | null;
     // Blocks
     blocks?: string;
   }
@@ -237,9 +247,22 @@ export async function updateCategory(
     }
   }
 
+  // Convert JSON fields to strings for database storage
+  const dbData: Record<string, unknown> = { ...data };
+  if (data.focusKeyphrases !== undefined) {
+    dbData.focusKeyphrases = Array.isArray(data.focusKeyphrases) 
+      ? JSON.stringify(data.focusKeyphrases) 
+      : null;
+  }
+  if (data.schemaData !== undefined) {
+    dbData.schemaData = data.schemaData 
+      ? JSON.stringify(data.schemaData) 
+      : null;
+  }
+
   return db.category.update({
     where: { id },
-    data,
+    data: dbData,
     include: {
       parent: true,
       children: {

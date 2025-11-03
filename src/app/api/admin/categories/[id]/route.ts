@@ -11,15 +11,25 @@ const updateCategorySchema = z.object({
   parentId: z.string().nullable().optional(),
   order: z.number().int().optional(),
   isActive: z.boolean().optional(),
-  // SEO fields
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
-  canonicalUrl: z.string().optional(),
-  ogTitle: z.string().optional(),
-  ogDescription: z.string().optional(),
-  twitterTitle: z.string().optional(),
-  twitterDescription: z.string().optional(),
+  // SEO - Basic
+  metaTitle: z.string().nullable().optional(),
+  metaDescription: z.string().nullable().optional(),
+  metaKeywords: z.string().nullable().optional(),
+  canonicalUrl: z.string().nullable().optional(),
+  // SEO - Open Graph
+  ogTitle: z.string().nullable().optional(),
+  ogDescription: z.string().nullable().optional(),
+  ogImageId: z.string().nullable().optional(),
+  // SEO - Twitter Card
+  twitterTitle: z.string().nullable().optional(),
+  twitterDescription: z.string().nullable().optional(),
+  twitterImageId: z.string().nullable().optional(),
+  // SEO - Advanced
+  focusKeyphrase: z.string().nullable().optional(),
+  focusKeyphrases: z.array(z.string()).nullable().optional(),
+  robots: z.string().nullable().optional(),
+  schemaType: z.string().nullable().optional(),
+  schemaData: z.record(z.unknown()).nullable().optional(),
   // Blocks
   blocks: z.string().optional(),
 });

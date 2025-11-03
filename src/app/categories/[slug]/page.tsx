@@ -93,8 +93,30 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     }
   }
 
+  // Parse schema data if available
+  let schemaDataToRender = null;
+  if ('schemaData' in category && category.schemaData) {
+    try {
+      schemaDataToRender = typeof category.schemaData === 'string' 
+        ? category.schemaData 
+        : JSON.stringify(category.schemaData);
+    } catch (error) {
+      console.error('Error parsing category schema data:', error);
+    }
+  }
+
   return (
     <PublicLayout>
+      {/* JSON-LD Structured Data */}
+      {schemaDataToRender && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaDataToRender,
+          }}
+        />
+      )}
+      
       <CategoryClient
         category={category}
         products={products}

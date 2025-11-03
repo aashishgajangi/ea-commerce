@@ -40,7 +40,13 @@ export default function PageEditor({ params }: PageEditorProps) {
   const [blocks, setBlocks] = useState<BlockInstance[]>([]);
   
   // SEO data
-  const [seoData, setSeoData] = useState<SEOData>({} as SEOData);
+  const [seoData, setSeoDataInternal] = useState<SEOData>({} as SEOData);
+  
+  // Wrapper to log SEO data changes
+  const setSeoData = (data: SEOData | ((prev: SEOData) => SEOData)) => {
+    console.log('🎨 setSeoData called with:', data);
+    setSeoDataInternal(data);
+  };
   
   useEffect(() => {
     async function loadPage() {
@@ -91,31 +97,26 @@ export default function PageEditor({ params }: PageEditorProps) {
               }
             }
             
-            // Parse SEO data
-            if (page.seoData) {
-              try {
-                const seo: SEOData = {
-                  metaTitle: page.metaTitle || undefined,
-                  metaDescription: page.metaDescription || undefined,
-                  metaKeywords: page.metaKeywords || undefined,
-                  canonicalUrl: page.canonicalUrl || undefined,
-                  ogTitle: page.ogTitle || undefined,
-                  ogDescription: page.ogDescription || undefined,
-                  ogImageId: page.ogImageId || undefined,
-                  twitterTitle: page.twitterTitle || undefined,
-                  twitterDescription: page.twitterDescription || undefined,
-                  twitterImageId: page.twitterImageId || undefined,
-                  focusKeyphrase: page.focusKeyphrase || undefined,
-                  focusKeyphrases: page.focusKeyphrases ? JSON.parse(page.focusKeyphrases) : undefined,
-                  robots: page.robots || undefined,
-                  schemaType: page.schemaType as SEOData['schemaType'],
-                  schemaData: page.schemaData ? JSON.parse(page.schemaData) : undefined,
-                };
-                setSeoData(seo);
-              } catch (e) {
-                console.error('Failed to parse SEO data:', e);
-              }
-            }
+            // Load SEO data from individual fields
+            const seo: SEOData = {
+              metaTitle: page.metaTitle || undefined,
+              metaDescription: page.metaDescription || undefined,
+              metaKeywords: page.metaKeywords || undefined,
+              canonicalUrl: page.canonicalUrl || undefined,
+              ogTitle: page.ogTitle || undefined,
+              ogDescription: page.ogDescription || undefined,
+              ogImageId: page.ogImageId || undefined,
+              twitterTitle: page.twitterTitle || undefined,
+              twitterDescription: page.twitterDescription || undefined,
+              twitterImageId: page.twitterImageId || undefined,
+              focusKeyphrase: page.focusKeyphrase || undefined,
+              focusKeyphrases: Array.isArray(page.focusKeyphrases) ? page.focusKeyphrases : undefined,
+              robots: page.robots || undefined,
+              schemaType: page.schemaType as SEOData['schemaType'],
+              schemaData: page.schemaData || undefined,
+            };
+            console.log('📥 Loaded SEO data from API:', seo);
+            setSeoData(seo);
           } else {
             const errorData = await response.json();
             throw new Error(errorData.message || errorData.error || 'Failed to fetch page');
@@ -139,31 +140,26 @@ export default function PageEditor({ params }: PageEditorProps) {
             }
           }
           
-          // Parse SEO data
-          if (page.seoData) {
-            try {
-              const seo: SEOData = {
-                metaTitle: page.metaTitle || undefined,
-                metaDescription: page.metaDescription || undefined,
-                metaKeywords: page.metaKeywords || undefined,
-                canonicalUrl: page.canonicalUrl || undefined,
-                ogTitle: page.ogTitle || undefined,
-                ogDescription: page.ogDescription || undefined,
-                ogImageId: page.ogImageId || undefined,
-                twitterTitle: page.twitterTitle || undefined,
-                twitterDescription: page.twitterDescription || undefined,
-                twitterImageId: page.twitterImageId || undefined,
-                focusKeyphrase: page.focusKeyphrase || undefined,
-                focusKeyphrases: page.focusKeyphrases ? JSON.parse(page.focusKeyphrases) : undefined,
-                robots: page.robots || undefined,
-                schemaType: page.schemaType as SEOData['schemaType'],
-                schemaData: page.schemaData ? JSON.parse(page.schemaData) : undefined,
-              };
-              setSeoData(seo);
-            } catch (e) {
-              console.error('Failed to parse SEO data:', e);
-            }
-          }
+          // Load SEO data from individual fields
+          const seo: SEOData = {
+            metaTitle: page.metaTitle || undefined,
+            metaDescription: page.metaDescription || undefined,
+            metaKeywords: page.metaKeywords || undefined,
+            canonicalUrl: page.canonicalUrl || undefined,
+            ogTitle: page.ogTitle || undefined,
+            ogDescription: page.ogDescription || undefined,
+            ogImageId: page.ogImageId || undefined,
+            twitterTitle: page.twitterTitle || undefined,
+            twitterDescription: page.twitterDescription || undefined,
+            twitterImageId: page.twitterImageId || undefined,
+            focusKeyphrase: page.focusKeyphrase || undefined,
+            focusKeyphrases: Array.isArray(page.focusKeyphrases) ? page.focusKeyphrases : undefined,
+            robots: page.robots || undefined,
+            schemaType: page.schemaType as SEOData['schemaType'],
+            schemaData: page.schemaData || undefined,
+          };
+          console.log('📥 Loaded SEO data from API:', seo);
+          setSeoData(seo);
         }
       } catch (error) {
         // Only log in development
@@ -212,37 +208,44 @@ export default function PageEditor({ params }: PageEditorProps) {
     setSaving(true);
     const originalSlug = originalSlugRef.current; // Store for comparison
     
+    // Debug logging
+    console.log('💾 Saving page with SEO data:', seoData);
+    
     try {
+      const requestBody = {
+        title,
+        slug,
+        content: ' ', // Legacy field - single space to pass validation
+        excerpt: excerpt || undefined,
+        status,
+        pageType: pageType || undefined,
+        blocks: blocks.length > 0 ? blocks : undefined,
+        // SEO fields
+        metaTitle: seoData.metaTitle || undefined,
+        metaDescription: seoData.metaDescription || undefined,
+        metaKeywords: seoData.metaKeywords || undefined,
+        canonicalUrl: seoData.canonicalUrl || undefined,
+        ogTitle: seoData.ogTitle || undefined,
+        ogDescription: seoData.ogDescription || undefined,
+        ogImageId: seoData.ogImageId || undefined,
+        twitterTitle: seoData.twitterTitle || undefined,
+        twitterDescription: seoData.twitterDescription || undefined,
+        twitterImageId: seoData.twitterImageId || undefined,
+        focusKeyphrase: seoData.focusKeyphrase || undefined,
+        focusKeyphrases: seoData.focusKeyphrases && seoData.focusKeyphrases.length > 0 ? seoData.focusKeyphrases : undefined,
+        robots: seoData.robots || undefined,
+        schemaType: seoData.schemaType || undefined,
+        schemaData: seoData.schemaData || undefined,
+      };
+
+      console.log('📤 Sending request body:', requestBody);
+
       const response = await fetch(`/api/admin/pages/${pageId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title,
-          slug,
-          content: ' ', // Legacy field - single space to pass validation
-          excerpt: excerpt || undefined,
-          status,
-          pageType: pageType || undefined,
-          blocks: blocks.length > 0 ? blocks : undefined,
-          // SEO fields
-          metaTitle: seoData.metaTitle || undefined,
-          metaDescription: seoData.metaDescription || undefined,
-          metaKeywords: seoData.metaKeywords || undefined,
-          canonicalUrl: seoData.canonicalUrl || undefined,
-          ogTitle: seoData.ogTitle || undefined,
-          ogDescription: seoData.ogDescription || undefined,
-          ogImageId: seoData.ogImageId || undefined,
-          twitterTitle: seoData.twitterTitle || undefined,
-          twitterDescription: seoData.twitterDescription || undefined,
-          twitterImageId: seoData.twitterImageId || undefined,
-          focusKeyphrase: seoData.focusKeyphrase || undefined,
-          focusKeyphrases: seoData.focusKeyphrases && seoData.focusKeyphrases.length > 0 ? seoData.focusKeyphrases : undefined,
-          robots: seoData.robots || undefined,
-          schemaType: seoData.schemaType || undefined,
-          schemaData: seoData.schemaData || undefined,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

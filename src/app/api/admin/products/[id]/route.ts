@@ -26,9 +26,25 @@ type UpdateProductData = {
   length?: number;
   width?: number;
   height?: number;
+  // SEO - Basic
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
+  canonicalUrl?: string;
+  // SEO - Open Graph
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageId?: string | null;
+  // SEO - Twitter Card
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImageId?: string | null;
+  // SEO - Advanced
+  focusKeyphrase?: string;
+  focusKeyphrases?: string[] | null;
+  robots?: string;
+  schemaType?: string;
+  schemaData?: Record<string, unknown> | null;
 };
 
 // Helper function to handle empty strings and null values for numeric fields
@@ -67,9 +83,29 @@ const updateProductSchema = z.object({
   length: optionalNumber(z.number().min(0)),
   width: optionalNumber(z.number().min(0)),
   height: optionalNumber(z.number().min(0)),
+  
+  // SEO - Basic
   metaTitle: z.string().nullable().optional(),
   metaDescription: z.string().nullable().optional(),
   metaKeywords: z.string().nullable().optional(),
+  canonicalUrl: z.string().nullable().optional(),
+  
+  // SEO - Open Graph
+  ogTitle: z.string().nullable().optional(),
+  ogDescription: z.string().nullable().optional(),
+  ogImageId: z.string().nullable().optional(),
+  
+  // SEO - Twitter Card
+  twitterTitle: z.string().nullable().optional(),
+  twitterDescription: z.string().nullable().optional(),
+  twitterImageId: z.string().nullable().optional(),
+  
+  // SEO - Advanced
+  focusKeyphrase: z.string().nullable().optional(),
+  focusKeyphrases: z.array(z.string()).nullable().optional(),
+  robots: z.string().nullable().optional(),
+  schemaType: z.string().nullable().optional(),
+  schemaData: z.record(z.unknown()).nullable().optional(),
 });
 
 /**

@@ -146,6 +146,16 @@ export default async function CategoryProductPage({ params }: ProductPageProps) 
   // Render the product page using existing ProductClient component
   return (
     <PublicLayout>
+      {/* JSON-LD Structured Data */}
+      {product.schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(product.schemaData),
+          }}
+        />
+      )}
+      
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">
