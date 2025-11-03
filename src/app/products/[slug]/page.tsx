@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getProductBySlug } from '@/lib/products';
 import { getGeneralSettings } from '@/lib/settings';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Metadata } from 'next';
 import ProductClient from './ProductClient';
+import { db } from '@/lib/db';
 
 interface PageProps {
   params: Promise<{
@@ -46,7 +47,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   
-  // Fetch product and currency settings in parallel
+  // Check if product has a category - redirect to new URL structure
+  const productWithCategory = await db.product.findUnique({
+    where: {
+      slug,
+      isActive: true,
+      status: 'published',
+    },
+    select: {
+      category: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  });
+
+  // If product has a category, redirect to new category-based URL
+  if (productWithCategory?.category?.slug) {
+    redirect(`/categories/${productWithCategory.category.slug}/${slug}`);
+  }
+
+  // Otherwise, continue with old URL (for products without categories)
   const [product, generalSettings] = await Promise.all([
     getProductBySlug(slug),
     getGeneralSettings(),

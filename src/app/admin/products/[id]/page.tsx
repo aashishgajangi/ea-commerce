@@ -18,6 +18,11 @@ import {
   Edit,
   Image as ImageIcon,
 } from 'lucide-react';
+import { generateSEOSlug } from '@/lib/slug-utils';
+import GoogleSearchPreview from '@/components/seo/GoogleSearchPreview';
+import FacebookSharePreview from '@/components/seo/FacebookSharePreview';
+import TwitterCardPreview from '@/components/seo/TwitterCardPreview';
+import SEOScorePanel from '@/components/seo/SEOScorePanel';
 
 interface Product {
   id: string;
@@ -44,11 +49,28 @@ interface Product {
   length: number | null;
   width: number | null;
   height: number | null;
+  // SEO - Basic
   metaTitle: string | null;
   metaDescription: string | null;
   metaKeywords: string | null;
+  canonicalUrl: string | null;
+  // SEO - Open Graph
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageId: string | null;
+  // SEO - Twitter Card
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+  twitterImageId: string | null;
+  // SEO - Advanced
+  focusKeyphrase: string | null;
+  focusKeyphrases: string[] | null;
+  robots: string | null;
+  schemaType: string | null;
+  schemaData: Record<string, unknown> | null;
   images: ProductImage[];
   variants: ProductVariant[];
+  category?: { id: string; name: string; slug: string } | null;
 }
 
 interface ProductImage {
@@ -75,11 +97,13 @@ interface ProductVariant {
 interface Category {
   id: string;
   name: string;
+  slug: string;
 }
 
 interface CategoryData {
   id: string;
   name: string;
+  slug: string;
   children?: CategoryData[];
 }
 
@@ -137,7 +161,7 @@ export default function ProductEditPage() {
       const flattenCategories = (cats: CategoryData[]): Category[] => {
         let result: Category[] = [];
         cats.forEach((cat) => {
-          result.push({ id: cat.id, name: cat.name });
+          result.push({ id: cat.id, name: cat.name, slug: cat.slug });
           if (cat.children && cat.children.length > 0) {
             result = result.concat(flattenCategories(cat.children));
           }
@@ -155,6 +179,28 @@ export default function ProductEditPage() {
     fetchProduct();
     fetchCategories();
   }, [fetchProduct, fetchCategories]);
+
+  // Handle category change and auto-update slug
+  const handleCategoryChange = (categoryId: string) => {
+    if (!product) return;
+
+    const selectedCategory = categories.find(cat => cat.id === categoryId);
+    
+    // Auto-generate slug based on category + product name
+    if (selectedCategory && product.name) {
+      const newSlug = generateSEOSlug(`${selectedCategory.slug} ${product.name}`);
+      setProduct({
+        ...product,
+        categoryId: categoryId || null,
+        slug: newSlug,
+      });
+    } else {
+      setProduct({
+        ...product,
+        categoryId: categoryId || null,
+      });
+    }
+  };
 
   // Handle ESC key to close modals
   useEffect(() => {
@@ -213,9 +259,29 @@ export default function ProductEditPage() {
         length: product.length !== null && product.length !== undefined ? Number(product.length) : null,
         width: product.width !== null && product.width !== undefined ? Number(product.width) : null,
         height: product.height !== null && product.height !== undefined ? Number(product.height) : null,
+        
+        // SEO - Basic
         metaTitle: product.metaTitle?.trim() || null,
         metaDescription: product.metaDescription?.trim() || null,
         metaKeywords: product.metaKeywords?.trim() || null,
+        canonicalUrl: product.canonicalUrl?.trim() || null,
+        
+        // SEO - Open Graph
+        ogTitle: product.ogTitle?.trim() || null,
+        ogDescription: product.ogDescription?.trim() || null,
+        ogImageId: product.ogImageId || null,
+        
+        // SEO - Twitter Card
+        twitterTitle: product.twitterTitle?.trim() || null,
+        twitterDescription: product.twitterDescription?.trim() || null,
+        twitterImageId: product.twitterImageId || null,
+        
+        // SEO - Advanced
+        focusKeyphrase: product.focusKeyphrase?.trim() || null,
+        focusKeyphrases: product.focusKeyphrases || null,
+        robots: product.robots || 'index,follow',
+        schemaType: product.schemaType || 'Product',
+        schemaData: product.schemaData || null,
       };
       
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -440,51 +506,45 @@ export default function ProductEditPage() {
         </Button>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-4">
-          <button
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'details'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </button>
-          <button
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'images'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('images')}
-          >
-            Images ({product.images.length})
-          </button>
-          <button
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'variants'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('variants')}
-          >
-            Variants ({product.variants.length})
-          </button>
-          <button
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'seo'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab('seo')}
-          >
-            SEO
-          </button>
-        </div>
-      </div>
+      {/* Split Layout: Content + SEO Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Main Content (2/3 width) */}
+        <div className="lg:col-span-2">
+          {/* Tabs */}
+          <div className="mb-6 border-b">
+            <div className="flex gap-4">
+              <button
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === 'details'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => setActiveTab('details')}
+              >
+                Details
+              </button>
+              <button
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === 'images'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => setActiveTab('images')}
+              >
+                Images ({product.images.length})
+              </button>
+              <button
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === 'variants'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => setActiveTab('variants')}
+              >
+                Variants ({product.variants.length})
+              </button>
+            </div>
+          </div>
 
       {/* Details Tab */}
       {activeTab === 'details' && (
@@ -541,9 +601,7 @@ export default function ProductEditPage() {
                   <select
                     id="category"
                     value={product.categoryId || ''}
-                    onChange={(e) =>
-                      setProduct({ ...product, categoryId: e.target.value || null })
-                    }
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-3 py-2 border rounded-md"
                   >
                     <option value="">Select a category (optional)</option>
@@ -1138,46 +1196,222 @@ export default function ProductEditPage() {
           </CardContent>
         </Card>
       )}
+        </div>
+        
+        {/* Right: SEO Sidebar (1/3 width) - Always Visible */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-20 space-y-6 max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {/* Basic SEO */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic SEO</CardTitle>
+                <CardDescription>Essential fields for search engines</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="metaTitle">Meta Title *</Label>
+                  <Input
+                    id="metaTitle"
+                    value={product.metaTitle || ''}
+                    onChange={(e) => setProduct({ ...product, metaTitle: e.target.value })}
+                    placeholder="Product title for search engines (50-60 characters)"
+                  />
+                  <p className="text-sm text-gray-500">
+                    {product.metaTitle?.length || 0}/60 characters
+                  </p>
+                </div>
 
-      {/* SEO Tab */}
-      {activeTab === 'seo' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>SEO Settings</CardTitle>
-            <CardDescription>Optimize product for search engines</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="metaTitle">Meta Title</Label>
-              <Input
-                id="metaTitle"
-                value={product.metaTitle || ''}
-                onChange={(e) => setProduct({ ...product, metaTitle: e.target.value })}
-                placeholder="SEO title for search engines"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="metaDescription">Meta Description</Label>
-              <textarea
-                id="metaDescription"
-                value={product.metaDescription || ''}
-                onChange={(e) => setProduct({ ...product, metaDescription: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md min-h-[100px]"
-                placeholder="SEO description for search engines"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="metaKeywords">Meta Keywords</Label>
-              <Input
-                id="metaKeywords"
-                value={product.metaKeywords || ''}
-                onChange={(e) => setProduct({ ...product, metaKeywords: e.target.value })}
-                placeholder="Comma-separated keywords"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                <div className="space-y-2">
+                  <Label htmlFor="metaDescription">Meta Description *</Label>
+                  <textarea
+                    id="metaDescription"
+                    value={product.metaDescription || ''}
+                    onChange={(e) => setProduct({ ...product, metaDescription: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md min-h-[100px]"
+                    placeholder="Product description for search engines (120-160 characters)"
+                  />
+                  <p className="text-sm text-gray-500">
+                    {product.metaDescription?.length || 0}/160 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="focusKeyphrase">Focus Keyphrase</Label>
+                  <Input
+                    id="focusKeyphrase"
+                    value={product.focusKeyphrase || ''}
+                    onChange={(e) => setProduct({ ...product, focusKeyphrase: e.target.value })}
+                    placeholder="Main keyword (e.g., 'organic tomatoes')"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="metaKeywords">Keywords</Label>
+                  <Input
+                    id="metaKeywords"
+                    value={product.metaKeywords || ''}
+                    onChange={(e) => setProduct({ ...product, metaKeywords: e.target.value })}
+                    placeholder="Comma-separated keywords"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="canonicalUrl">Canonical URL</Label>
+                  <Input
+                    id="canonicalUrl"
+                    value={product.canonicalUrl || ''}
+                    onChange={(e) => setProduct({ ...product, canonicalUrl: e.target.value })}
+                    placeholder={`/products/${product.slug}`}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Open Graph */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Open Graph (Facebook)</CardTitle>
+                <CardDescription>How your product appears on Facebook</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ogTitle">OG Title</Label>
+                  <Input
+                    id="ogTitle"
+                    value={product.ogTitle || ''}
+                    onChange={(e) => setProduct({ ...product, ogTitle: e.target.value })}
+                    placeholder="Title for social sharing"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ogDescription">OG Description</Label>
+                  <textarea
+                    id="ogDescription"
+                    value={product.ogDescription || ''}
+                    onChange={(e) => setProduct({ ...product, ogDescription: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md min-h-[80px]"
+                    placeholder="Description for social sharing"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Twitter Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Twitter Card</CardTitle>
+                <CardDescription>How your product appears on Twitter</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="twitterTitle">Twitter Title</Label>
+                  <Input
+                    id="twitterTitle"
+                    value={product.twitterTitle || ''}
+                    onChange={(e) => setProduct({ ...product, twitterTitle: e.target.value })}
+                    placeholder="Title for Twitter"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="twitterDescription">Twitter Description</Label>
+                  <textarea
+                    id="twitterDescription"
+                    value={product.twitterDescription || ''}
+                    onChange={(e) => setProduct({ ...product, twitterDescription: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md min-h-[80px]"
+                    placeholder="Description for Twitter"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Advanced SEO */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Advanced SEO</CardTitle>
+                <CardDescription>Additional SEO settings</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="robots">Robots Meta Tag</Label>
+                  <select
+                    id="robots"
+                    value={product.robots || 'index,follow'}
+                    onChange={(e) => setProduct({ ...product, robots: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="index,follow">Index, Follow (Default)</option>
+                    <option value="noindex,follow">No Index, Follow</option>
+                    <option value="index,nofollow">Index, No Follow</option>
+                    <option value="noindex,nofollow">No Index, No Follow</option>
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* SEO Score */}
+            <SEOScorePanel
+              title={product.metaTitle || product.name}
+              metaDescription={product.metaDescription || product.description || ''}
+              metaKeywords={product.metaKeywords || ''}
+              content={product.description || ''}
+              slug={product.slug}
+              ogTitle={product.ogTitle || ''}
+              ogDescription={product.ogDescription || ''}
+              twitterTitle={product.twitterTitle || ''}
+              twitterDescription={product.twitterDescription || ''}
+            />
+
+            {/* Google Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Google Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <GoogleSearchPreview
+                  title={product.metaTitle || product.name}
+                  slug={product.slug}
+                  metaDescription={product.metaDescription || product.description || ''}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Facebook Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Facebook Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FacebookSharePreview
+                  title={product.metaTitle || product.name}
+                  ogTitle={product.ogTitle || ''}
+                  ogDescription={product.ogDescription || product.metaDescription || ''}
+                  ogImage={product.images?.[0]?.url}
+                  siteUrl={`/products/${product.slug}`}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Twitter Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Twitter Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TwitterCardPreview
+                  title={product.metaTitle || product.name}
+                  twitterTitle={product.twitterTitle || ''}
+                  twitterDescription={product.twitterDescription || product.metaDescription || ''}
+                  twitterImage={product.images?.[0]?.url}
+                  siteUrl={`/products/${product.slug}`}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
 
       {/* Media Library Modal */}
       {showMediaLibrary && (

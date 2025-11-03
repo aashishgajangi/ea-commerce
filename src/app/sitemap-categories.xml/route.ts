@@ -61,7 +61,7 @@ export async function GET() {
       
       return `
   <url>
-    <loc>${siteUrl}/products?category=${category.slug}</loc>
+    <loc>${siteUrl}/categories/${category.slug}</loc>
     <changefreq>weekly</changefreq>
     <priority>${priority}</priority>
     <lastmod>${lastmod}</lastmod>${imageTag}

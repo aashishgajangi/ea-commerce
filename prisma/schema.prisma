@@ -82,6 +82,8 @@ model Media {
   // Relations
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   pages        Page[]   @relation("PageFeaturedImage")
+  productOGImages     Product[] @relation("ProductOGImage")
+  productTwitterImages Product[] @relation("ProductTwitterImage")
   
   @@index([userId])
   @@index([createdAt])
@@ -302,10 +304,30 @@ model Product {
   width           Float?      // in cm
   height          Float?      // in cm
 
-  // SEO
+  // SEO (Basic)
   metaTitle       String?
   metaDescription String?     @db.Text
   metaKeywords    String?
+  canonicalUrl    String?
+
+  // SEO (Open Graph)
+  ogTitle         String?
+  ogDescription   String?
+  ogImageId       String?
+  ogImage         Media?      @relation("ProductOGImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  // SEO (Twitter Card)
+  twitterTitle    String?
+  twitterDescription String?
+  twitterImageId  String?
+  twitterImage    Media?      @relation("ProductTwitterImage", fields: [twitterImageId], references: [id], onDelete: SetNull)
+
+  // SEO (Advanced)
+  focusKeyphrase  String?
+  focusKeyphrases Json?       // Array of keyphrases
+  robots          String?     @default("index,follow")
+  schemaType      String?     @default("Product")
+  schemaData      Json?       // Schema.org structured data
 
   // Dates
   publishedAt     DateTime?

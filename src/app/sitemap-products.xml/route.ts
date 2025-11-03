@@ -11,16 +11,22 @@ export async function GET() {
     const generalSettings = await getSetting<Record<string, string>>('general', {});
     const siteUrl = generalSettings?.siteUrl || process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     
-    // Fetch all active products
+    // Fetch all active published products with category info
     const products = await db.product.findMany({
       where: {
-        status: 'active',
+        status: 'published',
+        isActive: true,
       },
       select: {
         slug: true,
         updatedAt: true,
         createdAt: true,
         isFeatured: true,
+        category: {
+          select: {
+            slug: true,
+          },
+        },
         images: {
           select: {
             url: true,
@@ -62,6 +68,11 @@ export async function GET() {
       const lastmod = product.updatedAt?.toISOString() || product.createdAt?.toISOString() || now;
       const priority = product.isFeatured ? '0.8' : '0.7';
       
+      // Generate product URL - use category-nested format if category exists
+      const productUrl = product.category?.slug 
+        ? `${siteUrl}/categories/${product.category.slug}/${product.slug}`
+        : `${siteUrl}/products/${product.slug}`;
+      
       // Generate image tags
       const imageTags = product.images
         .map((img) => {
@@ -77,7 +88,7 @@ export async function GET() {
       
       return `
   <url>
-    <loc>${siteUrl}/products/${product.slug}</loc>
+    <loc>${productUrl}</loc>
     <changefreq>weekly</changefreq>
     <priority>${priority}</priority>
     <lastmod>${lastmod}</lastmod>${imageTags}
