@@ -76,6 +76,7 @@ export default function PageEditor({ params }: PageEditorProps) {
             const page = await retryResponse.json();
             setPageId(page.id);
             setTitle(page.title);
+            setSlug(page.slug || ''); // ← CRITICAL FIX: Set the slug state!
             originalSlugRef.current = page.slug;
             setExcerpt(page.excerpt || '');
             setStatus(page.status);
@@ -123,6 +124,7 @@ export default function PageEditor({ params }: PageEditorProps) {
           const page = await response.json();
           setPageId(page.id);
           setTitle(page.title);
+          setSlug(page.slug || ''); // ← CRITICAL FIX: Set the slug state!
           originalSlugRef.current = page.slug;
           setExcerpt(page.excerpt || '');
           setStatus(page.status);

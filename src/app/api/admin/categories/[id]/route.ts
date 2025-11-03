@@ -10,9 +10,18 @@ const updateCategorySchema = z.object({
   image: z.string().optional(),
   parentId: z.string().nullable().optional(),
   order: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+  // SEO fields
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  isActive: z.boolean().optional(),
+  metaKeywords: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+  twitterTitle: z.string().optional(),
+  twitterDescription: z.string().optional(),
+  // Blocks
+  blocks: z.string().optional(),
 });
 
 /**
@@ -96,6 +105,16 @@ export async function PUT(
       { status: 500 }
     );
   }
+}
+
+/**
+ * PATCH /api/admin/categories/[id] - Update a category (alias for PUT)
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return PUT(request, { params });
 }
 
 /**

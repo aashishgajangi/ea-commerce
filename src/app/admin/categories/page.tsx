@@ -74,20 +74,6 @@ export default function CategoriesPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
-    setFormData({
-      name: category.name,
-      description: category.description || '',
-      image: category.image || '',
-      parentId: category.parentId || '',
-      isActive: category.isActive,
-      metaTitle: category.metaTitle || '',
-      metaDescription: category.metaDescription || '',
-    });
-    setShowForm(true);
-  };
-
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this category?')) return;
 
@@ -196,9 +182,11 @@ export default function CategoriesPage() {
               )}
             </div>
             <div className="flex gap-2 shrink-0">
-              <Button variant="outline" size="sm" onClick={() => handleEdit(category)}>
-                <Edit className="h-4 w-4" />
-              </Button>
+              <Link href={`/admin/categories/${category.slug}/edit`}>
+                <Button variant="outline" size="sm">
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 size="sm"

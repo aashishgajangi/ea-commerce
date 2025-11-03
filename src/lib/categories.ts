@@ -1,14 +1,12 @@
 import { db } from '@/lib/db';
 import { Prisma } from '@prisma/client';
+import { generateCategorySEOSlug } from '@/lib/slug-utils';
 
 /**
- * Generate a unique slug for a category
+ * Generate a unique SEO-friendly slug for a category
  */
 export async function generateUniqueCategorySlug(name: string, excludeId?: string): Promise<string> {
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  const slug = generateCategorySEOSlug(name);
 
   // Check if slug exists
   const existing = await db.category.findFirst({
@@ -116,6 +114,14 @@ export async function getCategoryById(id: string) {
       parent: true,
       children: {
         orderBy: { order: 'asc' },
+        include: {
+          _count: {
+            select: {
+              products: true,
+              children: true,
+            },
+          },
+        },
       },
       _count: {
         select: {
@@ -137,6 +143,14 @@ export async function getCategoryBySlug(slug: string) {
       parent: true,
       children: {
         orderBy: { order: 'asc' },
+        include: {
+          _count: {
+            select: {
+              products: true,
+              children: true,
+            },
+          },
+        },
       },
       _count: {
         select: {
@@ -193,9 +207,18 @@ export async function updateCategory(
     image?: string;
     parentId?: string | null;
     order?: number;
+    isActive?: boolean;
+    // SEO fields
     metaTitle?: string;
     metaDescription?: string;
-    isActive?: boolean;
+    metaKeywords?: string;
+    canonicalUrl?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    twitterTitle?: string;
+    twitterDescription?: string;
+    // Blocks
+    blocks?: string;
   }
 ) {
   // If name is being changed and slug is not provided, generate new slug

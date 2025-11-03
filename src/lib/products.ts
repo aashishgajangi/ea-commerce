@@ -1,14 +1,12 @@
 import { db } from '@/lib/db';
 import { Prisma } from '@prisma/client';
+import { generateProductSEOSlug } from '@/lib/slug-utils';
 
 /**
- * Generate a unique slug for a product
+ * Generate a unique SEO-friendly slug for a product
  */
 export async function generateUniqueProductSlug(name: string, excludeId?: string): Promise<string> {
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  const slug = generateProductSEOSlug(name);
 
   // Check if slug exists
   const existing = await db.product.findFirst({

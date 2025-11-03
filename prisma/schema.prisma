@@ -235,6 +235,15 @@ model Category {
   // SEO
   metaTitle       String?
   metaDescription String?  @db.Text
+  metaKeywords    String?  @db.Text
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?  @db.Text
+  twitterTitle    String?
+  twitterDescription String? @db.Text
+  
+  // Block-based content
+  blocks          String?   @db.Text // JSON array of block instances
   
   // Status
   isActive    Boolean     @default(true)

@@ -405,7 +405,18 @@ export async function updatePage(id: string, data: UpdatePageInput): Promise<Pag
 
   // Handle slug update
   if (data.slug !== undefined) {
-    if (data.slug === '' || data.slug === '/') {
+    // Get current page to check if slug is actually changing
+    const currentPage = await db.page.findUnique({
+      where: { id },
+      select: { slug: true, isSystemPage: true },
+    });
+    
+    // If slug is the same, don't update it (avoid unnecessary validation)
+    if (currentPage && data.slug === currentPage.slug) {
+      // Slug hasn't changed, no need to validate or update
+      // Don't add to updateData - this prevents any slug validation
+    } else if (data.slug === '' || data.slug === '/') {
+      // Trying to set as homepage
       // Check if another homepage exists
       const existingHomepage = await db.page.findFirst({
         where: {
@@ -418,6 +429,7 @@ export async function updatePage(id: string, data: UpdatePageInput): Promise<Pag
       }
       updateData.slug = '';
     } else {
+      // Changing to a different slug
       const slugAvailable = await isSlugAvailable(data.slug, id);
       if (!slugAvailable) {
         throw new Error('Slug is already in use');
